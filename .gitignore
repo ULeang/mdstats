@@ -3,3 +3,4 @@ install/
 build/
 log/opencv/pic/*
 log.txt
+resource/csv/

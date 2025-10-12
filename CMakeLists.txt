@@ -37,7 +37,6 @@ target_link_directories(${PROJECT_NAME}
 
 # include(GNUInstallDirs)
 
-set(QTLIB C:/Qt/6.10.0/mingw_64/bin)
 set(DLLS
     lib/libstdc++-6.dll
     lib/libgcc_s_seh-1.dll

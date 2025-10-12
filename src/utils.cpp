@@ -87,7 +87,7 @@ bool check_resources(const std::vector<std::filesystem::path> &files)
 
 bool log(const std::string &l, LogLevel log_lv)
 {
-    if (log_lv >= globl_log_level)
+    if (log_lv >= prog::global::log_level)
     {
         std::clog << l << std::flush;
         return true;
@@ -96,7 +96,7 @@ bool log(const std::string &l, LogLevel log_lv)
 }
 bool logln(const std::string &l, LogLevel log_lv)
 {
-    if (log_lv >= globl_log_level)
+    if (log_lv >= prog::global::log_level)
     {
         std::clog << l << std::endl;
         return true;

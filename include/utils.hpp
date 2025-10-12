@@ -47,8 +47,12 @@ enum LogLevel
     USUALLY,
     ALWAYS,
 };
-// c++17
-inline LogLevel globl_log_level = LogLevel::USUALLY;
+
+namespace prog {
+    namespace global {
+        inline LogLevel log_level = LogLevel::USUALLY;
+    }
+}
 
 bool log(const std::string &l, LogLevel log_lv = LogLevel::USUALLY);
 bool logln(const std::string &l, LogLevel log_lv = LogLevel::USUALLY);
