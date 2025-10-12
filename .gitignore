@@ -1,0 +1,4 @@
+lib/
+install/
+build/
+log/opencv/pic/*

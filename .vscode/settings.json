@@ -1,0 +1,8 @@
+{
+    "qtConfigure.qtKitDir": "C:/Qt/6.10.0/mingw_64",
+    "files.associations": {
+        "qapplication": "cpp",
+        "utility": "cpp",
+        "tuple": "cpp"
+    }
+}
