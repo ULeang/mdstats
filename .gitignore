@@ -2,3 +2,4 @@ lib/
 install/
 build/
 log/opencv/pic/*
+log.txt

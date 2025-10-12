@@ -338,7 +338,7 @@ void MainWindow::on_reloadBtn_clicked()
     load_record_tbl();
 }
 
-static auto _matcher_thread_helper(const std::stop_token &stoken, const Matcher &matcher,
+static auto _matcher_thread_helper(const std::stop_token &stoken, Matcher &matcher,
                                    const std::function<std::optional<cv::Mat>()> &f,
                                    MatcherGotType got)
     -> std::expected<size_t, ErrorType>

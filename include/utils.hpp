@@ -209,7 +209,7 @@ template <>
 class T_Matcher<CV_8UC3, cv::TM_CCOEFF_NORMED>
 {
     std::vector<cv::Mat> templ;
-    std::ofstream flog;
+    std::ofstream _flog;
 
 public:
     const size_t size;
@@ -223,7 +223,7 @@ public:
           threshold(threshold),
           log(log),
           text_log(text_log),
-          flog("log.txt", std::ios::app)
+          _flog("log.txt", std::ios::out | std::ios::app)
     {
         templ.resize(size);
         size_t i = 0;
@@ -235,7 +235,7 @@ public:
                               });
     }
 
-    std::expected<size_t, MatcherFailT> try_once(const std::function<std::optional<cv::Mat>()> &f) const
+    std::expected<size_t, MatcherFailT> try_once(const std::function<std::optional<cv::Mat>()> &f)
     {
         auto finput = f();
         if (!finput.has_value())
@@ -258,18 +258,12 @@ public:
             cv::Point minLoc, maxLoc;
             minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc);
 
-#ifndef NDEBUG
-            logln(std::format("maxVal:{:5.2f}", 100 * maxVal), LogLevel::SELDOM);
-#endif
             if (text_log)
             {
-                flog << std::format("maxVal:{:5.2f}\n", 100 * maxVal);
+                _flog << std::format("maxVal:{:5.2f}\n", 100 * maxVal);
             }
             if (maxVal > threshold)
             {
-#ifndef NDEBUG
-                logln(std::format("x:{},y:{}", maxLoc.x, maxLoc.y), LogLevel::SELDOM);
-#endif
                 all_res.push_back({i, maxVal, maxLoc});
             }
         }
@@ -301,7 +295,7 @@ public:
     }
 
     std::expected<size_t, MatcherFailT> keep_try(const std::function<std::optional<cv::Mat>()> &f,
-                                                 DWORD sleep = 1 * 1000) const
+                                                 DWORD sleep = 1 * 1000)
     {
         while (true)
         {
@@ -320,7 +314,7 @@ public:
     }
 
     std::expected<size_t, MatcherFailT> try_n(const std::function<std::optional<cv::Mat>()> &f,
-                                              size_t n, DWORD sleep = 1 * 1000) const
+                                              size_t n, DWORD sleep = 1 * 1000)
     {
         for (size_t i = 0; i < n; ++i)
         {
