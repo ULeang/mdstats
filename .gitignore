@@ -4,3 +4,4 @@ build/
 log/opencv/pic/*
 log.txt
 resource/csv/
+resource/csv/data.csv
