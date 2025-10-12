@@ -405,7 +405,7 @@ _determine_resolution(long width, long height)
     {
         return std::make_tuple("3200x1800", cv::Rect{1200, 1150, 900, 200}, cv::Rect{1200, 650, 900, 650});
     }
-    return std::make_tuple("3840x2160", cv::Rect{0, 0, 3840, 2160}, cv::Rect{0, 0, 3840, 2160});
+    return std::make_tuple("3840x2160", cv::Rect{1300, 1300, 1300, 350}, cv::Rect{1400, 800, 1200, 700});
 }
 
 ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken)
