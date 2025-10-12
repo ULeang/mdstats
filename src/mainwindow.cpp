@@ -463,6 +463,23 @@ ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken)
     auto f_coin = capture_fn_generator(ss, hwnd, scale, crop_coin);
     auto f_result = capture_fn_generator(ss, hwnd, scale, crop_result);
 
+    if (prog::env::debug::test_capture_flag)
+    {
+        auto cap_coin = f_coin();
+        auto cap_result = f_result();
+        logln(format("cap_coin {}exists, cap_result {}exists",
+                     cap_coin.has_value() ? "" : "NOT ", cap_result.has_value() ? "" : "NOT "),
+              LogLevel::ALWAYS);
+        if (cap_coin.has_value())
+        {
+            cv::imwrite("cap_coin.png", cap_coin.value());
+        }
+        if (cap_result.has_value())
+        {
+            cv::imwrite("cap_result.png", cap_result.value());
+        }
+    }
+
     Matcher match_coin({(path + "coin_win.png").c_str(), (path + "coin_lose.png").c_str()}, 0.88, true, true);
     Matcher match_st_nd({(path + "go_first.png").c_str(), (path + "go_second.png").c_str()}, 0.88, true, true);
     Matcher match_result({(path + "victory.png").c_str(), (path + "defeat.png").c_str()}, 0.88, true, true);

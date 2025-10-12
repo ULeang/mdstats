@@ -13,6 +13,10 @@ namespace prog {
         inline const string capture_window_title{"masterduel"};
 
         inline const string default_font_filename{"resource\\font\\SourceHanSansCN-Bold.otf"};
+        
+        namespace debug {
+            inline bool test_capture_flag{true};
+        }
     }
     namespace global {
         inline int qt_font_id;
