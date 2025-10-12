@@ -1,4 +1,4 @@
-EXEC:=mdstats.exe
+EXEC:=mdstats
 
 .SHELL: pwsh
 
@@ -19,8 +19,8 @@ build:
 
 .PHONY: install
 install:
-	@cmake --install build --prefix install
-	@windeployqt install/$(EXEC)
+	@cmake --install build --prefix $(EXEC)
+	@windeployqt $(EXEC)/$(EXEC).exe
 
 .PHONY: debug
 debug :
@@ -50,12 +50,12 @@ release :
 
 .PHONY: run
 run: export PATH:=./lib;${PATH}
-run: ./build/$(EXEC)
-	@./build/$(EXEC)
+run: ./build/$(EXEC).exe
+	@./build/$(EXEC).exe
 
 ./build/$(EXEC):
-	@make debug
+	@make release
 
 .PHONY: clean
 clean:
-	@rm -rf build install
+	@rm -rf build $(EXEC)

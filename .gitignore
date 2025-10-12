@@ -4,5 +4,6 @@ build/
 log/opencv/pic/*
 log.txt
 resource/csv/
-cap_coin.png
-cap_result.png
+mdstats/
+*.7z
+*.png
