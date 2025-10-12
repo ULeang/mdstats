@@ -9,6 +9,7 @@
 
 #include <thread>
 #include <future>
+#include <atomic>
 
 #include "utils.hpp"
 
@@ -57,13 +58,16 @@ private:
 
     QTableWidget stats_tbl, record_tbl;
     QPushButton startBtn, stopBtn, cptoclpbdBtn, reloadBtn, openCSVBtn;
+    QPushButton manual_victoryBtn, manual_defeatBtn;
     QLabel coin_lbl, st_nd_lbl, result_lbl, time_lbl;
 
-    std::packaged_task<ErrorType(std::stop_token)> task_matcher_thread;
+    std::packaged_task<ErrorType(std::stop_token, std::atomic_size_t &)> task_matcher_thread;
     std::future<ErrorType> ret_matcher_thread;
     std::jthread thrd_matcher_thread;
 
     DataBase data;
+
+    std::atomic_size_t _a_manual_result;
 
     void connect_signals();
     ErrorType load_record_tbl();
@@ -72,9 +76,12 @@ private:
     void update_stats_tbl();
     void update_record_tbl_color(int row);
 
-    static ErrorType fn_matcher_thread(std::stop_token stoken);
+    static ErrorType fn_matcher_thread(std::stop_token stoken, std::atomic_size_t &a_manual_result);
 
     void auto_scroll_record_tbl();
+    void disable_manual_result_btn(bool disable);
+
+    void manual_result_reset();
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -90,6 +97,8 @@ private slots:
     void on_emitter_matcher_got(MatcherGotType got, size_t n);
     void on_emitter_matcher_thread_exit(ErrorType err);
     void on_reloadBtn_clicked();
+    void on_manual_victoryBtn_clicked();
+    void on_manual_defeatBtn_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -48,8 +48,10 @@ enum LogLevel
     ALWAYS,
 };
 
-namespace prog {
-    namespace global {
+namespace prog
+{
+    namespace global
+    {
         inline LogLevel log_level = LogLevel::USUALLY;
     }
 }
@@ -227,8 +229,12 @@ public:
           threshold(threshold),
           log(log),
           text_log(text_log),
-          _flog("log.txt", std::ios::out | std::ios::app)
+          _flog()
     {
+        if (prog::env::debug::matcher_text_log)
+        {
+            _flog.open("log.txt", std::ios::out | std::ios::app);
+        }
         templ.resize(size);
         size_t i = 0;
         std::ranges::for_each(img_filepath.begin(), img_filepath.end(),
@@ -262,10 +268,6 @@ public:
             cv::Point minLoc, maxLoc;
             minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc);
 
-            if (text_log)
-            {
-                _flog << std::format("maxVal:{:5.2f}\n", 100 * maxVal);
-            }
             if (maxVal > threshold)
             {
                 all_res.push_back({i, maxVal, maxLoc});
@@ -294,6 +296,10 @@ public:
                                     local_time->tm_hour, local_time->tm_min, local_time->tm_sec, c_maxVal)
                             .c_str(),
                         image);
+            // TODO
+            if (text_log) {
+                
+            }
         }
         return c_i;
     }

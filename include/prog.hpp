@@ -16,7 +16,9 @@ namespace prog {
         inline const string default_font_filename{"resource\\font\\SourceHanSansCN-Bold.otf"};
         
         namespace debug {
-            inline bool test_capture_flag{true};
+            inline const bool test_capture_flag{false};
+            inline const bool matcher_text_log{false};
+            inline const bool matcher_img_log{true};
         }
     }
     namespace global {
