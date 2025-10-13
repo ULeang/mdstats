@@ -3,8 +3,9 @@
 !/include/
 !/resource
 /resource/csv/
-!CMakeLists.txt
-!Makefile
+!/CMakeLists.txt
+!/Makefile
 !/.vscode/
-!config.toml
-!LICENSE
+!/config.toml
+!/LICENSE
+!/README.md

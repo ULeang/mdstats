@@ -44,6 +44,7 @@ set(DLLS
 )
 set(PROGFILES
     config.toml
+    README
 )
 install(TARGETS ${PROJECT_NAME} DESTINATION .)
 install(FILES ${DLLS} ${PROGFILES} DESTINATION .)
