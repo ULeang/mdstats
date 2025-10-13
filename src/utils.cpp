@@ -162,14 +162,31 @@ size_t DataBase::trunc_last(size_t n)
 
 void DataBase::load_csv(const std::string &csv_filename)
 {
-    rapidcsv::Document doc(csv_filename, rapidcsv::LabelParams(0, 0));
-    rowc = doc.GetRowCount();
-    coin_col = doc.GetColumn<std::string>("硬币");
-    st_nd_col = doc.GetColumn<std::string>("先后");
-    result_col = doc.GetColumn<std::string>("胜负");
-    deck_col = doc.GetColumn<std::string>("卡组");
-    time_col = doc.GetColumn<std::string>("时间");
-    doc.Clear();
+    try
+    {
+        rapidcsv::Document doc(csv_filename, rapidcsv::LabelParams(0, 0));
+        rowc = doc.GetRowCount();
+        coin_col = doc.GetColumn<std::string>("硬币");
+        st_nd_col = doc.GetColumn<std::string>("先后");
+        result_col = doc.GetColumn<std::string>("胜负");
+        deck_col = doc.GetColumn<std::string>("卡组");
+        time_col = doc.GetColumn<std::string>("时间");
+    }
+    catch (const std::out_of_range &e)
+    {
+        rowc = 0;
+        coin_col.clear();
+        st_nd_col.clear();
+        result_col.clear();
+        deck_col.clear();
+        time_col.clear();
+        logln(std::format("load csv exception :\n\t{}", e.what()));
+        logln("csv file is corrupted, fix it first or just remove it and try again");
+    }
+    catch (...)
+    {
+        logln(std::format("load csv exception :\n\tunknown exception"));
+    }
 
     clear_stats();
     for (size_t i; i < rowc; ++i)

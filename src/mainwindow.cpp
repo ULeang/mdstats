@@ -367,6 +367,16 @@ void MainWindow::disable_manual_result_btn(bool disable)
 {
     manual_victoryBtn.setDisabled(disable);
     manual_defeatBtn.setDisabled(disable);
+    if (disable)
+    {
+        manual_victoryBtn.setPalette(Qt::gray);
+        manual_defeatBtn.setPalette(Qt::gray);
+    }
+    else
+    {
+        manual_victoryBtn.setPalette(Qt::cyan);
+        manual_defeatBtn.setPalette(Qt::cyan);
+    }
 }
 void MainWindow::on_reloadBtn_clicked()
 {
@@ -404,7 +414,7 @@ static auto _matcher_thread_helper(const std::stop_token &stoken, Matcher &match
             signal_emitter->emit_matcher_thread_exit(ErrorType::ErrStopRequested);
             return std::unexpected{ErrorType::ErrStopRequested};
         }
-        Sleep(1 * 1000);
+        Sleep(prog::env::matcher_sleep_ms);
     }
 }
 static ErrorType _matcher_thread_emit_exit(ErrorType err)
@@ -435,23 +445,23 @@ _determine_resolution(long width, long height)
     }
     if (width < 1920)
     {
-        return std::make_tuple("1600x900", cv::Rect{600, 530, 400, 160}, cv::Rect{550, 300, 550, 380});
+        return std::make_tuple("1600x900", cv::Rect{600, 530, 400, 160}, cv::Rect{550, 300, 570, 380});
     }
     if (width < 2048)
     {
-        return std::make_tuple("1920x1080", cv::Rect{700, 630, 500, 200}, cv::Rect{650, 350, 600, 450});
+        return std::make_tuple("1920x1080", cv::Rect{700, 630, 500, 200}, cv::Rect{650, 350, 620, 450});
     }
     if (width < 2560)
     {
-        return std::make_tuple("2048x1152", cv::Rect{750, 650, 550, 220}, cv::Rect{700, 380, 650, 480});
+        return std::make_tuple("2048x1152", cv::Rect{750, 650, 550, 220}, cv::Rect{700, 380, 670, 480});
     }
     if (width < 3200)
     {
-        return std::make_tuple("2560x1440", cv::Rect{950, 850, 700, 250}, cv::Rect{880, 450, 820, 600});
+        return std::make_tuple("2560x1440", cv::Rect{950, 850, 700, 250}, cv::Rect{880, 450, 840, 600});
     }
     if (width < 3840)
     {
-        return std::make_tuple("3200x1800", cv::Rect{1200, 1050, 800, 280}, cv::Rect{1100, 600, 1030, 700});
+        return std::make_tuple("3200x1800", cv::Rect{1200, 1050, 800, 280}, cv::Rect{1100, 600, 1050, 700});
     }
     return std::make_tuple("3840x2160", cv::Rect{1450, 1300, 950, 300}, cv::Rect{1400, 750, 1150, 700});
 }
@@ -486,7 +496,7 @@ ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size
     RECT rect = rect_e.value();
     auto width = rect.right - rect.left;
     auto height = rect.bottom - rect.top;
-    logln(format("the init window size is {}x{}", width, height));
+    logln(format("init window size : {}x{}", width, height));
     auto resolution_e = _determine_resolution(width, height);
     if (!resolution_e.has_value())
     {
@@ -494,7 +504,7 @@ ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size
         return _matcher_thread_emit_exit(resolution_e.error());
     }
     auto [res_text, crop_coin, crop_result] = resolution_e.value();
-    logln(format("determined resolution is {}", res_text));
+    logln(format("determined resolution : {}", res_text));
 
     std::string path{prog::env::opencv_templ_directory + res_text + "\\"};
     if (!check_resources({std::filesystem::path{path + "coin_win.png"},
@@ -504,14 +514,16 @@ ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size
                           std::filesystem::path{path + "victory.png"},
                           std::filesystem::path{path + "defeat.png"}}))
     {
-        logln("resources missing");
+        logln(format(
+            "opencv template is missing, or current window resolution '{}' is not supported yet",
+            res_text));
         return _matcher_thread_emit_exit(ErrorType::ErrCheckResources);
     }
 
     auto f_coin = capture_fn_generator(ss, hwnd, scale, crop_coin);
     auto f_result = capture_fn_generator(ss, hwnd, scale, crop_result);
 
-    if (prog::env::debug::test_capture_flag)
+    if constexpr (prog::env::debug::test_capture_flag)
     {
         auto cap_coin = f_coin();
         auto cap_result = f_result();
@@ -529,11 +541,14 @@ ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size
     }
 
     Matcher match_coin({(path + "coin_win.png").c_str(), (path + "coin_lose.png").c_str()},
-                       0.88, prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
+                       prog::env::matcher_threshold,
+                       prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
     Matcher match_st_nd({(path + "go_first.png").c_str(), (path + "go_second.png").c_str()},
-                        0.88, prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
+                        prog::env::matcher_threshold,
+                        prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
     Matcher match_result({(path + "victory.png").c_str(), (path + "defeat.png").c_str()},
-                         0.88, prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
+                         prog::env::matcher_threshold,
+                         prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
     while (true)
     {
         auto coin = _matcher_thread_helper(stoken, match_coin, f_coin, MatcherGotType::Coin, a_manual_result);

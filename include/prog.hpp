@@ -2,10 +2,13 @@
 #define PROG_HPP_
 
 #include <string>
+#include <windows.h>
 
-namespace prog {
+namespace prog
+{
     // c++17
-    namespace env {
+    namespace env
+    {
         using std::string;
 
         inline const string data_csv_filename{"resource\\csv\\data.csv"};
@@ -14,14 +17,18 @@ namespace prog {
         inline const string capture_window_title{"masterduel"};
 
         inline const string default_font_filename{"resource\\font\\SourceHanSansCN-Bold.otf"};
-        
-        namespace debug {
+        inline const double matcher_threshold{0.9};
+        inline const DWORD matcher_sleep_ms{1 * 1000};
+
+        namespace debug
+        {
             inline const bool test_capture_flag{false};
             inline const bool matcher_text_log{false};
             inline const bool matcher_img_log{true};
         }
     }
-    namespace global {
+    namespace global
+    {
         inline int qt_font_id;
     }
 }
