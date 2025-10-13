@@ -1,4 +1,9 @@
+# 设置统计表格（总场次那个表格）的背景色和前景色，rgb格式
 stats_tbl_background_color = "#303030"
 stats_tbl_foreground_color = "#ffffff"
 
+# 设置程序窗口打开时出现的位置以及大小（x轴，y轴，宽度，长度）
+prog_window_init_x_y_width_height = [800, 400, 900, 400]
+
+# 设置匹配的间隔时间，即每多少秒进行一次截图匹配，单位毫秒，注意，调低这个值会增加cpu占用进而导致系统变卡
 matcher_sleep_ms = 1000

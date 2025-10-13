@@ -5,6 +5,7 @@
 #include <windows.h>
 
 #include <toml.hpp>
+#include <array>
 
 namespace prog
 {
@@ -26,6 +27,7 @@ namespace prog
         {
             inline string stats_tbl_background_color{"#000000"};
             inline string stats_tbl_foreground_color{"#ffffff"};
+            inline std::array<size_t, 4> prog_window_init_x_y_width_height{800, 400, 900, 400};
             inline DWORD matcher_sleep_ms{1 * 1000};
 
             bool load_prog_config();

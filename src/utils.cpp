@@ -288,6 +288,10 @@ bool prog::env::config::load_prog_config()
         config,
         "matcher_sleep_ms",
         matcher_sleep_ms);
+    prog_window_init_x_y_width_height = toml::find_or<std::array<size_t, 4>>(
+        config,
+        "prog_window_init_x_y_width_height",
+        prog_window_init_x_y_width_height);
 
     return true;
 }

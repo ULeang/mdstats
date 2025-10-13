@@ -37,7 +37,10 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     w.setWindowTitle("MD stats");
-    w.setGeometry({800, 400, 900, 400});
+    w.setGeometry({prog::env::config::prog_window_init_x_y_width_height[0],
+                   prog::env::config::prog_window_init_x_y_width_height[1],
+                   prog::env::config::prog_window_init_x_y_width_height[2],
+                   prog::env::config::prog_window_init_x_y_width_height[3]});
     w.show();
 
     return a.exec();
