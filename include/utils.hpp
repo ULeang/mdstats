@@ -290,7 +290,7 @@ public:
             auto local_time = get_local_time();
 
             // the filename may not contain colon ':', otherwise imwrite fails
-            cv::imwrite(std::format("{}\\pic\\{:04}{:02}{:02}-{:02}{:02}{:02}-{:.5f}.png",
+            cv::imwrite(std::format("{}\\{:04}{:02}{:02}-{:02}{:02}{:02}-{:.5f}.png",
                                     prog::env::opencv_log_directory,
                                     local_time->tm_year + 1900, local_time->tm_mon + 1, local_time->tm_mday,
                                     local_time->tm_hour, local_time->tm_min, local_time->tm_sec, c_maxVal)

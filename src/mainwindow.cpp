@@ -259,13 +259,13 @@ void MainWindow::update_stats_tbl()
     stats_tbl.item(2, 1)->setText(QString::number(res_win));
     stats_tbl.item(2, 2)->setText(QString::number(res_lose));
     stats_tbl.item(3, 1)->setText(coin_win == 0
-                                      ? "0"
+                                      ? "-"
                                       : std::format("{:5.2f}%", 100 * win_rate_coin_win).c_str());
     stats_tbl.item(4, 1)->setText(coin_lose == 0
-                                      ? "0"
+                                      ? "-"
                                       : std::format("{:5.2f}%", 100 * win_rate_coin_lose).c_str());
     stats_tbl.item(5, 1)->setText(total == 0
-                                      ? "0"
+                                      ? "-"
                                       : std::format("{:5.2f}%", 100 * win_rate_total).c_str());
 }
 void MainWindow::on_startBtn_clicked()
@@ -435,25 +435,25 @@ _determine_resolution(long width, long height)
     }
     if (width < 1920)
     {
-        return std::make_tuple("1600x900", cv::Rect{0, 0, 1600, 900}, cv::Rect{0, 0, 1600, 900});
+        return std::make_tuple("1600x900", cv::Rect{600, 530, 400, 160}, cv::Rect{550, 300, 550, 380});
     }
     if (width < 2048)
     {
-        return std::make_tuple("1920x1080", cv::Rect{700, 700, 600, 180}, cv::Rect{640, 360, 800, 500});
+        return std::make_tuple("1920x1080", cv::Rect{700, 630, 500, 200}, cv::Rect{650, 350, 600, 450});
     }
     if (width < 2560)
     {
-        return std::make_tuple("2048x1152", cv::Rect{0, 0, 2048, 1152}, cv::Rect{0, 0, 2048, 1152});
+        return std::make_tuple("2048x1152", cv::Rect{750, 650, 550, 220}, cv::Rect{700, 380, 650, 480});
     }
     if (width < 3200)
     {
-        return std::make_tuple("2560x1440", cv::Rect{900, 900, 800, 200}, cv::Rect{900, 450, 800, 600});
+        return std::make_tuple("2560x1440", cv::Rect{950, 850, 700, 250}, cv::Rect{880, 450, 820, 600});
     }
     if (width < 3840)
     {
-        return std::make_tuple("3200x1800", cv::Rect{1200, 1150, 900, 200}, cv::Rect{1200, 650, 900, 650});
+        return std::make_tuple("3200x1800", cv::Rect{1200, 1050, 800, 280}, cv::Rect{1100, 600, 1030, 700});
     }
-    return std::make_tuple("3840x2160", cv::Rect{1300, 1300, 1300, 350}, cv::Rect{1400, 800, 1200, 700});
+    return std::make_tuple("3840x2160", cv::Rect{1450, 1300, 950, 300}, cv::Rect{1400, 750, 1150, 700});
 }
 
 ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size_t &a_manual_result)

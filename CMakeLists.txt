@@ -44,5 +44,4 @@ set(DLLS
 )
 install(TARGETS ${PROJECT_NAME} DESTINATION .)
 install(FILES ${DLLS} DESTINATION .)
-install(DIRECTORY log DESTINATION .)
 install(DIRECTORY resource DESTINATION . PATTERN resource/csv EXCLUDE)

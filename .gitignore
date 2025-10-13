@@ -1,9 +1,8 @@
-lib/
-install/
-build/
-log/opencv/pic/*
-log.txt
-resource/csv/
-mdstats/
-*.7z
-*.png
+/*
+!/src/
+!/include/
+!/resource
+/resource/csv/
+!CMakeLists.txt
+!Makefile
+!/.vscode/
