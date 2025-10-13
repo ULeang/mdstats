@@ -325,7 +325,7 @@ void MainWindow::on_stopBtn_clicked()
 }
 void MainWindow::on_openCSVBtn_clicked()
 {
-    ShellExecuteA(0, "open", prog::env::data_csv_filename.c_str(), 0, 0, SW_SHOWNORMAL);
+    ShellExecuteA(0, "open", prog::env::data_csv_path.c_str(), 0, 0, SW_SHOWNORMAL);
 }
 void MainWindow::on_cptoclpbdBtn_clicked()
 {

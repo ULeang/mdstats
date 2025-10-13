@@ -297,8 +297,8 @@ public:
                             .c_str(),
                         image);
             // TODO
-            if (text_log) {
-                
+            if (text_log)
+            {
             }
         }
         return c_i;

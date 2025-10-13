@@ -34,8 +34,7 @@ bool ensure_csv(std::filesystem::path csv)
 {
     if (!std::filesystem::exists(csv))
     {
-        std::filesystem::path csv_path_temp{csv};
-        std::filesystem::create_directories(csv_path_temp.remove_filename());
+        std::filesystem::create_directories(prog::env::data_csv_path);
         std::ofstream fout(csv, std::ios::out);
         if (!fout.good())
         {
