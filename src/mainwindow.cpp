@@ -27,8 +27,8 @@ MainWindow::MainWindow(QWidget *parent)
       result_lbl(),
       time_lbl(),
       data(),
-      manual_victoryBtn("VICTORY"),
-      manual_defeatBtn("DEFEAT")
+      manual_0Btn("赢币"),
+      manual_1Btn("输币")
 {
     // forbid user to modify the table
     stats_tbl.setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -95,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent)
     startBtn.setPalette(Qt::green);
     stopBtn.setPalette(Qt::gray);
 
-    disable_manual_result_btn(true);
+    disable_manual_btn(true);
 
     // set font
     // auto font = QFont("FiraCode Nerd Font Mono", 16);
@@ -111,14 +111,14 @@ MainWindow::MainWindow(QWidget *parent)
     st_nd_lbl.setFont(font);
     result_lbl.setFont(font);
     time_lbl.setFont(font);
-    manual_victoryBtn.setFont(font);
-    manual_defeatBtn.setFont(font);
+    manual_0Btn.setFont(font);
+    manual_1Btn.setFont(font);
 
     // set layout
     auto g_layout1 = new QGridLayout;
     g_layout1->addWidget(&stats_tbl, 0, 0, 3, 6);
-    g_layout1->addWidget(&manual_victoryBtn, 3, 0, 1, 3);
-    g_layout1->addWidget(&manual_defeatBtn, 3, 3, 1, 3);
+    g_layout1->addWidget(&manual_0Btn, 3, 0, 1, 3);
+    g_layout1->addWidget(&manual_1Btn, 3, 3, 1, 3);
     g_layout1->addWidget(&coin_lbl, 4, 0, 1, 2);
     g_layout1->addWidget(&st_nd_lbl, 4, 2, 1, 2);
     g_layout1->addWidget(&result_lbl, 4, 4, 1, 2);
@@ -151,8 +151,8 @@ void MainWindow::connect_signals()
     connect(&reloadBtn, SIGNAL(clicked()), this, SLOT(on_reloadBtn_clicked()));
     connect(&openCSVBtn, SIGNAL(clicked()), this, SLOT(on_openCSVBtn_clicked()));
     connect(&cptoclpbdBtn, SIGNAL(clicked()), this, SLOT(on_cptoclpbdBtn_clicked()));
-    connect(&manual_victoryBtn, SIGNAL(clicked()), this, SLOT(on_manual_victoryBtn_clicked()));
-    connect(&manual_defeatBtn, SIGNAL(clicked()), this, SLOT(on_manual_defeatBtn_clicked()));
+    connect(&manual_0Btn, SIGNAL(clicked()), this, SLOT(on_manual_0Btn_clicked()));
+    connect(&manual_1Btn, SIGNAL(clicked()), this, SLOT(on_manual_1Btn_clicked()));
 
     static const auto signal_emitter = MySignalEmitter::instance();
     connect(signal_emitter, SIGNAL(matcher_got(MatcherGotType, size_t)),
@@ -311,12 +311,12 @@ void MainWindow::on_startBtn_clicked()
     startBtn.setPalette(Qt::gray);
     stopBtn.setPalette(Qt::red);
 
-    // ~0, i.e. the max value of size_t, represents no manual result
-    manual_result_reset();
+    disable_manual_btn(false);
+    manual_reset();
 
     task_matcher_thread = std::packaged_task(fn_matcher_thread);
     ret_matcher_thread = task_matcher_thread.get_future();
-    thrd_matcher_thread = std::jthread(std::move(task_matcher_thread), std::ref(_a_manual_result));
+    thrd_matcher_thread = std::jthread(std::move(task_matcher_thread), std::ref(_a_manual));
 }
 void MainWindow::on_stopBtn_clicked()
 {
@@ -349,14 +349,18 @@ void MainWindow::on_emitter_matcher_got(MatcherGotType got, size_t n)
     case MatcherGotType::Coin:
         clear_lbl();
         coin_lbl.setText({n == 0 ? "赢币" : "输币"});
+        manual_0Btn.setText("先攻");
+        manual_1Btn.setText("后攻");
+        disable_manual_btn(false);
         break;
     case MatcherGotType::St_nd:
-        disable_manual_result_btn(false);
         st_nd_lbl.setText({n == 0 ? "先攻" : "后攻"});
+        manual_0Btn.setText("胜利");
+        manual_1Btn.setText("失败");
+        disable_manual_btn(false);
         break;
     case MatcherGotType::Result:
     {
-        disable_manual_result_btn(true);
         result_lbl.setText({n == 0 ? "胜利" : "失败"});
 
         auto t = get_local_time();
@@ -364,6 +368,9 @@ void MainWindow::on_emitter_matcher_got(MatcherGotType got, size_t n)
                                     t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
                                     t->tm_hour, t->tm_min, t->tm_sec);
         time_lbl.setText(t_string.c_str());
+        manual_0Btn.setText("赢币");
+        manual_1Btn.setText("输币");
+        disable_manual_btn(false);
         update_data_and_record_tbl_by_lbl();
     }
     break;
@@ -378,39 +385,41 @@ void MainWindow::on_emitter_matcher_thread_exit(ErrorType err)
     startBtn.setPalette(Qt::green);
     stopBtn.setPalette(Qt::gray);
 
-    manual_result_reset();
     thrd_matcher_thread.join();
+    disable_manual_btn(true);
 
     logln(format("Matcher exited with {}", size_t(err)));
 }
-void MainWindow::manual_result_reset()
+void MainWindow::manual_reset()
 {
-    disable_manual_result_btn(true);
-    _a_manual_result.store(~0, std::memory_order_release);
+    manual_0Btn.setText("赢币");
+    manual_1Btn.setText("输币");
+    // ~0, i.e. the max value of size_t, represents no manual result
+    _a_manual.store(~0, std::memory_order_release);
 }
-void MainWindow::on_manual_victoryBtn_clicked()
+void MainWindow::on_manual_0Btn_clicked()
 {
-    disable_manual_result_btn(true);
-    _a_manual_result.store(0, std::memory_order_release);
+    disable_manual_btn(true);
+    _a_manual.store(0, std::memory_order_release);
 }
-void MainWindow::on_manual_defeatBtn_clicked()
+void MainWindow::on_manual_1Btn_clicked()
 {
-    disable_manual_result_btn(true);
-    _a_manual_result.store(1, std::memory_order_release);
+    disable_manual_btn(true);
+    _a_manual.store(1, std::memory_order_release);
 }
-void MainWindow::disable_manual_result_btn(bool disable)
+void MainWindow::disable_manual_btn(bool disable)
 {
-    manual_victoryBtn.setDisabled(disable);
-    manual_defeatBtn.setDisabled(disable);
+    manual_0Btn.setDisabled(disable);
+    manual_1Btn.setDisabled(disable);
     if (disable)
     {
-        manual_victoryBtn.setPalette(Qt::gray);
-        manual_defeatBtn.setPalette(Qt::gray);
+        manual_0Btn.setPalette(Qt::gray);
+        manual_1Btn.setPalette(Qt::gray);
     }
     else
     {
-        manual_victoryBtn.setPalette(Qt::cyan);
-        manual_defeatBtn.setPalette(Qt::cyan);
+        manual_0Btn.setPalette(Qt::cyan);
+        manual_1Btn.setPalette(Qt::cyan);
     }
 }
 void MainWindow::on_reloadBtn_clicked()
@@ -420,22 +429,19 @@ void MainWindow::on_reloadBtn_clicked()
 
 static auto _matcher_thread_helper(const std::stop_token &stoken, Matcher &matcher,
                                    const std::function<std::optional<cv::Mat>()> &f,
-                                   MatcherGotType got, std::atomic_size_t &a_manual_result)
+                                   MatcherGotType got, std::atomic_size_t &a_manual)
     -> std::expected<size_t, ErrorType>
 {
     static const auto signal_emitter = MySignalEmitter::instance();
     while (true)
     {
-        // ad-hoc for manual result
-        if (got == MatcherGotType::Result)
+        // ad-hoc for manual
+        auto m_r = a_manual.load(std::memory_order_acquire);
+        if (m_r != ~0)
         {
-            auto m_r = a_manual_result.load(std::memory_order_acquire);
-            if (m_r != ~0)
-            {
-                a_manual_result.store(~0, std::memory_order_release);
-                signal_emitter->emit_matcher_got(got, m_r);
-                return m_r;
-            }
+            a_manual.store(~0, std::memory_order_release);
+            signal_emitter->emit_matcher_got(got, m_r);
+            return m_r;
         }
 
         auto match_r = matcher.try_once(f);
@@ -501,7 +507,7 @@ _determine_resolution(long width, long height)
     return std::make_tuple("3840x2160", cv::Rect{1450, 1300, 950, 300}, cv::Rect{1400, 750, 1150, 700});
 }
 
-ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size_t &a_manual_result)
+ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size_t &a_manual)
 {
     static const auto signal_emitter = MySignalEmitter::instance();
 
@@ -586,7 +592,7 @@ ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size
                          prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
     while (true)
     {
-        auto coin = _matcher_thread_helper(stoken, match_coin, f_coin, MatcherGotType::Coin, a_manual_result);
+        auto coin = _matcher_thread_helper(stoken, match_coin, f_coin, MatcherGotType::Coin, a_manual);
         if (coin.has_value())
         {
             logln(format("{}", coin.value() == 0 ? "coin win" : "coin lose"));
@@ -595,7 +601,7 @@ ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size
         {
             return coin.error();
         }
-        auto st_nd = _matcher_thread_helper(stoken, match_st_nd, f_coin, MatcherGotType::St_nd, a_manual_result);
+        auto st_nd = _matcher_thread_helper(stoken, match_st_nd, f_coin, MatcherGotType::St_nd, a_manual);
         if (st_nd.has_value())
         {
             logln(format("{}", st_nd.value() == 0 ? "go first" : "go second"));
@@ -604,7 +610,7 @@ ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size
         {
             return st_nd.error();
         }
-        auto result = _matcher_thread_helper(stoken, match_result, f_result, MatcherGotType::Result, a_manual_result);
+        auto result = _matcher_thread_helper(stoken, match_result, f_result, MatcherGotType::Result, a_manual);
         if (result.has_value())
         {
             logln(format("{}", result.value() == 0 ? "victory" : "defeat"));
