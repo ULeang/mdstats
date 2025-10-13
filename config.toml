@@ -1,0 +1,4 @@
+stats_tbl_background_color = "#303030"
+stats_tbl_foreground_color = "#ffffff"
+
+matcher_sleep_ms = 1000

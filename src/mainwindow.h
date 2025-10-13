@@ -82,6 +82,8 @@ private:
     void disable_manual_result_btn(bool disable);
 
     void manual_result_reset();
+    
+    void ensure_config();
 
 public:
     MainWindow(QWidget *parent = nullptr);

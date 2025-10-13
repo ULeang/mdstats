@@ -4,6 +4,8 @@
 #include <string>
 #include <windows.h>
 
+#include <toml.hpp>
+
 namespace prog
 {
     // c++17
@@ -15,10 +17,19 @@ namespace prog
         inline const string opencv_templ_directory{"resource\\template\\"};
         inline const string opencv_log_directory{"log\\opencv\\"};
         inline const string capture_window_title{"masterduel"};
+        inline const string config_filename{"config.toml"};
 
         inline const string default_font_filename{"resource\\font\\SourceHanSansCN-Bold.otf"};
         inline const double matcher_threshold{0.9};
-        inline const DWORD matcher_sleep_ms{1 * 1000};
+
+        namespace config
+        {
+            inline string stats_tbl_background_color{"#000000"};
+            inline string stats_tbl_foreground_color{"#ffffff"};
+            inline DWORD matcher_sleep_ms{1 * 1000};
+
+            bool load_prog_config();
+        }
 
         namespace debug
         {

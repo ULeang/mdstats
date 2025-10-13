@@ -185,6 +185,12 @@ void DataBase::load_csv(const std::string &csv_filename)
     }
     catch (...)
     {
+        rowc = 0;
+        coin_col.clear();
+        st_nd_col.clear();
+        result_col.clear();
+        deck_col.clear();
+        time_col.clear();
         logln(std::format("load csv exception :\n\tunknown exception"));
     }
 
@@ -258,4 +264,30 @@ void CopyToClipboard(const char *text)
 
     // 关闭剪贴板
     CloseClipboard();
+}
+bool prog::env::config::load_prog_config()
+{
+    auto config_r = toml::try_parse(config_filename);
+    if (!config_r.is_ok())
+    {
+        std::cerr << config_r.unwrap_err().at(0) << std::endl;
+        logln("load prog config fail, using default config");
+        return false;
+    }
+
+    auto config = config_r.unwrap();
+    stats_tbl_background_color = toml::find_or<string>(
+        config,
+        "stats_tbl_background_color",
+        stats_tbl_background_color);
+    stats_tbl_foreground_color = toml::find_or<string>(
+        config,
+        "stats_tbl_foreground_color",
+        stats_tbl_foreground_color);
+    matcher_sleep_ms = toml::find_or<DWORD>(
+        config,
+        "matcher_sleep_ms",
+        matcher_sleep_ms);
+
+    return true;
 }

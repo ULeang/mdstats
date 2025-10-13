@@ -8,6 +8,7 @@
 #include <QFontDatabase>
 #include <QGridLayout>
 #include <QHBoxLayout>
+#include <QColor>
 #include <windows.h>
 
 using std::format;
@@ -136,6 +137,7 @@ MainWindow::MainWindow(QWidget *parent)
     widget->setLayout(h_layout1);
     this->setCentralWidget(widget);
 
+    ensure_config();
     load_record_tbl();
     connect_signals();
 }
@@ -159,6 +161,39 @@ void MainWindow::connect_signals()
             this, SLOT(on_emitter_matcher_thread_exit(ErrorType)));
 }
 
+void MainWindow::ensure_config()
+{
+    stats_tbl.setPalette(QColor{prog::env::config::stats_tbl_background_color.c_str()});
+    struct
+    {
+        int r;
+        int c;
+    } stats_tbl_active_cell_arr[] = {
+        {0, 0},
+        {1, 0},
+        {2, 0},
+        {3, 0},
+        {4, 0},
+        {5, 0},
+        {0, 1},
+        {1, 1},
+        {1, 2},
+        {2, 1},
+        {2, 2},
+        {3, 1},
+        {4, 1},
+        {5, 1}};
+    const size_t staca_length = sizeof(stats_tbl_active_cell_arr) / sizeof(stats_tbl_active_cell_arr[0]);
+    for (size_t i = 0; i < staca_length; ++i)
+    {
+        stats_tbl.item(stats_tbl_active_cell_arr[i].r,
+                       stats_tbl_active_cell_arr[i].c)
+            ->setBackground(QColor{prog::env::config::stats_tbl_background_color.c_str()});
+        stats_tbl.item(stats_tbl_active_cell_arr[i].r,
+                       stats_tbl_active_cell_arr[i].c)
+            ->setForeground(QColor{prog::env::config::stats_tbl_foreground_color.c_str()});
+    }
+}
 ErrorType MainWindow::load_record_tbl()
 {
     logln(format("loading record from '{}'", prog::env::data_csv_filename));
@@ -414,7 +449,7 @@ static auto _matcher_thread_helper(const std::stop_token &stoken, Matcher &match
             signal_emitter->emit_matcher_thread_exit(ErrorType::ErrStopRequested);
             return std::unexpected{ErrorType::ErrStopRequested};
         }
-        Sleep(prog::env::matcher_sleep_ms);
+        Sleep(prog::env::config::matcher_sleep_ms);
     }
 }
 static ErrorType _matcher_thread_emit_exit(ErrorType err)
@@ -496,7 +531,7 @@ ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size
     RECT rect = rect_e.value();
     auto width = rect.right - rect.left;
     auto height = rect.bottom - rect.top;
-    logln(format("init window size : {}x{}", width, height));
+    logln(format("init window size \t: {}x{}", width, height));
     auto resolution_e = _determine_resolution(width, height);
     if (!resolution_e.has_value())
     {
@@ -504,7 +539,7 @@ ErrorType MainWindow::fn_matcher_thread(std::stop_token stoken, std::atomic_size
         return _matcher_thread_emit_exit(resolution_e.error());
     }
     auto [res_text, crop_coin, crop_result] = resolution_e.value();
-    logln(format("determined resolution : {}", res_text));
+    logln(format("determined resolution \t: {}", res_text));
 
     std::string path{prog::env::opencv_templ_directory + res_text + "\\"};
     if (!check_resources({std::filesystem::path{path + "coin_win.png"},

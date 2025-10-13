@@ -42,6 +42,9 @@ set(DLLS
     lib/libgcc_s_seh-1.dll
     lib/libopencv_world4130.dll
 )
+set(PROGFILES
+    config.toml
+)
 install(TARGETS ${PROJECT_NAME} DESTINATION .)
-install(FILES ${DLLS} DESTINATION .)
+install(FILES ${DLLS} ${PROGFILES} DESTINATION .)
 install(DIRECTORY resource DESTINATION . PATTERN resource/csv EXCLUDE)
