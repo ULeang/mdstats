@@ -1,0 +1,407 @@
+#include "databasemodel.hpp"
+
+void Stats_::update_stats_tbl()
+{
+    auto coin_win = w_st_wins + w_st_loses + w_st_others + w_nd_wins + w_nd_loses + w_nd_others;
+    auto coin_lose = l_st_wins + l_st_loses + l_st_others + l_nd_wins + l_nd_loses + l_nd_others;
+    auto res_win = w_st_wins + w_nd_wins + l_st_wins + l_nd_wins;
+    auto res_lose = w_st_loses + w_nd_loses + l_st_loses + l_nd_loses;
+    auto coin_win_res_win = w_st_wins + w_nd_wins;
+    auto coin_lose_res_win = l_st_wins + l_nd_wins;
+
+    stats_tbl[0].row_data[1] = QString{"%1"}.arg(total);
+    stats_tbl[1].row_data[1] = QString{"%1"}.arg(coin_win);
+    stats_tbl[1].row_data[2] = QString{"%1"}.arg(coin_lose);
+    stats_tbl[2].row_data[1] = QString{"%1"}.arg(res_win);
+    stats_tbl[2].row_data[2] = QString{"%1"}.arg(res_lose);
+
+    auto win_rate_coin_win = double(coin_win_res_win) / coin_win;
+    auto win_rate_coin_lose = double(coin_lose_res_win) / coin_lose;
+    auto win_rate_total = double(res_win) / total;
+    stats_tbl[3].row_data[1] = QString{coin_win == 0 ? "0" : std::format("{:5.2f}%", 100 * win_rate_coin_win).c_str()};
+    stats_tbl[4].row_data[1] = QString{coin_lose == 0 ? "0" : std::format("{:5.2f}%", 100 * win_rate_coin_lose).c_str()};
+    stats_tbl[5].row_data[1] = QString{total == 0 ? "0" : std::format("{:5.2f}%", 100 * win_rate_total).c_str()};
+    emit dataChanged(index(0, 1), index(5, 2));
+}
+
+Stats_::Stats_(QObject *parent)
+    : QAbstractTableModel(),
+      stats_tbl{
+          QVector<QString>{"总场次", "", ""},
+          QVector<QString>{"硬币(赢/输)", "", ""},
+          QVector<QString>{"胜负(胜/负)", "", ""},
+          QVector<QString>{"赢币胜率", "", ""},
+          QVector<QString>{"输币胜率", "", ""},
+          QVector<QString>{"综合胜率", "", ""},
+      }
+{
+    clear_stats();
+}
+Stats_::~Stats_() {}
+
+// Essential methods to override
+int Stats_::rowCount(const QModelIndex &parent) const
+{
+    if (parent.isValid()) // For list/table models, parent should be invalid
+        return 0;
+    return rowc;
+}
+int Stats_::columnCount(const QModelIndex &parent) const
+{
+    if (parent.isValid()) // For list/table models, parent should be invalid
+        return 0;
+    return colc;
+}
+QVariant Stats_::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return {};
+
+    if (index.row() >= rowc || index.column() >= colc)
+        return {};
+
+    switch (role)
+    {
+    case Qt::DisplayRole:
+    case Qt::EditRole:
+        return stats_tbl[index.row()].row_data[index.column()];
+    case Qt::TextAlignmentRole:
+        return int(Qt::AlignHCenter | Qt::AlignVCenter);
+    case Qt::BackgroundRole:
+        return QColor{prog::env::config::stats_tbl_background_color.c_str()};
+    case Qt::ForegroundRole:
+        return QColor{prog::env::config::stats_tbl_foreground_color.c_str()};
+    case Qt::FontRole:
+    default:
+        return {};
+    }
+}
+QVariant Stats_::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    return {};
+}
+Qt::ItemFlags Stats_::flags(const QModelIndex &index) const
+{
+    return Qt::NoItemFlags;
+}
+bool Stats_::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    return false;
+}
+
+void Stats_::clear_stats()
+{
+    total = 0;
+    w_st_wins = 0;
+    l_st_wins = 0;
+    w_nd_wins = 0;
+    l_nd_wins = 0;
+    w_st_loses = 0;
+    l_st_loses = 0;
+    w_nd_loses = 0;
+    l_nd_loses = 0;
+    w_st_others = 0;
+    l_st_others = 0;
+    w_nd_others = 0;
+    l_nd_others = 0;
+    update_stats_tbl();
+}
+void Stats_::add_record(bool inc, const Record &record)
+{
+    const auto &coin = record.coin;
+    const auto &st_nd = record.st_nd;
+    const auto &result = record.result;
+
+    size_t ont_hot = 0b000'00'00;
+    ont_hot |= coin == "赢币" ? 0b000'00'01 : 0b000'00'10;
+    ont_hot |= st_nd == "先攻" ? 0b000'01'00 : 0b000'10'00;
+    ont_hot |= result == "胜利"   ? 0b001'00'00
+               : result == "失败" ? 0b010'00'00
+                                  : 0b100'00'00;
+
+    auto f_exactly = [ont_hot, inc](size_t &n, size_t mask)
+    {
+        n = (ont_hot ^ mask) == 0 ? (inc ? n + 1 : n - 1) : n;
+    };
+    // auto f_any = [ont_hot, inc](size_t &n, size_t mask)
+    // {
+    //     n = ont_hot & mask ? (inc ? n + 1 : n - 1) : n;
+    // };
+
+    total += 1;
+    f_exactly(w_st_wins, 0b001'01'01);
+    f_exactly(l_st_wins, 0b001'01'10);
+    f_exactly(w_nd_wins, 0b001'10'01);
+    f_exactly(l_nd_wins, 0b001'10'10);
+    f_exactly(w_st_loses, 0b010'01'01);
+    f_exactly(l_st_loses, 0b010'01'10);
+    f_exactly(w_nd_loses, 0b010'10'01);
+    f_exactly(l_nd_loses, 0b010'10'10);
+    f_exactly(w_st_others, 0b100'01'01);
+    f_exactly(l_st_others, 0b100'01'10);
+    f_exactly(w_nd_others, 0b100'10'01);
+    f_exactly(l_nd_others, 0b100'10'10);
+    update_stats_tbl();
+}
+
+DataBase_::DataBase_(QObject *parent) : QAbstractTableModel(parent)
+{
+    header_labels << "硬币" << "先后" << "胜负" << "卡组" << "备注" << "时间";
+}
+DataBase_::~DataBase_() {}
+
+// Essential methods to override
+int DataBase_::rowCount(const QModelIndex &parent) const
+{
+    if (parent.isValid()) // For list/table models, parent should be invalid
+        return 0;
+    return db.size();
+}
+int DataBase_::columnCount(const QModelIndex &parent) const
+{
+    if (parent.isValid()) // For list/table models, parent should be invalid
+        return 0;
+    return header_labels.size();
+}
+QVariant DataBase_::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return {};
+
+    if (index.row() >= db.size() || index.column() >= header_labels.size())
+        return {};
+
+    const auto &rec = db[index.row()];
+
+    switch (role)
+    {
+    case Qt::DisplayRole:
+    case Qt::EditRole:
+        return index.column() == 0   ? rec.coin
+               : index.column() == 1 ? rec.st_nd
+               : index.column() == 2 ? rec.result
+               : index.column() == 3 ? rec.deck
+               : index.column() == 4 ? rec.note
+                                     : rec.time;
+    case Qt::TextAlignmentRole:
+        return int(Qt::AlignHCenter | Qt::AlignVCenter);
+    case Qt::BackgroundRole:
+        return index.column() == 0   ? QColor(rec.coin == "赢币" ? Qt::green : rec.coin == "输币" ? Qt::red
+                                                                                                  : Qt::blue)
+               : index.column() == 1 ? QColor(rec.st_nd == "先攻" ? Qt::green : rec.st_nd == "后攻" ? Qt::red
+                                                                                                    : Qt::blue)
+               : index.column() == 2 ? QColor(rec.result == "胜利" ? Qt::green : rec.result == "失败" ? Qt::red
+                                                                                                      : Qt::blue)
+                                     : QVariant{};
+    case Qt::ForegroundRole:
+        return index.column() == 0 || index.column() == 1 || index.column() == 2 ? QColor(Qt::black)
+                                                                                 : QVariant{};
+    case Qt::FontRole:
+    default:
+        return {};
+    }
+}
+QVariant DataBase_::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role != Qt::DisplayRole)
+        return {};
+
+    return orientation == Qt::Horizontal
+               ? (section >= 0 && section < header_labels.size() ? header_labels[section] : QVariant{})
+               : section + 1;
+}
+Qt::ItemFlags DataBase_::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::NoItemFlags;
+
+    return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+}
+bool DataBase_::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!index.isValid())
+        return false;
+
+    if (index.row() >= db.size() || index.column() >= header_labels.size())
+        return false;
+
+    auto &rec = db[index.row()];
+
+    switch (role)
+    {
+    case Qt::EditRole:
+    {
+        if (index.column() == 0)
+            return _setData_helper(rec.coin, std::move(value.toString()), index, role);
+        else if (index.column() == 1)
+            return _setData_helper(rec.st_nd, std::move(value.toString()), index, role);
+        else if (index.column() == 2)
+            return _setData_helper(rec.result, std::move(value.toString()), index, role);
+        else if (index.column() == 3)
+            return _setData_helper(rec.deck, std::move(value.toString()), index, role);
+        else if (index.column() == 4)
+            return _setData_helper(rec.note, std::move(value.toString()), index, role);
+        else
+            return _setData_helper(rec.time, std::move(value.toString()), index, role);
+    }
+    break;
+    default:
+        return false;
+    }
+}
+
+static QString format_record(size_t no, const Record &record)
+{
+    return QString{"%1,%2,%3,%4,%5,%6,%7"}
+        .arg(no)
+        .arg(record.coin)
+        .arg(record.st_nd)
+        .arg(record.result)
+        .arg(record.deck)
+        .arg(record.note)
+        .arg(record.time);
+}
+
+// these two functions will not save csv automatically
+void DataBase_::append_record(Record rec)
+{
+    stats.add_record(true, rec);
+    associate_csv_content.push_back(format_record(db.size() + 1, rec));
+    beginInsertRows({}, db.size(), db.size());
+    db.push_back(std::move(rec));
+    endInsertRows();
+}
+size_t DataBase_::trunc_last(size_t n)
+{
+    size_t _n = std::min(n, size_t(db.size()));
+    auto first = db.size() - _n;
+    if (_n != 0)
+    {
+        beginRemoveRows({}, first, db.size() - 1);
+        for (size_t i = 0; i < _n; ++i)
+        {
+            stats.add_record(false, db.back());
+            db.pop_back();
+            associate_csv_content.pop_back();
+        }
+        endRemoveRows();
+    }
+    return _n;
+}
+
+// static std::optional<std::string> load_csv_into_string(const std::filesystem::path &csv_path)
+// {
+//     std::ifstream fin(csv_path, std::ios::in);
+//     if (!fin.good())
+//     {
+//         return std::nullopt;
+//     }
+//     std::ostringstream buf;
+//     buf << fin.rdbuf();
+//     return buf.str();
+// }
+bool DataBase_::save_csv()
+{
+    if (!associate_csv_path.has_value())
+    {
+        return false;
+    }
+    std::ofstream fout(associate_csv_path.value(), std::ios::out | std::ios::trunc);
+    if (!fout.good())
+    {
+        return false;
+    }
+    fout << "序号,硬币,先后,胜负,卡组,备注,时间\n";
+    for (const auto &line : associate_csv_content)
+    {
+        fout << line.toStdString() << '\n';
+    }
+
+    return fout.good();
+}
+bool DataBase_::load_csv(std::filesystem::path csv_path)
+{
+    associate_csv_path = std::nullopt;
+    associate_csv_content.clear();
+    trunc_last(db.size());
+
+    std::ifstream fin(csv_path, std::ios::in);
+    if (!fin.good())
+    {
+        return false;
+    }
+    try
+    {
+        rapidcsv::Document doc(fin, rapidcsv::LabelParams(0, 0));
+        auto rowc = doc.GetRowCount();
+        auto coin_col = doc.GetColumn<QString>("硬币");
+        auto st_nd_col = doc.GetColumn<QString>("先后");
+        auto result_col = doc.GetColumn<QString>("胜负");
+        auto deck_col = doc.GetColumn<QString>("卡组");
+        auto note_col = doc.GetColumn<QString>("备注");
+        auto time_col = doc.GetColumn<QString>("时间");
+        db.reserve(rowc);
+        for (size_t i = 0; i < rowc; ++i)
+        {
+            append_record({std::move(coin_col[i]),
+                           std::move(st_nd_col[i]),
+                           std::move(result_col[i]),
+                           std::move(deck_col[i]),
+                           std::move(note_col[i]),
+                           std::move(time_col[i])});
+        }
+        associate_csv_path = std::move(csv_path);
+        std::ostringstream buf;
+        doc.Save(buf);
+        auto csv_content_line = QString(std::move(buf).str().c_str()).split('\n', Qt::SkipEmptyParts);
+        csv_content_line.pop_front();
+        associate_csv_content = std::move(csv_content_line);
+        return true;
+    }
+    catch (const std::out_of_range &e)
+    {
+        trunc_last(db.size());
+        associate_csv_path = std::nullopt;
+        associate_csv_content.clear();
+        logln(std::format("load csv exception :\n\t{}", e.what()));
+        logln("csv file is corrupted, fix it first or just remove it and try again");
+    }
+    catch (...)
+    {
+        trunc_last(db.size());
+        associate_csv_path = std::nullopt;
+        associate_csv_content.clear();
+        logln(std::format("load csv exception :\n\tunknown exception"));
+    }
+    return false;
+}
+
+Stats_ *DataBase_::get_stats()
+{
+    return &stats;
+}
+
+bool DataBase_::_setData_helper(QString &r, QString value, const QModelIndex &index, int role)
+{
+    if (r == value)
+        return false;
+    r = std::move(value);
+    emit dataChanged(index, index, {role});
+    associate_csv_content[index.row()] = format_record(index.row() + 1, db[index.row()]);
+    save_csv();
+    return true;
+}
+
+namespace rapidcsv
+{
+    template <>
+    void Converter<QString>::ToVal(const std::string &pStr, QString &pVal) const
+    {
+        pVal = QString{pStr.c_str()};
+    }
+    template <>
+    void Converter<QString>::ToStr(const QString &pVal, std::string &pStr) const
+    {
+        pStr = pVal.toStdString();
+    }
+}
