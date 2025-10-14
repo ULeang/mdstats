@@ -13,8 +13,9 @@ qt_add_executable(${PROJECT_NAME}
     MACOSX_BUNDLE
     src/main.cpp
     src/utils.cpp
-    src/mainwindow.cpp
+    # src/mainwindow.cpp
     src/databasemodel.cpp
+    src/matcher.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

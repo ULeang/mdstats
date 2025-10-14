@@ -4,13 +4,15 @@
 
 #include <rapidcsv.h>
 
-#include "mainwindow.h"
+// #include "mainwindow.h"
 
 #include "utils.hpp"
 #include "prog.hpp"
 #include "databasemodel.hpp"
+#include "matcher.hpp"
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QTableView>
 
 static void ensure_font()
 {
@@ -61,13 +63,15 @@ int main(int argc, char *argv[])
     table_stats->setSpan(5, 1, 1, 2);
 
     database->load_csv("resource\\csv\\data.csv");
-    database->append_record({"1", "2", "3", "4", "5", "6"});
-    database->save_csv();
     table_stats->horizontalHeader()->setVisible(false);
     table_stats->verticalHeader()->setVisible(false);
 
     table_record->setModel(database);
     table_stats->setModel(stats);
+
+    QThread *matcher_thread = new QThread;
+    Matcher_ *matcher = new Matcher_;
+    matcher->moveToThread(matcher_thread);
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(table_record);

@@ -128,7 +128,7 @@ void Stats_::add_record(bool inc, const Record &record)
     //     n = ont_hot & mask ? (inc ? n + 1 : n - 1) : n;
     // };
 
-    total += 1;
+    inc ? total += 1 : total -= 1;
     f_exactly(w_st_wins, 0b001'01'01);
     f_exactly(l_st_wins, 0b001'01'10);
     f_exactly(w_nd_wins, 0b001'10'01);
@@ -252,7 +252,7 @@ bool DataBase_::setData(const QModelIndex &index, const QVariant &value, int rol
 
 static QString format_record(size_t no, const Record &record)
 {
-    return QString{"%1,%2,%3,%4,%5,%6,%7"}
+    return QString{"%1|%2|%3|%4|%5|%6|%7"}
         .arg(no)
         .arg(record.coin)
         .arg(record.st_nd)
@@ -311,7 +311,7 @@ bool DataBase_::save_csv()
     {
         return false;
     }
-    fout << "序号,硬币,先后,胜负,卡组,备注,时间\n";
+    fout << "序号|硬币|先后|胜负|卡组|备注|时间\n";
     for (const auto &line : associate_csv_content)
     {
         fout << line.toStdString() << '\n';
@@ -332,7 +332,7 @@ bool DataBase_::load_csv(std::filesystem::path csv_path)
     }
     try
     {
-        rapidcsv::Document doc(fin, rapidcsv::LabelParams(0, 0));
+        rapidcsv::Document doc(fin, rapidcsv::LabelParams(0, 0), rapidcsv::SeparatorParams('|'));
         auto rowc = doc.GetRowCount();
         auto coin_col = doc.GetColumn<QString>("硬币");
         auto st_nd_col = doc.GetColumn<QString>("先后");
@@ -385,8 +385,11 @@ bool DataBase_::_setData_helper(QString &r, QString value, const QModelIndex &in
 {
     if (r == value)
         return false;
+    stats.add_record(false, db[index.row()]);
     r = std::move(value);
     emit dataChanged(index, index, {role});
+    stats.add_record(true, db[index.row()]);
+
     associate_csv_content[index.row()] = format_record(index.row() + 1, db[index.row()]);
     save_csv();
     return true;

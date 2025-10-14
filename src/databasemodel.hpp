@@ -4,7 +4,6 @@
 #include <QAbstractTableModel>
 #include <QColor>
 #include <optional>
-#include <vector>
 #include <fstream>
 #include <rapidcsv.h>
 #include "utils.hpp"
