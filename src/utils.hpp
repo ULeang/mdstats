@@ -199,12 +199,6 @@ std::function<std::optional<cv::Mat>()> capture_fn_generator(ScreenShot &ss, HWN
 
 std::tm *get_local_time();
 
-// csv
-bool ensure_csv(std::filesystem::path csv);
-bool append_to_csv(const std::filesystem::path &csv, const std::string &record);
-std::string format_csv_record(size_t no, size_t coin, size_t st_nd, size_t result,
-                              const std::string &deck, const std::tm *t);
-
 bool check_resources(const std::vector<std::filesystem::path> &files);
 
 // Matcher

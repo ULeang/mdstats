@@ -30,48 +30,6 @@ std::tm *get_local_time()
     return local_time;
 }
 
-bool ensure_csv(std::filesystem::path csv)
-{
-    if (!std::filesystem::exists(csv))
-    {
-        std::filesystem::create_directories(prog::env::data_csv_path);
-        std::ofstream fout(csv, std::ios::out);
-        if (!fout.good())
-        {
-            return false;
-        }
-        fout << "序号,硬币,先后,胜负,卡组,时间\n"
-             << std::flush;
-        return fout.good();
-    }
-    return true;
-}
-
-std::string format_csv_record(size_t no, size_t coin, size_t st_nd, size_t result,
-                              const std::string &deck, const std::tm *t)
-{
-    return std::format("{},{},{},{},{},{}\n",
-                       no,
-                       coin == 0 ? "赢币" : "输币",
-                       st_nd == 0 ? "先攻" : "后攻",
-                       result == 0 ? "胜利" : "失败",
-                       deck,
-                       std::format("{:04}{:02}{:02}-{:02}{:02}{:02}",
-                                   t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
-                                   t->tm_hour, t->tm_min, t->tm_sec));
-}
-
-bool append_to_csv(const std::filesystem::path &csv, const std::string &record)
-{
-    std::ofstream fout(csv, std::ios::out | std::ios::app);
-    if (!fout.good())
-    {
-        return false;
-    }
-    fout << record << std::flush;
-    return fout.good();
-}
-
 bool check_resources(const std::vector<std::filesystem::path> &files)
 {
     for (const auto &f : files)

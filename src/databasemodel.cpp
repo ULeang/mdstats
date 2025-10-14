@@ -143,6 +143,29 @@ void Stats_::add_record(bool inc, const Record &record)
     f_exactly(l_nd_others, 0b100'10'10);
     update_stats_tbl();
 }
+void Stats_::copy_to_clipboard()
+{
+    CopyToClipboard(
+        QString{
+            "%1\t%2\n%3\t%4/%5\n%6\t%7/%8\n%9\t%10\n%11\t%12\n%13\t%14\n",
+        }
+            .arg(stats_tbl[0].row_data[0])
+            .arg(stats_tbl[0].row_data[1])
+            .arg(stats_tbl[1].row_data[0])
+            .arg(stats_tbl[1].row_data[1])
+            .arg(stats_tbl[1].row_data[2])
+            .arg(stats_tbl[2].row_data[0])
+            .arg(stats_tbl[2].row_data[1])
+            .arg(stats_tbl[2].row_data[2])
+            .arg(stats_tbl[3].row_data[0])
+            .arg(stats_tbl[3].row_data[1])
+            .arg(stats_tbl[4].row_data[0])
+            .arg(stats_tbl[4].row_data[1])
+            .arg(stats_tbl[5].row_data[0])
+            .arg(stats_tbl[5].row_data[1])
+            .toStdString()
+            .c_str());
+}
 
 DataBase_::DataBase_(QObject *parent) : QAbstractTableModel(parent)
 {
@@ -300,6 +323,24 @@ size_t DataBase_::trunc_last(size_t n)
 //     buf << fin.rdbuf();
 //     return buf.str();
 // }
+
+static const char *csv_head = "序号|硬币|先后|胜负|卡组|备注|时间\n";
+bool DataBase_::ensure_csv(std::filesystem::path csv_path)
+{
+    if (!std::filesystem::exists(csv_path))
+    {
+        std::filesystem::create_directories(prog::env::data_csv_path);
+        std::ofstream fout(csv_path, std::ios::out);
+        if (!fout.good())
+        {
+            return false;
+        }
+        fout << csv_head << std::flush;
+        return fout.good();
+    }
+    return true;
+}
+
 bool DataBase_::save_csv()
 {
     if (!associate_csv_path.has_value())
@@ -311,7 +352,7 @@ bool DataBase_::save_csv()
     {
         return false;
     }
-    fout << "序号|硬币|先后|胜负|卡组|备注|时间\n";
+    fout << csv_head;
     for (const auto &line : associate_csv_content)
     {
         fout << line.toStdString() << '\n';
@@ -322,7 +363,6 @@ bool DataBase_::save_csv()
 bool DataBase_::load_csv(std::filesystem::path csv_path)
 {
     associate_csv_path = std::nullopt;
-    associate_csv_content.clear();
     trunc_last(db.size());
 
     std::ifstream fin(csv_path, std::ios::in);
@@ -351,18 +391,17 @@ bool DataBase_::load_csv(std::filesystem::path csv_path)
                            std::move(time_col[i])});
         }
         associate_csv_path = std::move(csv_path);
-        std::ostringstream buf;
-        doc.Save(buf);
-        auto csv_content_line = QString(std::move(buf).str().c_str()).split('\n', Qt::SkipEmptyParts);
-        csv_content_line.pop_front();
-        associate_csv_content = std::move(csv_content_line);
+        // std::ostringstream buf;
+        // doc.Save(buf);
+        // auto csv_content_line = QString(std::move(buf).str().c_str()).split('\n', Qt::SkipEmptyParts);
+        // csv_content_line.pop_front();
+        // associate_csv_content = std::move(csv_content_line);
         return true;
     }
     catch (const std::out_of_range &e)
     {
         trunc_last(db.size());
         associate_csv_path = std::nullopt;
-        associate_csv_content.clear();
         logln(std::format("load csv exception :\n\t{}", e.what()));
         logln("csv file is corrupted, fix it first or just remove it and try again");
     }
@@ -370,7 +409,6 @@ bool DataBase_::load_csv(std::filesystem::path csv_path)
     {
         trunc_last(db.size());
         associate_csv_path = std::nullopt;
-        associate_csv_content.clear();
         logln(std::format("load csv exception :\n\tunknown exception"));
     }
     return false;

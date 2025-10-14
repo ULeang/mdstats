@@ -61,6 +61,7 @@ public:
 
     void clear_stats();
     void add_record(bool inc, const Record &record);
+    void copy_to_clipboard();
 };
 
 class DataBase_ : public QAbstractTableModel
@@ -83,6 +84,8 @@ public slots:
     // these two functions will not save csv automatically
     void append_record(Record rec);
     size_t trunc_last(size_t n = 1);
+
+    static bool ensure_csv(std::filesystem::path csv_path);
 
     bool load_csv(std::filesystem::path csv_path);
     bool save_csv();

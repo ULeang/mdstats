@@ -7,7 +7,6 @@ _determine_resolution(long width, long height);
 
 ErrorType Matcher_::main_matcher()
 {
-
 #define emit_exited_return(err) \
     do                          \
     {                           \
