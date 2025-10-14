@@ -364,7 +364,7 @@ void MainWindow::on_emitter_matcher_got(MatcherGotType got, size_t n)
         result_lbl.setText({n == 0 ? "胜利" : "失败"});
 
         auto t = get_local_time();
-        auto t_string = std::format("{:04}{:02}{:02}-{:02}{:02}{:02}",
+        auto t_string = std::format("{:04}-{:02}-{:02} {:02}:{:02}:{:02}",
                                     t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
                                     t->tm_hour, t->tm_min, t->tm_sec);
         time_lbl.setText(t_string.c_str());

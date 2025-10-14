@@ -84,7 +84,7 @@ public:
     {
         return hdcScreen != NULL && hdcMem != NULL;
     }
-    std::expected<RECT, ErrorType> get_window_rect(HWND hwnd)
+    static std::expected<RECT, ErrorType> get_window_rect(HWND hwnd)
     {
         RECT rect; // left, top, right, bottom
         if (!GetWindowRect(hwnd, &rect))
