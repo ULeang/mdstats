@@ -1,9 +1,9 @@
 # 设置卡组列的快捷选项
-# 注意，由于存储使用的csv的限制，不能含有字符'|'，否则会影响csv的数据
+# 注意，由于存储使用的csv的限制，不能含有字符'|'、'"'，否则会影响csv的数据
 custom_deck_list = ["自奏", "巳剑", "雷火", "码丽丝", "小黄毛"]
 
 # 设置备注列的快捷选项
-# 注意，由于存储使用的csv的限制，不能含有字符'|'，否则会影响csv的数据
+# 注意，由于存储使用的csv的限制，不能含有字符'|'、'"'，否则会影响csv的数据
 custom_note_list = [
     "先攻全手坑",
     "后攻全通召",
@@ -39,4 +39,4 @@ use_daily_record_csv = false
 matcher_sleep_ms = 500
 
 # 设置是否隐藏控制台窗口
-hide_console = true
+hide_console = false

@@ -5,7 +5,6 @@
 #include <QColor>
 #include <optional>
 #include <fstream>
-#include <rapidcsv.h>
 #include "utils.hpp"
 
 struct Record
@@ -42,7 +41,7 @@ class Stats : public QAbstractTableModel
 
     struct
     {
-        QVector<QString> row_data;
+        QStringList row_data;
     } stats_tbl[rowc];
 
     void update_stats_tbl();

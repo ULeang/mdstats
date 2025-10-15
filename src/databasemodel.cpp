@@ -1,5 +1,11 @@
 #include "databasemodel.hpp"
 
+#include <QFile>
+#include <QTextStream>
+
+#define HAS_CODECVT
+#include <rapidcsv.h>
+
 void Stats::update_stats_tbl()
 {
     auto coin_win = w_st_wins + w_st_loses + w_st_others + w_nd_wins + w_nd_loses + w_nd_others;
@@ -27,12 +33,12 @@ void Stats::update_stats_tbl()
 Stats::Stats(QObject *parent)
     : QAbstractTableModel(),
       stats_tbl{
-          QVector<QString>{"总场次", "", ""},
-          QVector<QString>{"硬币(赢/输)", "", ""},
-          QVector<QString>{"胜负(胜/负)", "", ""},
-          QVector<QString>{"赢币胜率", "", ""},
-          QVector<QString>{"输币胜率", "", ""},
-          QVector<QString>{"综合胜率", "", ""},
+          QStringList{"总场次", "", ""},
+          QStringList{"硬币(赢/输)", "", ""},
+          QStringList{"胜负(胜/负)", "", ""},
+          QStringList{"赢币胜率", "", ""},
+          QStringList{"输币胜率", "", ""},
+          QStringList{"综合胜率", "", ""},
       }
 {
     clear_stats();
@@ -323,19 +329,25 @@ size_t DataBase::trunc_last(size_t n)
 //     return buf.str();
 // }
 
-static const char *csv_head = "序号|硬币|先后|胜负|卡组|备注|时间\n";
+static QString csv_head{"序号|硬币|先后|胜负|卡组|备注|时间"};
 bool DataBase::ensure_csv(std::filesystem::path csv_path)
 {
     if (!std::filesystem::exists(csv_path))
     {
-        std::filesystem::create_directories(prog::env::data_csv_path);
-        std::ofstream fout(csv_path, std::ios::out);
-        if (!fout.good())
+
+        auto _csv_path = csv_path;
+        _csv_path.remove_filename();
+        std::filesystem::create_directories(_csv_path);
+        QFile file(csv_path);
+
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::NewOnly))
         {
             return false;
         }
-        fout << csv_head << std::flush;
-        return fout.good();
+        QTextStream fout(&file);
+        fout.setEncoding(QStringConverter::Encoding::Utf8);
+        fout << csv_head << Qt::endl;
+        return fout.status() == QTextStream::Status::Ok;
     }
     return true;
 }
@@ -346,18 +358,21 @@ bool DataBase::save_csv()
     {
         return false;
     }
-    std::ofstream fout(associate_csv_path.value(), std::ios::out | std::ios::trunc);
-    if (!fout.good())
+    QFile file(associate_csv_path.value());
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
     {
         return false;
     }
-    fout << csv_head;
+    QTextStream fout(&file);
+    fout.setEncoding(QStringConverter::Encoding::Utf8);
+    fout << csv_head << Qt::endl;
     for (const auto &line : associate_csv_content)
     {
-        fout << line.toStdString() << '\n';
+        fout << line << Qt::endl;
     }
+    fout.flush();
 
-    return fout.good();
+    return fout.status() == QTextStream::Status::Ok;
 }
 bool DataBase::load_csv(std::filesystem::path csv_path)
 {
@@ -390,11 +405,6 @@ bool DataBase::load_csv(std::filesystem::path csv_path)
                            std::move(time_col[i])});
         }
         associate_csv_path = std::move(csv_path);
-        // std::ostringstream buf;
-        // doc.Save(buf);
-        // auto csv_content_line = QString(std::move(buf).str().c_str()).split('\n', Qt::SkipEmptyParts);
-        // csv_content_line.pop_front();
-        // associate_csv_content = std::move(csv_content_line);
         return true;
     }
     catch (const std::out_of_range &e)

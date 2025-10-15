@@ -90,6 +90,35 @@ void CopyToClipboard(const char *text)
     // 关闭剪贴板
     CloseClipboard();
 }
+void CopyToClipboard(const wchar_t *text)
+{
+    // 打开剪贴板
+    if (!OpenClipboard(nullptr))
+        return;
+
+    // 清空剪贴板
+    EmptyClipboard();
+
+    // 为文本分配全局内存
+    size_t size = wcslen(text) + 1;
+    HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE, size * sizeof(wchar_t));
+    if (!hGlobal)
+    {
+        CloseClipboard();
+        return;
+    }
+
+    // 将文本复制到全局内存
+    wchar_t *pGlobal = static_cast<wchar_t *>(GlobalLock(hGlobal));
+    wcsncpy(pGlobal, text, size);
+    GlobalUnlock(hGlobal);
+
+    // 设置剪贴板数据
+    SetClipboardData(CF_UNICODETEXT, hGlobal);
+
+    // 关闭剪贴板
+    CloseClipboard();
+}
 
 template <typename T, typename V>
 concept TOML = requires(T t) {

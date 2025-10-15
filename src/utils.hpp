@@ -12,8 +12,6 @@
 #include <filesystem>
 #include <fstream>
 
-#include <rapidcsv.h>
-
 #include "prog.hpp"
 
 enum class ErrorType
@@ -342,5 +340,6 @@ using Matcher = T_Matcher<CV_8UC3, cv::TM_CCOEFF_NORMED>;
 
 // clipboard
 void CopyToClipboard(const char *text);
+void CopyToClipboard(const wchar_t *text);
 
 #endif
