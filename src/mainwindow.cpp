@@ -1,5 +1,6 @@
 #include "prog.hpp"
 #include "mainwindow.h"
+#include "delegate.hpp"
 
 #include <QPushButton>
 #include <QTableWidget>
@@ -19,55 +20,42 @@ MainWindow::MainWindow(QWidget *parent)
       stopBtn("停止"),
       cptoclpbdBtn("复制到剪贴板"),
       reloadBtn("重新加载数据"),
-      openCSVBtn("打开data.csv目录"),
-      manual_0Btn("赢币"),
-      manual_1Btn("输币")
+      openCSVBtn("打开data.csv目录")
 {
     matcher.moveToThread(&matcher_thread);
 
     record_tbl.setModel(&data);
     stats_tbl.setModel(data.get_stats());
 
-    // hide headers
     stats_tbl.horizontalHeader()->setVisible(false);
     stats_tbl.verticalHeader()->setVisible(false);
+
     // set grid
     stats_tbl.setShowGrid(false);
-    // set cell size
-    stats_tbl.setColumnWidth(0, 150);
-    stats_tbl.setColumnWidth(1, 50);
-    stats_tbl.setColumnWidth(2, 50);
+
     // set span
     stats_tbl.setSpan(0, 1, 1, 2);
     stats_tbl.setSpan(3, 1, 1, 2);
     stats_tbl.setSpan(4, 1, 1, 2);
     stats_tbl.setSpan(5, 1, 1, 2);
 
-    record_tbl.horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+    // set delegate
+    record_tbl.setItemDelegateForColumn(0, new MyDelegate({"赢币", "输币"}, false));
+    record_tbl.setItemDelegateForColumn(1, new MyDelegate({"先攻", "后攻"}, false));
+    record_tbl.setItemDelegateForColumn(2, new MyDelegate({"胜利", "失败", "平局"}));
 
     stopBtn.setDisabled(true);
     startBtn.setEnabled(true);
     startBtn.setPalette(Qt::green);
     stopBtn.setPalette(Qt::gray);
 
+    manual_reset();
     disable_manual_btn(true);
 
     // set font
     // auto font = QFont("FiraCode Nerd Font Mono", 16);
     auto font = QFont(QFontDatabase::applicationFontFamilies(prog::global::qt_font_id).at(0), 14);
-    stats_tbl.setFont(font);
-    record_tbl.setFont(font);
-    startBtn.setFont(font);
-    stopBtn.setFont(font);
-    reloadBtn.setFont(font);
-    openCSVBtn.setFont(font);
-    cptoclpbdBtn.setFont(font);
-    manual_0Btn.setFont(font);
-    manual_1Btn.setFont(font);
-    coin_lbl.setFont(font);
-    st_nd_lbl.setFont(font);
-    result_lbl.setFont(font);
-    time_lbl.setFont(font);
+    setFont(font);
 
     // set layout
     auto g_layout1 = new QGridLayout;
@@ -123,9 +111,54 @@ void MainWindow::connect_signals()
             this, SLOT(on_matcher_exited(ErrorType)));
 }
 
+template <typename T>
+static bool contain_zero(const T &c)
+{
+    for (const auto &w : c)
+    {
+        if (w == 0)
+            return true;
+    }
+    return false;
+}
+
 void MainWindow::ensure_config()
 {
-    stats_tbl.setPalette(QColor{prog::env::config::stats_tbl_background_color.c_str()});
+    stats_tbl.setPalette(QColor(prog::env::config::stats_tbl_background_color.c_str()));
+
+    stats_tbl.setColumnWidth(0, prog::env::config::stats_tbl_column_width[0]);
+    stats_tbl.setColumnWidth(1, prog::env::config::stats_tbl_column_width[1]);
+    stats_tbl.setColumnWidth(2, prog::env::config::stats_tbl_column_width[2]);
+
+    record_tbl.horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
+
+    for (size_t i = 0; i < prog::env::config::record_tbl_column_width.size(); ++i)
+    {
+        if (prog::env::config::record_tbl_column_width[i] == 0)
+        {
+            record_tbl.horizontalHeader()->setSectionResizeMode(i, QHeaderView::ResizeMode::ResizeToContents);
+        }
+        else
+        {
+            record_tbl.setColumnWidth(i, prog::env::config::record_tbl_column_width[i]);
+        }
+    }
+
+    QStringList deck_list;
+    deck_list.reserve(prog::env::config::custom_deck_list.size());
+    for (const auto &d : prog::env::config::custom_deck_list)
+    {
+        deck_list.push_back(d.c_str());
+    }
+    record_tbl.setItemDelegateForColumn(3, new MyDelegate(deck_list));
+
+    QStringList note_list;
+    note_list.reserve(prog::env::config::custom_note_list.size());
+    for (const auto &d : prog::env::config::custom_note_list)
+    {
+        note_list.push_back(d.c_str());
+    }
+    record_tbl.setItemDelegateForColumn(4, new MyDelegate(note_list));
 }
 ErrorType MainWindow::load_database()
 {
@@ -134,8 +167,10 @@ ErrorType MainWindow::load_database()
     {
         auto t = get_local_time();
         data_csv_name = std::format("data-{:04}-{:02}-{:02}.csv",
-                                        t->tm_year + 1900, t->tm_mon + 1, t->tm_mday);
-    }else{
+                                    t->tm_year + 1900, t->tm_mon + 1, t->tm_mday);
+    }
+    else
+    {
         data_csv_name = prog::env::default_data_csv_name;
     }
 
@@ -144,7 +179,7 @@ ErrorType MainWindow::load_database()
 
     std::filesystem::path csv_filepath(data_csv_full_name);
 
-    if (!DataBase_::ensure_csv(csv_filepath))
+    if (!DataBase::ensure_csv(csv_filepath))
     {
         logln("cannot ensure csv!");
         return ErrorType::ErrEnsureCSV;

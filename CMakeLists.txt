@@ -16,6 +16,7 @@ qt_add_executable(${PROJECT_NAME}
     src/mainwindow.cpp
     src/databasemodel.cpp
     src/matcher.cpp
+    src/delegate.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

@@ -90,6 +90,23 @@ void CopyToClipboard(const char *text)
     // 关闭剪贴板
     CloseClipboard();
 }
+
+template <typename T, typename V>
+concept TOML = requires(T t) {
+    { toml::find<std::optional<V>>(t, "") } -> std::same_as<std::optional<V>>;
+};
+
+template <typename V, TOML<V> T>
+static bool load_value_by_name(T &toml, V &value, const char *name)
+{
+    std::optional<V> v_o = toml::find<std::optional<V>>(toml, name);
+    if (!v_o.has_value())
+    {
+        return false;
+    }
+    value = v_o.value();
+    return true;
+}
 bool prog::env::config::load_prog_config()
 {
     auto config_r = toml::try_parse(config_filename);
@@ -101,26 +118,19 @@ bool prog::env::config::load_prog_config()
     }
 
     auto config = config_r.unwrap();
-    stats_tbl_background_color = toml::find_or<string>(
-        config,
-        "stats_tbl_background_color",
-        stats_tbl_background_color);
-    stats_tbl_foreground_color = toml::find_or<string>(
-        config,
-        "stats_tbl_foreground_color",
-        stats_tbl_foreground_color);
-    matcher_sleep_ms = toml::find_or<DWORD>(
-        config,
-        "matcher_sleep_ms",
-        matcher_sleep_ms);
-    prog_window_init_x_y_width_height = toml::find_or<std::array<size_t, 4>>(
-        config,
-        "prog_window_init_x_y_width_height",
-        prog_window_init_x_y_width_height);
-    use_daily_record_csv = toml::find_or<bool>(
-        config,
-        "use_daily_record_csv",
-        use_daily_record_csv);
+
+#define LOAD(var) \
+    load_value_by_name(config, var, #var)
+
+    LOAD(stats_tbl_background_color);
+    LOAD(stats_tbl_foreground_color);
+    LOAD(prog_window_init_x_y_width_height);
+    LOAD(matcher_sleep_ms);
+    LOAD(use_daily_record_csv);
+    LOAD(stats_tbl_column_width);
+    LOAD(record_tbl_column_width);
+    LOAD(custom_deck_list);
+    LOAD(custom_note_list);
 
     return true;
 }

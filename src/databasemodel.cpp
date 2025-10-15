@@ -1,6 +1,6 @@
 #include "databasemodel.hpp"
 
-void Stats_::update_stats_tbl()
+void Stats::update_stats_tbl()
 {
     auto coin_win = w_st_wins + w_st_loses + w_st_others + w_nd_wins + w_nd_loses + w_nd_others;
     auto coin_lose = l_st_wins + l_st_loses + l_st_others + l_nd_wins + l_nd_loses + l_nd_others;
@@ -24,7 +24,7 @@ void Stats_::update_stats_tbl()
     emit dataChanged(index(0, 1), index(5, 2));
 }
 
-Stats_::Stats_(QObject *parent)
+Stats::Stats(QObject *parent)
     : QAbstractTableModel(),
       stats_tbl{
           QVector<QString>{"总场次", "", ""},
@@ -37,22 +37,22 @@ Stats_::Stats_(QObject *parent)
 {
     clear_stats();
 }
-Stats_::~Stats_() {}
+Stats::~Stats() {}
 
 // Essential methods to override
-int Stats_::rowCount(const QModelIndex &parent) const
+int Stats::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid()) // For list/table models, parent should be invalid
         return 0;
     return rowc;
 }
-int Stats_::columnCount(const QModelIndex &parent) const
+int Stats::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid()) // For list/table models, parent should be invalid
         return 0;
     return colc;
 }
-QVariant Stats_::data(const QModelIndex &index, int role) const
+QVariant Stats::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return {};
@@ -63,7 +63,6 @@ QVariant Stats_::data(const QModelIndex &index, int role) const
     switch (role)
     {
     case Qt::DisplayRole:
-    case Qt::EditRole:
         return stats_tbl[index.row()].row_data[index.column()];
     case Qt::TextAlignmentRole:
         return int(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -76,20 +75,20 @@ QVariant Stats_::data(const QModelIndex &index, int role) const
         return {};
     }
 }
-QVariant Stats_::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant Stats::headerData(int section, Qt::Orientation orientation, int role) const
 {
     return {};
 }
-Qt::ItemFlags Stats_::flags(const QModelIndex &index) const
+Qt::ItemFlags Stats::flags(const QModelIndex &index) const
 {
     return Qt::NoItemFlags;
 }
-bool Stats_::setData(const QModelIndex &index, const QVariant &value, int role)
+bool Stats::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     return false;
 }
 
-void Stats_::clear_stats()
+void Stats::clear_stats()
 {
     total = 0;
     w_st_wins = 0;
@@ -106,7 +105,7 @@ void Stats_::clear_stats()
     l_nd_others = 0;
     update_stats_tbl();
 }
-void Stats_::add_record(bool inc, const Record &record)
+void Stats::add_record(bool inc, const Record &record)
 {
     const auto &coin = record.coin;
     const auto &st_nd = record.st_nd;
@@ -143,7 +142,7 @@ void Stats_::add_record(bool inc, const Record &record)
     f_exactly(l_nd_others, 0b100'10'10);
     update_stats_tbl();
 }
-void Stats_::copy_to_clipboard()
+void Stats::copy_to_clipboard()
 {
     CopyToClipboard(
         QString{
@@ -167,26 +166,26 @@ void Stats_::copy_to_clipboard()
             .c_str());
 }
 
-DataBase_::DataBase_(QObject *parent) : QAbstractTableModel(parent)
+DataBase::DataBase(QObject *parent) : QAbstractTableModel(parent)
 {
     header_labels << "硬币" << "先后" << "胜负" << "卡组" << "备注" << "时间";
 }
-DataBase_::~DataBase_() {}
+DataBase::~DataBase() {}
 
 // Essential methods to override
-int DataBase_::rowCount(const QModelIndex &parent) const
+int DataBase::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid()) // For list/table models, parent should be invalid
         return 0;
     return db.size();
 }
-int DataBase_::columnCount(const QModelIndex &parent) const
+int DataBase::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid()) // For list/table models, parent should be invalid
         return 0;
     return header_labels.size();
 }
-QVariant DataBase_::data(const QModelIndex &index, int role) const
+QVariant DataBase::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return {};
@@ -224,7 +223,7 @@ QVariant DataBase_::data(const QModelIndex &index, int role) const
         return {};
     }
 }
-QVariant DataBase_::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant DataBase::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
         return {};
@@ -233,14 +232,14 @@ QVariant DataBase_::headerData(int section, Qt::Orientation orientation, int rol
                ? (section >= 0 && section < header_labels.size() ? header_labels[section] : QVariant{})
                : section + 1;
 }
-Qt::ItemFlags DataBase_::flags(const QModelIndex &index) const
+Qt::ItemFlags DataBase::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
 
     return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
 }
-bool DataBase_::setData(const QModelIndex &index, const QVariant &value, int role)
+bool DataBase::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (!index.isValid())
         return false;
@@ -286,7 +285,7 @@ static QString format_record(size_t no, const Record &record)
 }
 
 // these two functions will not save csv automatically
-void DataBase_::append_record(Record rec)
+void DataBase::append_record(Record rec)
 {
     stats.add_record(true, rec);
     associate_csv_content.push_back(format_record(db.size() + 1, rec));
@@ -294,7 +293,7 @@ void DataBase_::append_record(Record rec)
     db.push_back(std::move(rec));
     endInsertRows();
 }
-size_t DataBase_::trunc_last(size_t n)
+size_t DataBase::trunc_last(size_t n)
 {
     size_t _n = std::min(n, size_t(db.size()));
     auto first = db.size() - _n;
@@ -325,7 +324,7 @@ size_t DataBase_::trunc_last(size_t n)
 // }
 
 static const char *csv_head = "序号|硬币|先后|胜负|卡组|备注|时间\n";
-bool DataBase_::ensure_csv(std::filesystem::path csv_path)
+bool DataBase::ensure_csv(std::filesystem::path csv_path)
 {
     if (!std::filesystem::exists(csv_path))
     {
@@ -341,7 +340,7 @@ bool DataBase_::ensure_csv(std::filesystem::path csv_path)
     return true;
 }
 
-bool DataBase_::save_csv()
+bool DataBase::save_csv()
 {
     if (!associate_csv_path.has_value())
     {
@@ -360,7 +359,7 @@ bool DataBase_::save_csv()
 
     return fout.good();
 }
-bool DataBase_::load_csv(std::filesystem::path csv_path)
+bool DataBase::load_csv(std::filesystem::path csv_path)
 {
     associate_csv_path = std::nullopt;
     trunc_last(db.size());
@@ -414,12 +413,12 @@ bool DataBase_::load_csv(std::filesystem::path csv_path)
     return false;
 }
 
-Stats_ *DataBase_::get_stats()
+Stats *DataBase::get_stats()
 {
     return &stats;
 }
 
-bool DataBase_::_setData_helper(QString &r, QString value, const QModelIndex &index, int role)
+bool DataBase::_setData_helper(QString &r, QString value, const QModelIndex &index, int role)
 {
     if (r == value)
         return false;

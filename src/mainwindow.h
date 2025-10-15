@@ -21,7 +21,7 @@ private:
     QPushButton manual_0Btn, manual_1Btn;
     QLabel coin_lbl, st_nd_lbl, result_lbl, time_lbl;
 
-    DataBase_ data;
+    DataBase data;
 
     QThread matcher_thread;
     Matcher_ matcher;

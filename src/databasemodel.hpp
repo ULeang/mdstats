@@ -18,7 +18,7 @@ struct Record
     QString time;
 };
 
-class Stats_ : public QAbstractTableModel
+class Stats : public QAbstractTableModel
 {
 
     Q_OBJECT
@@ -48,8 +48,8 @@ class Stats_ : public QAbstractTableModel
     void update_stats_tbl();
 
 public:
-    Stats_(QObject *parent = nullptr);
-    ~Stats_();
+    Stats(QObject *parent = nullptr);
+    ~Stats();
 
     // Essential methods to override
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -64,13 +64,13 @@ public:
     void copy_to_clipboard();
 };
 
-class DataBase_ : public QAbstractTableModel
+class DataBase : public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
-    DataBase_(QObject *parent = nullptr);
-    ~DataBase_();
+    DataBase(QObject *parent = nullptr);
+    ~DataBase();
 
     // Essential methods to override
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -90,14 +90,14 @@ public slots:
     bool load_csv(std::filesystem::path csv_path);
     bool save_csv();
 
-    Stats_ *get_stats();
+    Stats *get_stats();
 
 private:
     std::optional<std::filesystem::path> associate_csv_path;
     QStringList associate_csv_content;
     QStringList header_labels;
     QVector<Record> db;
-    Stats_ stats;
+    Stats stats;
 
     bool _setData_helper(QString &r, QString value, const QModelIndex &index, int role);
 };

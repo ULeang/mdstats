@@ -30,7 +30,11 @@ namespace prog
             inline string stats_tbl_foreground_color{"#ffffff"};
             inline std::array<size_t, 4> prog_window_init_x_y_width_height{800, 400, 900, 400};
             inline DWORD matcher_sleep_ms{500};
-            inline bool use_daily_record_csv{"false"};
+            inline bool use_daily_record_csv{false};
+            inline std::array<size_t, 3> stats_tbl_column_width{150, 50, 50};
+            inline std::array<size_t, 6> record_tbl_column_width{0, 0, 0, 0, 150, 0};
+            inline std::vector<std::string> custom_deck_list{};
+            inline std::vector<std::string> custom_note_list{};
 
             bool load_prog_config();
         }
