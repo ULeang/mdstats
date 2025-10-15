@@ -36,6 +36,8 @@ namespace prog
             inline std::vector<std::string> custom_deck_list{};
             inline std::vector<std::string> custom_note_list{};
 
+            inline bool hide_console{true};
+
             bool load_prog_config();
         }
 

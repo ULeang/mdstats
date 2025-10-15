@@ -131,6 +131,7 @@ bool prog::env::config::load_prog_config()
     LOAD(record_tbl_column_width);
     LOAD(custom_deck_list);
     LOAD(custom_note_list);
+    LOAD(hide_console);
 
     return true;
 }

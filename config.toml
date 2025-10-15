@@ -37,3 +37,6 @@ use_daily_record_csv = false
 
 # 设置匹配的间隔时间，即每多少秒进行一次截图匹配，单位毫秒，注意，调低这个值会增加cpu占用进而导致系统变卡
 matcher_sleep_ms = 500
+
+# 设置是否隐藏控制台窗口
+hide_console = true
