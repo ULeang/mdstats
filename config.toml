@@ -7,3 +7,6 @@ prog_window_init_x_y_width_height = [800, 400, 900, 400]
 
 # 设置匹配的间隔时间，即每多少秒进行一次截图匹配，单位毫秒，注意，调低这个值会增加cpu占用进而导致系统变卡
 matcher_sleep_ms = 500
+
+# 设置是否按日期保存记录数据，false为否，true为是
+use_daily_record_csv = false

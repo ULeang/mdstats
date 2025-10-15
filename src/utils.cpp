@@ -60,138 +60,6 @@ bool logln(const std::string &l, LogLevel log_lv)
     }
     return false;
 }
-
-DataBase::DataBase() : rowc(0)
-{
-    clear_stats();
-}
-void DataBase::clear_stats()
-{
-    w_st_wins = 0;
-    l_st_wins = 0;
-    w_nd_wins = 0;
-    l_nd_wins = 0;
-    w_st_loses = 0;
-    l_st_loses = 0;
-    w_nd_loses = 0;
-    l_nd_loses = 0;
-    w_st_others = 0;
-    l_st_others = 0;
-    w_nd_others = 0;
-    l_nd_others = 0;
-}
-
-DataBase::DataBase(const std::string &csv_filename) : DataBase()
-{
-    load_csv(csv_filename);
-}
-
-void DataBase::append_record(std::string coin, std::string st_nd, std::string result,
-                             std::string deck, std::string t)
-{
-    update_stats_by(true, coin, st_nd, result);
-    ++rowc;
-    coin_col.push_back(std::move(coin));
-    st_nd_col.push_back(std::move(st_nd));
-    result_col.push_back(std::move(result));
-    deck_col.push_back(std::move(deck));
-    time_col.push_back(std::move(t));
-}
-size_t DataBase::trunc_last(size_t n)
-{
-    size_t i = 0;
-    for (; i < n; ++i)
-    {
-        if (rowc == 0)
-        {
-            break;
-        }
-        update_stats_by(false, coin_col[rowc - 1], st_nd_col[rowc - 1], result_col[rowc - 1]);
-        --rowc;
-        coin_col.pop_back();
-        st_nd_col.pop_back();
-        result_col.pop_back();
-        deck_col.pop_back();
-        time_col.pop_back();
-    }
-    return i;
-}
-
-void DataBase::load_csv(const std::string &csv_filename)
-{
-    try
-    {
-        rapidcsv::Document doc(csv_filename, rapidcsv::LabelParams(0, 0));
-        rowc = doc.GetRowCount();
-        coin_col = doc.GetColumn<std::string>("硬币");
-        st_nd_col = doc.GetColumn<std::string>("先后");
-        result_col = doc.GetColumn<std::string>("胜负");
-        deck_col = doc.GetColumn<std::string>("卡组");
-        time_col = doc.GetColumn<std::string>("时间");
-    }
-    catch (const std::out_of_range &e)
-    {
-        rowc = 0;
-        coin_col.clear();
-        st_nd_col.clear();
-        result_col.clear();
-        deck_col.clear();
-        time_col.clear();
-        logln(std::format("load csv exception :\n\t{}", e.what()));
-        logln("csv file is corrupted, fix it first or just remove it and try again");
-    }
-    catch (...)
-    {
-        rowc = 0;
-        coin_col.clear();
-        st_nd_col.clear();
-        result_col.clear();
-        deck_col.clear();
-        time_col.clear();
-        logln(std::format("load csv exception :\n\tunknown exception"));
-    }
-
-    clear_stats();
-    for (size_t i; i < rowc; ++i)
-    {
-        update_stats_by(true, coin_col[i], st_nd_col[i], result_col[i]);
-    }
-}
-void DataBase::update_stats_by(bool inc,
-                               const std::string &coin,
-                               const std::string &st_nd,
-                               const std::string &result)
-{
-    size_t ont_hot = 0b000'00'00;
-    ont_hot |= coin == "赢币" ? 0b000'00'01 : 0b000'00'10;
-    ont_hot |= st_nd == "先攻" ? 0b000'01'00 : 0b000'10'00;
-    ont_hot |= result == "胜利"   ? 0b001'00'00
-               : result == "失败" ? 0b010'00'00
-                                  : 0b100'00'00;
-
-    auto f_exactly = [ont_hot, inc](size_t &n, size_t mask)
-    {
-        n = (ont_hot ^ mask) == 0 ? (inc ? n + 1 : n - 1) : n;
-    };
-    // auto f_any = [ont_hot, inc](size_t &n, size_t mask)
-    // {
-    //     n = ont_hot & mask ? (inc ? n + 1 : n - 1) : n;
-    // };
-
-    f_exactly(w_st_wins, 0b001'01'01);
-    f_exactly(l_st_wins, 0b001'01'10);
-    f_exactly(w_nd_wins, 0b001'10'01);
-    f_exactly(l_nd_wins, 0b001'10'10);
-    f_exactly(w_st_loses, 0b010'01'01);
-    f_exactly(l_st_loses, 0b010'01'10);
-    f_exactly(w_nd_loses, 0b010'10'01);
-    f_exactly(l_nd_loses, 0b010'10'10);
-    f_exactly(w_st_others, 0b100'01'01);
-    f_exactly(l_st_others, 0b100'01'10);
-    f_exactly(w_nd_others, 0b100'10'01);
-    f_exactly(l_nd_others, 0b100'10'10);
-}
-
 void CopyToClipboard(const char *text)
 {
     // 打开剪贴板
@@ -249,6 +117,10 @@ bool prog::env::config::load_prog_config()
         config,
         "prog_window_init_x_y_width_height",
         prog_window_init_x_y_width_height);
+    use_daily_record_csv = toml::find_or<bool>(
+        config,
+        "use_daily_record_csv",
+        use_daily_record_csv);
 
     return true;
 }

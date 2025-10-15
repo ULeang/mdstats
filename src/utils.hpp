@@ -340,42 +340,6 @@ public:
 
 using Matcher = T_Matcher<CV_8UC3, cv::TM_CCOEFF_NORMED>;
 
-// csv data
-struct DataBase
-{
-    using Data = std::vector<std::string>;
-    size_t rowc;
-    Data coin_col;
-    Data st_nd_col;
-    Data result_col;
-    Data deck_col;
-    Data time_col;
-
-    size_t w_st_wins;
-    size_t l_st_wins;
-    size_t w_nd_wins;
-    size_t l_nd_wins;
-    size_t w_st_loses;
-    size_t l_st_loses;
-    size_t w_nd_loses;
-    size_t l_nd_loses;
-    size_t w_st_others;
-    size_t l_st_others;
-    size_t w_nd_others;
-    size_t l_nd_others;
-
-    DataBase(const std::string &csv_filename);
-    DataBase();
-    void append_record(std::string coin, std::string st_nd, std::string result,
-                       std::string deck, std::string t);
-    size_t trunc_last(size_t n = 1);
-    void load_csv(const std::string &csv_filename);
-
-private:
-    void update_stats_by(bool inc, const std::string &coin, const std::string &st_nd, const std::string &result);
-    void clear_stats();
-};
-
 // clipboard
 void CopyToClipboard(const char *text);
 

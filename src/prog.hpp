@@ -15,7 +15,7 @@ namespace prog
         using std::string;
 
         inline const string data_csv_path{"resource\\csv\\"};
-        inline const string data_csv_filename{data_csv_path + "data.csv"};
+        inline const string default_data_csv_name{"data.csv"};
         inline const string opencv_templ_directory{"resource\\template\\"};
         inline const string opencv_log_directory{"log\\opencv\\"};
         inline const string capture_window_title{"masterduel"};
@@ -30,6 +30,7 @@ namespace prog
             inline string stats_tbl_foreground_color{"#ffffff"};
             inline std::array<size_t, 4> prog_window_init_x_y_width_height{800, 400, 900, 400};
             inline DWORD matcher_sleep_ms{500};
+            inline bool use_daily_record_csv{"false"};
 
             bool load_prog_config();
         }

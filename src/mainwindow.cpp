@@ -129,9 +129,20 @@ void MainWindow::ensure_config()
 }
 ErrorType MainWindow::load_database()
 {
-    logln(format("loading record from '{}'", prog::env::data_csv_filename));
+    std::string data_csv_name;
+    if (prog::env::config::use_daily_record_csv)
+    {
+        auto t = get_local_time();
+        data_csv_name = std::format("data-{:04}-{:02}-{:02}.csv",
+                                        t->tm_year + 1900, t->tm_mon + 1, t->tm_mday);
+    }else{
+        data_csv_name = prog::env::default_data_csv_name;
+    }
 
-    std::filesystem::path csv_filepath(prog::env::data_csv_filename);
+    std::string data_csv_full_name = prog::env::data_csv_path + data_csv_name;
+    logln(format("loading record from '{}'", data_csv_full_name));
+
+    std::filesystem::path csv_filepath(data_csv_full_name);
 
     if (!DataBase_::ensure_csv(csv_filepath))
     {
