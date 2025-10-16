@@ -2,9 +2,7 @@
 #define DATABASEMODEL_HPP_
 
 #include <QAbstractTableModel>
-#include <QColor>
 #include <optional>
-#include <fstream>
 #include "utils.hpp"
 
 struct Record
@@ -78,6 +76,10 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+
+signals:
+    void warning_corrupted_csv(std::filesystem::path path);
+    void good_csv(std::filesystem::path path);
 
 public slots:
     // these two functions will not save csv automatically

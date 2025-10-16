@@ -2,6 +2,7 @@
 
 #include <print>
 #include <fstream>
+#include <toml.hpp>
 
 std::function<std::optional<cv::Mat>()> capture_fn_generator(ScreenShot &ss, HWND hwnd, double scale)
 {

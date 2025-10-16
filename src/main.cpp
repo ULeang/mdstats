@@ -6,8 +6,6 @@
 
 #include "utils.hpp"
 #include "prog.hpp"
-#include "databasemodel.hpp"
-#include "matcher.hpp"
 
 static void ensure_font()
 {

@@ -1,11 +1,14 @@
 #include "matcher.hpp"
 
-Matcher_::Matcher_() : QObject() {}
+#include <expected>
+#include <tuple>
+
+MatcherWorker::MatcherWorker() : QObject() {}
 
 static std::expected<std::tuple<std::string, cv::Rect, cv::Rect>, ErrorType>
 _determine_resolution(long width, long height);
 
-ErrorType Matcher_::main_matcher()
+ErrorType MatcherWorker::main_matcher()
 {
 #define emit_exited_return(err) \
     do                          \
@@ -165,12 +168,12 @@ ErrorType Matcher_::main_matcher()
         }
     }
 }
-void Matcher_::set_extern_input(size_t input)
+void MatcherWorker::set_extern_input(size_t input)
 {
     external_input = input;
     external_input_flag.store(true, std::memory_order_release);
 }
-void Matcher_::request_stop()
+void MatcherWorker::request_stop()
 {
     stop_requested.store(true, std::memory_order_release);
 }

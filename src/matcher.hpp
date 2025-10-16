@@ -4,11 +4,8 @@
 #include <QThread>
 #include <QObject>
 #include <QString>
-#include <QDebug>
 
 #include <atomic>
-#include <expected>
-#include <tuple>
 
 #include "prog.hpp"
 #include "utils.hpp"
@@ -20,7 +17,7 @@ enum class MatcherGotType
     Result,
 };
 
-class Matcher_ : public QObject
+class MatcherWorker : public QObject
 {
     Q_OBJECT
 
@@ -29,7 +26,7 @@ class Matcher_ : public QObject
     size_t external_input;
 
 public:
-    Matcher_();
+    MatcherWorker();
 
 public slots:
     // the work func, normally block the worker thread in a while(true) loop, so use queuedconnection

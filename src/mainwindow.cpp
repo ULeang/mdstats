@@ -3,8 +3,6 @@
 #include "delegate.hpp"
 
 #include <QPushButton>
-#include <QTableWidget>
-#include <QTableWidgetItem>
 #include <QHeaderView>
 #include <QFontDatabase>
 #include <QGridLayout>
@@ -23,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
       openCSVBtn("打开data.csv目录")
 {
     matcher.moveToThread(&matcher_thread);
+    matcher_thread.start();
 
     record_tbl.setModel(&data);
     stats_tbl.setModel(data.get_stats());
@@ -52,6 +51,13 @@ MainWindow::MainWindow(QWidget *parent)
     manual_reset();
     disable_manual_btn(true);
 
+    corrupted_csv_lbl.setText(
+R"(警告:csv文件已损坏,你正处于无csv模式,
+此时的一切数据都不会被保存
+请点击下方'打开data.csv目录'尝试修复,
+或者直接删除该文件,然后点击'重新加载数据')");
+    corrupted_csv_lbl.setVisible(false);
+
     // set font
     // auto font = QFont("FiraCode Nerd Font Mono", 16);
     auto font = QFont(QFontDatabase::applicationFontFamilies(prog::global::qt_font_id).at(0), 14);
@@ -71,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent)
     g_layout1->addWidget(&stopBtn, 7, 3, 1, 3);
     auto g_layout2 = new QGridLayout;
     g_layout2->addWidget(&record_tbl, 0, 0, 1, 2);
+    g_layout2->addWidget(&corrupted_csv_lbl, 0, 0, 1, 2);
     g_layout2->addWidget(&reloadBtn, 1, 0);
     g_layout2->addWidget(&openCSVBtn, 1, 1);
     auto h_layout1 = new QHBoxLayout;
@@ -81,9 +88,8 @@ MainWindow::MainWindow(QWidget *parent)
     this->setCentralWidget(widget);
 
     ensure_config();
-    load_database();
     connect_signals();
-    matcher_thread.start();
+    load_database();
 }
 
 MainWindow::~MainWindow()
@@ -109,17 +115,22 @@ void MainWindow::connect_signals()
             this, SLOT(on_matcher_got_match_step(MatcherGotType, size_t)));
     connect(&matcher, SIGNAL(exited(ErrorType)),
             this, SLOT(on_matcher_exited(ErrorType)));
+
+    connect(&data, SIGNAL(warning_corrupted_csv(std::filesystem::path)),
+            this, SLOT(on_database_warning_corrupted_csv(std::filesystem::path)));
+    connect(&data, SIGNAL(good_csv(std::filesystem::path)),
+            this, SLOT(on_database_good_csv(std::filesystem::path)));
 }
 
-template <typename T>
-static bool contain_zero(const T &c)
+void MainWindow::on_database_warning_corrupted_csv(std::filesystem::path path)
 {
-    for (const auto &w : c)
-    {
-        if (w == 0)
-            return true;
-    }
-    return false;
+    corrupted_csv_lbl.setVisible(true);
+    // record_tbl.setVisible(false);
+}
+void MainWindow::on_database_good_csv(std::filesystem::path path)
+{
+    corrupted_csv_lbl.setVisible(false);
+    // record_tbl.setVisible(true);
 }
 
 void MainWindow::ensure_config()

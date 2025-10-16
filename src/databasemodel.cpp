@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QColor>
 
 #define HAS_CODECVT
 #include <rapidcsv.h>
@@ -334,7 +335,6 @@ bool DataBase::ensure_csv(std::filesystem::path csv_path)
 {
     if (!std::filesystem::exists(csv_path))
     {
-
         auto _csv_path = csv_path;
         _csv_path.remove_filename();
         std::filesystem::create_directories(_csv_path);
@@ -382,6 +382,7 @@ bool DataBase::load_csv(std::filesystem::path csv_path)
     std::ifstream fin(csv_path, std::ios::in);
     if (!fin.good())
     {
+        emit warning_corrupted_csv(csv_path);
         return false;
     }
     try
@@ -405,12 +406,14 @@ bool DataBase::load_csv(std::filesystem::path csv_path)
                            std::move(time_col[i])});
         }
         associate_csv_path = std::move(csv_path);
+        emit good_csv(csv_path);
         return true;
     }
     catch (const std::out_of_range &e)
     {
         trunc_last(db.size());
         associate_csv_path = std::nullopt;
+        emit warning_corrupted_csv(csv_path);
         logln(std::format("load csv exception :\n\t{}", e.what()));
         logln("csv file is corrupted, fix it first or just remove it and try again");
     }
@@ -418,6 +421,7 @@ bool DataBase::load_csv(std::filesystem::path csv_path)
     {
         trunc_last(db.size());
         associate_csv_path = std::nullopt;
+        emit warning_corrupted_csv(csv_path);
         logln(std::format("load csv exception :\n\tunknown exception"));
     }
     return false;
