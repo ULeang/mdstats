@@ -9,6 +9,7 @@
 #include <QHBoxLayout>
 #include <QColor>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <windows.h>
 
 using std::format;
@@ -20,7 +21,8 @@ MainWindow::MainWindow(QWidget *parent)
       cptoclpbdBtn("复制到剪贴板"),
       reloadBtn("重新加载数据"),
       openCSVBtn("打开data.csv目录"),
-      saveAsBtn("把csv另存为")
+      saveAsBtn("把csv另存为"),
+      clearrecordBtn("清除所有记录")
 {
     matcher.moveToThread(&matcher_thread);
     matcher_thread.start();
@@ -78,11 +80,12 @@ MainWindow::MainWindow(QWidget *parent)
     g_layout1->addWidget(&startBtn, 7, 0, 1, 3);
     g_layout1->addWidget(&stopBtn, 7, 3, 1, 3);
     auto g_layout2 = new QGridLayout;
-    g_layout2->addWidget(&record_tbl, 0, 0, 1, 3);
-    g_layout2->addWidget(&corrupted_csv_lbl, 0, 0, 1, 3);
-    g_layout2->addWidget(&reloadBtn, 1, 0);
-    g_layout2->addWidget(&saveAsBtn, 1, 1);
-    g_layout2->addWidget(&openCSVBtn, 1, 2);
+    g_layout2->addWidget(&record_tbl, 0, 0, 1, 2);
+    g_layout2->addWidget(&corrupted_csv_lbl, 0, 0, 1, 2);
+    g_layout2->addWidget(&openCSVBtn, 1, 0);
+    g_layout2->addWidget(&reloadBtn, 1, 1);
+    g_layout2->addWidget(&saveAsBtn, 2, 0);
+    g_layout2->addWidget(&clearrecordBtn, 2, 1);
     auto h_layout1 = new QHBoxLayout;
     h_layout1->addLayout(g_layout1, 2);
     h_layout1->addLayout(g_layout2, 3);
@@ -112,6 +115,7 @@ void MainWindow::connect_signals()
     connect(&openCSVBtn, SIGNAL(clicked()), this, SLOT(on_openCSVBtn_clicked()));
     connect(&cptoclpbdBtn, SIGNAL(clicked()), this, SLOT(on_cptoclpbdBtn_clicked()));
     connect(&saveAsBtn, SIGNAL(clicked()), this, SLOT(on_saveAsBtn_clicked()));
+    connect(&clearrecordBtn, SIGNAL(clicked()), this, SLOT(on_clearrecordBtn_clicked()));
     connect(&manual_0Btn, SIGNAL(clicked()), this, SLOT(on_manual_0Btn_clicked()));
     connect(&manual_1Btn, SIGNAL(clicked()), this, SLOT(on_manual_1Btn_clicked()));
 
@@ -257,6 +261,21 @@ void MainWindow::on_saveAsBtn_clicked()
     }
     logln(format("save csv as '{}'", new_csv_filename.toStdString()));
     data.save_csv_as({new_csv_filename.toStdString()});
+}
+void MainWindow::on_clearrecordBtn_clicked()
+{
+    auto chosen_button = QMessageBox::question(
+        this,
+        "清除所有记录",
+        "是否清除所有记录?此操作不可逆",
+        QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No),
+        QMessageBox::No);
+    if (chosen_button == QMessageBox::Yes)
+    {
+        logln("clearing all records by user");
+        data.trunc_last(~0);
+        data.save_csv();
+    }
 }
 void MainWindow::on_cptoclpbdBtn_clicked()
 {
