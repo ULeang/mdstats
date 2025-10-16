@@ -29,26 +29,22 @@ int main(int argc, char *argv[])
 
     prog::env::config::load_prog_config();
 
-    if (prog::env::config::hide_console)
+    if (prog::env::config::misc_hide_console)
     {
         FreeConsole();
     }
 
-    QApplication a(argc, argv);
-    if (prog::env::debug::matcher_img_log || prog::env::debug::matcher_text_log)
+    if constexpr (prog::env::debug::matcher_img_log || prog::env::debug::matcher_text_log)
     {
         std::filesystem::create_directories(prog::env::opencv_log_directory);
     }
+
+    QApplication a(argc, argv);
 
     ensure_font();
 
     MainWindow w;
 
-    w.setWindowTitle("MD stats");
-    w.setGeometry({prog::env::config::prog_window_init_x_y_width_height[0],
-                   prog::env::config::prog_window_init_x_y_width_height[1],
-                   prog::env::config::prog_window_init_x_y_width_height[2],
-                   prog::env::config::prog_window_init_x_y_width_height[3]});
     w.show();
 
     return a.exec();

@@ -6,6 +6,8 @@
 #include <QLabel>
 #include <QTableView>
 #include <QThread>
+#include <QGridLayout>
+#include <QHBoxLayout>
 
 #include "utils.hpp"
 #include "databasemodel.hpp"
@@ -15,16 +17,24 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-    QTableView stats_tbl, record_tbl;
-    QPushButton startBtn, stopBtn, cptoclpbdBtn, reloadBtn, openCSVBtn, saveAsBtn, clearrecordBtn;
-    QPushButton manual_0Btn, manual_1Btn;
-    QLabel coin_lbl, st_nd_lbl, result_lbl, time_lbl;
-    QLabel corrupted_csv_lbl;
+    QTableView *stats_tbl, *record_tbl;
+    QPushButton *startBtn, *stopBtn, *cptoclpbdBtn, *reloadBtn, *openCSVBtn, *saveAsBtn, *clearrecordBtn;
+    QPushButton *manual_0Btn, *manual_1Btn;
+    QPushButton *open_config_Btn, *reload_config_Btn;
+    QLabel *coin_lbl, *st_nd_lbl, *result_lbl, *time_lbl;
+    QLabel *corrupted_csv_lbl;
+    QHBoxLayout *h_layout1;
+    QGridLayout *g_layout1, *g_layout2;
+    QWidget *widget;
 
-    DataBase data;
+    DataBase *data;
 
-    QThread matcher_thread;
-    MatcherWorker matcher;
+    QThread *matcher_thread;
+    MatcherWorker *matcher;
+    
+    void reset();
+    void construct_all();
+    void destruct_all();
 
     void connect_signals();
     ErrorType load_database();
@@ -54,6 +64,8 @@ private slots:
     void on_clearrecordBtn_clicked();
     void on_manual_0Btn_clicked();
     void on_manual_1Btn_clicked();
+    void on_open_config_Btn_clicked();
+    void on_reload_config_Btn_clicked();
     void on_matcher_got_match_step(MatcherGotType got, size_t n);
     void on_matcher_exited(ErrorType err);
     void on_database_warning_corrupted_csv(std::filesystem::path path);

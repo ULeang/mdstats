@@ -1,10 +1,16 @@
+# 注意:此文件为toml文件,请使用utf8格式保存,建议使用文本编辑器进行修改,例如:notepad(记事本),vscode
+# 不要使用word,wps等非专用于处理文本数据的编辑工具,否则极易产生编码错误
+# 如果你不熟悉toml格式,请不要改变本文件内容顺序,仅修改内容即可
+# 如果你不确定你的编辑是否正确,请在修改前保存备份
+
+[custom_list]
 # 设置卡组列的快捷选项
-# 注意，由于存储使用的csv的限制，不能含有字符'|'、'"'，否则会影响csv的数据
-custom_deck_list = ["自奏", "巳剑", "雷火", "码丽丝", "小黄毛"]
+# 注意，由于存储使用的csv的限制，不能含有字符'|'、'"'等，否则会影响csv的数据
+deck = ["自奏", "巳剑", "雷火", "码丽丝", "小黄毛"]
 
 # 设置备注列的快捷选项
-# 注意，由于存储使用的csv的限制，不能含有字符'|'、'"'，否则会影响csv的数据
-custom_note_list = [
+# 注意，由于存储使用的csv的限制，不能含有字符'|'、'"'等，否则会影响csv的数据
+note = [
     "先攻全手坑",
     "后攻全通召",
     "对手小糖人",
@@ -17,20 +23,40 @@ custom_note_list = [
     "无敌小黄毛打完丢g,怎么你不服气?",
 ]
 
-# 设置统计数据表格的背景色和前景色，rgb格式
-stats_tbl_background_color = "#00ff00"
-stats_tbl_foreground_color = "#ffffff"
-
+[stats_tbl]
 # 设置统计数据表格的单元格宽度(第1列,第2列,第3列)
-stats_tbl_column_width = [150, 50, 50]
+column_width = [150, 50, 50]
 
+[stats_tbl.color]
+# 设置统计数据表格的背景色和前景色，rgb格式
+background = "#00ff00"
+foreground = "#ffffff"
+
+[record_tbl]
 # 设置对战记录表格的初始单元格宽度(第1列,第2列,第3列,第4列,第5列,第6列)
 # 如果不为0，可以通过拖动表头来动态调整宽度
 # 如果为0，则宽度跟随内容调整，不可手动调整
-record_tbl_column_width = [0, 0, 0, 0, 150, 0]
+column_width = [0, 0, 0, 0, 150, 0]
 
+[record_tbl.color.coin]
+# 设置对战记录表格硬币列的背景色和前景色，分别对应赢币和输币
+win = { background = "#98fb98", foreground = "#000000" }
+lose = { background = "#f08080", foreground = "#000000" }
+
+[record_tbl.color.st_nd]
+# 设置对战记录表格先后列的背景色和前景色，分别对应先攻和后攻
+first = { background = "#98fb98", foreground = "#000000" }
+second = { background = "#f08080", foreground = "#000000" }
+
+[record_tbl.color.result]
+# 设置对战记录表格胜负列的背景色和前景色，分别对应胜利、失败和其他(如平局)
+victory = { background = "#98fb98", foreground = "#000000" }
+defeat = { background = "#f08080", foreground = "#000000" }
+other = { background = "#afeeee", foreground = "#000000" }
+
+[misc]
 # 设置程序窗口打开时出现的位置以及大小(x轴，y轴，宽度，高度)
-prog_window_init_x_y_width_height = [800, 400, 900, 400]
+prog_window_init_geometry = { x = 800, y = 400, width = 900, height = 400 }
 
 # 设置是否按日期保存记录数据，false为否，true为是
 use_daily_record_csv = false
@@ -38,5 +64,5 @@ use_daily_record_csv = false
 # 设置匹配的间隔时间，即每多少秒进行一次截图匹配，单位毫秒，注意，调低这个值会增加cpu占用进而导致系统变卡
 matcher_sleep_ms = 500
 
-# 设置是否隐藏控制台窗口
+# 设置启动时是否隐藏控制台窗口
 hide_console = false

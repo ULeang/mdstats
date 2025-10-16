@@ -25,6 +25,7 @@ enum class ErrorType
     ErrEnsureCSV,
     ErrCheckResources,
     ErrStopRequested,
+    ErrOthers,
 };
 
 enum class MatcherFailT

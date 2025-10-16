@@ -1,4 +1,7 @@
 #include "utils.hpp"
+#include "evil.h"
+
+#include <QColor>
 
 #include <print>
 #include <fstream>
@@ -121,15 +124,17 @@ void CopyToClipboard(const wchar_t *text)
     CloseClipboard();
 }
 
-template <typename T, typename V>
-concept TOML = requires(T t) {
-    { toml::find<std::optional<V>>(t, "") } -> std::same_as<std::optional<V>>;
+template <typename T, typename V, typename... Ks>
+concept TOML = requires(T t, V v, V _v, Ks... ks) {
+    { toml::find<std::optional<V>>(t, ks...) } -> std::same_as<std::optional<V>>;
+    { v = _v };
 };
 
-template <typename V, TOML<V> T>
-static bool load_value_by_name(T &toml, V &value, const char *name)
+template <typename T, typename V, typename... Ks>
+    requires TOML<T, V, Ks...>
+static bool load_value(T &toml, V &value, const Ks &...ks)
 {
-    std::optional<V> v_o = toml::find<std::optional<V>>(toml, name);
+    std::optional<V> v_o = toml::find<std::optional<V>>(toml, ks...);
     if (!v_o.has_value())
     {
         return false;
@@ -139,6 +144,7 @@ static bool load_value_by_name(T &toml, V &value, const char *name)
 }
 bool prog::env::config::load_prog_config()
 {
+    reset_prog_config();
     auto config_r = toml::try_parse(config_filename);
     if (!config_r.is_ok())
     {
@@ -146,22 +152,126 @@ bool prog::env::config::load_prog_config()
         logln("load prog config fail, using default config");
         return false;
     }
-
     auto config = config_r.unwrap();
 
-#define LOAD(var) \
-    load_value_by_name(config, var, #var)
+#define LOAD(...) \
+    load_value(config, VARLOOK(__VA_ARGS__))
 
-    LOAD(stats_tbl_background_color);
-    LOAD(stats_tbl_foreground_color);
-    LOAD(prog_window_init_x_y_width_height);
-    LOAD(matcher_sleep_ms);
-    LOAD(use_daily_record_csv);
-    LOAD(stats_tbl_column_width);
-    LOAD(record_tbl_column_width);
-    LOAD(custom_deck_list);
-    LOAD(custom_note_list);
-    LOAD(hide_console);
+    LOAD(custom, deck);
+    LOAD(custom, note);
+
+    LOAD(stats_tbl, column_width);
+    LOAD(stats_tbl, color, background);
+    LOAD(stats_tbl, color, foreground);
+
+    LOAD(record_tbl, column_width);
+    LOAD(record_tbl, color, coin, win, background);
+    LOAD(record_tbl, color, coin, win, foreground);
+    LOAD(record_tbl, color, coin, lose, background);
+    LOAD(record_tbl, color, coin, lose, foreground);
+
+    LOAD(record_tbl, color, st_nd, first, background);
+    LOAD(record_tbl, color, st_nd, first, foreground);
+    LOAD(record_tbl, color, st_nd, second, background);
+    LOAD(record_tbl, color, st_nd, second, foreground);
+
+    LOAD(record_tbl, color, result, victory, background);
+    LOAD(record_tbl, color, result, victory, foreground);
+    LOAD(record_tbl, color, result, defeat, background);
+    LOAD(record_tbl, color, result, defeat, foreground);
+    LOAD(record_tbl, color, result, other, background);
+    LOAD(record_tbl, color, result, other, foreground);
+
+    LOAD(misc, prog_window_init_geometry, x);
+    LOAD(misc, prog_window_init_geometry, y);
+    LOAD(misc, prog_window_init_geometry, width);
+    LOAD(misc, prog_window_init_geometry, height);
+
+    LOAD(misc, matcher_sleep_ms);
+    LOAD(misc, use_daily_record_csv);
+    LOAD(misc, hide_console);
+
+    return preprocessed::preprocess();
+}
+
+void prog::env::config::reset_prog_config()
+{
+    custom_deck = {};
+    custom_note = {};
+
+    stats_tbl_column_width = {150, 50, 50};
+    stats_tbl_color_background = {};
+    stats_tbl_color_foreground = {};
+
+    record_tbl_column_width = {0, 0, 0, 0, 150, 0};
+    record_tbl_color_coin_win_background = {};
+    record_tbl_color_coin_win_foreground = {};
+    record_tbl_color_coin_lose_background = {};
+    record_tbl_color_coin_lose_foreground = {};
+
+    record_tbl_color_st_nd_first_background = {};
+    record_tbl_color_st_nd_first_foreground = {};
+    record_tbl_color_st_nd_second_background = {};
+    record_tbl_color_st_nd_second_foreground = {};
+
+    record_tbl_color_result_victory_background = {};
+    record_tbl_color_result_victory_foreground = {};
+    record_tbl_color_result_defeat_background = {};
+    record_tbl_color_result_defeat_foreground = {};
+    record_tbl_color_result_other_background = {};
+    record_tbl_color_result_other_foreground = {};
+
+    misc_prog_window_init_geometry_x = {800};
+    misc_prog_window_init_geometry_y = {400};
+    misc_prog_window_init_geometry_width = {900};
+    misc_prog_window_init_geometry_height = {400};
+
+    misc_matcher_sleep_ms = {500};
+    misc_use_daily_record_csv = {false};
+    misc_hide_console = {false};
+}
+
+bool prog::env::config::preprocessed::preprocess()
+{
+    custom_deck.clear();
+    custom_deck.reserve(prog::env::config::custom_deck.size());
+    for (const auto &d : prog::env::config::custom_deck)
+    {
+        custom_deck.push_back(d.c_str());
+    }
+
+    custom_note.clear();
+    custom_note.reserve(prog::env::config::custom_note.size());
+    for (const auto &d : prog::env::config::custom_note)
+    {
+        custom_note.push_back(d.c_str());
+    }
+
+    QColor color;
+
+#define SETCOLOR(v)                       \
+    color = prog::env::config::v.c_str(); \
+    v = color.isValid() ? QVariant{color} : QVariant{};
+
+    SETCOLOR(stats_tbl_color_background);
+    SETCOLOR(stats_tbl_color_foreground);
+
+    SETCOLOR(record_tbl_color_coin_win_background);
+    SETCOLOR(record_tbl_color_coin_win_foreground);
+    SETCOLOR(record_tbl_color_coin_lose_background);
+    SETCOLOR(record_tbl_color_coin_lose_foreground);
+
+    SETCOLOR(record_tbl_color_st_nd_first_background);
+    SETCOLOR(record_tbl_color_st_nd_first_foreground);
+    SETCOLOR(record_tbl_color_st_nd_second_background);
+    SETCOLOR(record_tbl_color_st_nd_second_foreground);
+
+    SETCOLOR(record_tbl_color_result_victory_background);
+    SETCOLOR(record_tbl_color_result_victory_foreground);
+    SETCOLOR(record_tbl_color_result_defeat_background);
+    SETCOLOR(record_tbl_color_result_defeat_foreground);
+    SETCOLOR(record_tbl_color_result_other_background);
+    SETCOLOR(record_tbl_color_result_other_foreground);
 
     return true;
 }

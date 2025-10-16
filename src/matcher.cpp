@@ -133,7 +133,7 @@ ErrorType MatcherWorker::main_matcher()
                 emit exited(ErrorType::ErrStopRequested);
                 return std::unexpected{ErrorType::ErrStopRequested};
             }
-            QThread::msleep(prog::env::config::matcher_sleep_ms);
+            QThread::msleep(prog::env::config::misc_matcher_sleep_ms);
         }
     };
 

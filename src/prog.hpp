@@ -7,6 +7,9 @@
 #include <array>
 #include <vector>
 
+#include <QStringList>
+#include <QVariant>
+
 namespace prog
 {
     // c++17
@@ -26,19 +29,69 @@ namespace prog
 
         namespace config
         {
-            inline string stats_tbl_background_color{"#303030"};
-            inline string stats_tbl_foreground_color{"#ffffff"};
-            inline std::array<size_t, 4> prog_window_init_x_y_width_height{800, 400, 900, 400};
-            inline DWORD matcher_sleep_ms{500};
-            inline bool use_daily_record_csv{false};
-            inline std::array<size_t, 3> stats_tbl_column_width{150, 50, 50};
-            inline std::array<size_t, 6> record_tbl_column_width{0, 0, 0, 0, 150, 0};
-            inline std::vector<std::string> custom_deck_list{};
-            inline std::vector<std::string> custom_note_list{};
+            inline std::vector<std::string> custom_deck{};
+            inline std::vector<std::string> custom_note{};
 
-            inline bool hide_console{true};
+            inline std::array<size_t, 3> stats_tbl_column_width{};
+            inline string stats_tbl_color_background{};
+            inline string stats_tbl_color_foreground{};
+
+            inline std::array<size_t, 6> record_tbl_column_width{};
+            inline string record_tbl_color_coin_win_background{};
+            inline string record_tbl_color_coin_win_foreground{};
+            inline string record_tbl_color_coin_lose_background{};
+            inline string record_tbl_color_coin_lose_foreground{};
+
+            inline string record_tbl_color_st_nd_first_background{};
+            inline string record_tbl_color_st_nd_first_foreground{};
+            inline string record_tbl_color_st_nd_second_background{};
+            inline string record_tbl_color_st_nd_second_foreground{};
+
+            inline string record_tbl_color_result_victory_background{};
+            inline string record_tbl_color_result_victory_foreground{};
+            inline string record_tbl_color_result_defeat_background{};
+            inline string record_tbl_color_result_defeat_foreground{};
+            inline string record_tbl_color_result_other_background{};
+            inline string record_tbl_color_result_other_foreground{};
+
+            inline size_t misc_prog_window_init_geometry_x{};
+            inline size_t misc_prog_window_init_geometry_y{};
+            inline size_t misc_prog_window_init_geometry_width{};
+            inline size_t misc_prog_window_init_geometry_height{};
+
+            inline size_t misc_matcher_sleep_ms{};
+            inline bool misc_use_daily_record_csv{};
+            inline bool misc_hide_console{};
 
             bool load_prog_config();
+            void reset_prog_config();
+
+            namespace preprocessed
+            {
+                inline QStringList custom_deck{};
+                inline QStringList custom_note{};
+                inline QVariant stats_tbl_color_background{};
+                inline QVariant stats_tbl_color_foreground{};
+
+                inline QVariant record_tbl_color_coin_win_background{};
+                inline QVariant record_tbl_color_coin_win_foreground{};
+                inline QVariant record_tbl_color_coin_lose_background{};
+                inline QVariant record_tbl_color_coin_lose_foreground{};
+
+                inline QVariant record_tbl_color_st_nd_first_background{};
+                inline QVariant record_tbl_color_st_nd_first_foreground{};
+                inline QVariant record_tbl_color_st_nd_second_background{};
+                inline QVariant record_tbl_color_st_nd_second_foreground{};
+
+                inline QVariant record_tbl_color_result_victory_background{};
+                inline QVariant record_tbl_color_result_victory_foreground{};
+                inline QVariant record_tbl_color_result_defeat_background{};
+                inline QVariant record_tbl_color_result_defeat_foreground{};
+                inline QVariant record_tbl_color_result_other_background{};
+                inline QVariant record_tbl_color_result_other_foreground{};
+
+                bool preprocess();
+            }
         }
 
         namespace debug

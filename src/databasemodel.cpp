@@ -32,7 +32,7 @@ void Stats::update_stats_tbl()
 }
 
 Stats::Stats(QObject *parent)
-    : QAbstractTableModel(),
+    : QAbstractTableModel(parent),
       stats_tbl{
           QStringList{"总场次", "", ""},
           QStringList{"硬币(赢/输)", "", ""},
@@ -74,9 +74,9 @@ QVariant Stats::data(const QModelIndex &index, int role) const
     case Qt::TextAlignmentRole:
         return int(Qt::AlignHCenter | Qt::AlignVCenter);
     case Qt::BackgroundRole:
-        return QColor{prog::env::config::stats_tbl_background_color.c_str()};
+        return prog::env::config::preprocessed::stats_tbl_color_background;
     case Qt::ForegroundRole:
-        return QColor{prog::env::config::stats_tbl_foreground_color.c_str()};
+        return prog::env::config::preprocessed::stats_tbl_color_foreground;
     case Qt::FontRole:
     default:
         return {};
@@ -88,7 +88,7 @@ QVariant Stats::headerData(int section, Qt::Orientation orientation, int role) c
 }
 Qt::ItemFlags Stats::flags(const QModelIndex &index) const
 {
-    return Qt::NoItemFlags;
+    return QAbstractTableModel::flags(index);
 }
 bool Stats::setData(const QModelIndex &index, const QVariant &value, int role)
 {
@@ -202,6 +202,7 @@ QVariant DataBase::data(const QModelIndex &index, int role) const
 
     const auto &rec = db[index.row()];
 
+    using namespace prog::env::config::preprocessed;
     switch (role)
     {
     case Qt::DisplayRole:
@@ -215,16 +216,31 @@ QVariant DataBase::data(const QModelIndex &index, int role) const
     case Qt::TextAlignmentRole:
         return int(Qt::AlignHCenter | Qt::AlignVCenter);
     case Qt::BackgroundRole:
-        return index.column() == 0   ? QColor(rec.coin == "赢币" ? Qt::green : rec.coin == "输币" ? Qt::red
-                                                                                                  : Qt::blue)
-               : index.column() == 1 ? QColor(rec.st_nd == "先攻" ? Qt::green : rec.st_nd == "后攻" ? Qt::red
-                                                                                                    : Qt::blue)
-               : index.column() == 2 ? QColor(rec.result == "胜利" ? Qt::green : rec.result == "失败" ? Qt::red
-                                                                                                      : Qt::blue)
+        return index.column() == 0   ? (rec.coin == "赢币"
+                                            ? record_tbl_color_coin_win_background
+                                            : record_tbl_color_coin_lose_background)
+               : index.column() == 1 ? (rec.st_nd == "先攻"
+                                            ? record_tbl_color_st_nd_first_background
+                                            : record_tbl_color_st_nd_second_background)
+               : index.column() == 2 ? (rec.result == "胜利"
+                                            ? record_tbl_color_result_victory_background
+                                        : rec.result == "失败"
+                                            ? record_tbl_color_result_defeat_background
+                                            : record_tbl_color_result_other_background)
                                      : QVariant{};
     case Qt::ForegroundRole:
-        return index.column() == 0 || index.column() == 1 || index.column() == 2 ? QColor(Qt::black)
-                                                                                 : QVariant{};
+        return index.column() == 0   ? (rec.coin == "赢币"
+                                            ? record_tbl_color_coin_win_foreground
+                                            : record_tbl_color_coin_lose_foreground)
+               : index.column() == 1 ? (rec.st_nd == "先攻"
+                                            ? record_tbl_color_st_nd_first_foreground
+                                            : record_tbl_color_st_nd_second_foreground)
+               : index.column() == 2 ? (rec.result == "胜利"
+                                            ? record_tbl_color_result_victory_foreground
+                                        : rec.result == "失败"
+                                            ? record_tbl_color_result_defeat_foreground
+                                            : record_tbl_color_result_other_foreground)
+                                     : QVariant{};
     case Qt::FontRole:
     default:
         return {};
@@ -365,6 +381,7 @@ bool DataBase::save_csv_as(std::filesystem::path csv_path)
     QFile file(csv_path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
     {
+        logln("DataBase : cannot open csv when save");
         return false;
     }
     QTextStream fout(&file);
@@ -387,6 +404,7 @@ bool DataBase::load_csv(std::filesystem::path csv_path)
     if (!fin.good())
     {
         emit warning_corrupted_csv(csv_path);
+        logln("DataBase : cannot open csv when load");
         return false;
     }
     try
