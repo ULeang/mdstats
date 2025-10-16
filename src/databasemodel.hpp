@@ -90,6 +90,7 @@ public slots:
 
     bool load_csv(std::filesystem::path csv_path);
     bool save_csv();
+    bool save_csv_as(std::filesystem::path csv_path);
 
     Stats *get_stats();
 

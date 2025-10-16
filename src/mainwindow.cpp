@@ -8,6 +8,7 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QColor>
+#include <QFileDialog>
 #include <windows.h>
 
 using std::format;
@@ -18,7 +19,8 @@ MainWindow::MainWindow(QWidget *parent)
       stopBtn("停止"),
       cptoclpbdBtn("复制到剪贴板"),
       reloadBtn("重新加载数据"),
-      openCSVBtn("打开data.csv目录")
+      openCSVBtn("打开data.csv目录"),
+      saveAsBtn("把csv另存为")
 {
     matcher.moveToThread(&matcher_thread);
     matcher_thread.start();
@@ -52,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent)
     disable_manual_btn(true);
 
     corrupted_csv_lbl.setText(
-R"(警告:csv文件已损坏,你正处于无csv模式,
+        R"(警告:csv文件已损坏,你正处于无csv模式,
 此时的一切数据都不会被保存
 请点击下方'打开data.csv目录'尝试修复,
 或者直接删除该文件,然后点击'重新加载数据')");
@@ -76,10 +78,11 @@ R"(警告:csv文件已损坏,你正处于无csv模式,
     g_layout1->addWidget(&startBtn, 7, 0, 1, 3);
     g_layout1->addWidget(&stopBtn, 7, 3, 1, 3);
     auto g_layout2 = new QGridLayout;
-    g_layout2->addWidget(&record_tbl, 0, 0, 1, 2);
-    g_layout2->addWidget(&corrupted_csv_lbl, 0, 0, 1, 2);
+    g_layout2->addWidget(&record_tbl, 0, 0, 1, 3);
+    g_layout2->addWidget(&corrupted_csv_lbl, 0, 0, 1, 3);
     g_layout2->addWidget(&reloadBtn, 1, 0);
-    g_layout2->addWidget(&openCSVBtn, 1, 1);
+    g_layout2->addWidget(&saveAsBtn, 1, 1);
+    g_layout2->addWidget(&openCSVBtn, 1, 2);
     auto h_layout1 = new QHBoxLayout;
     h_layout1->addLayout(g_layout1, 2);
     h_layout1->addLayout(g_layout2, 3);
@@ -108,6 +111,7 @@ void MainWindow::connect_signals()
     connect(&reloadBtn, SIGNAL(clicked()), this, SLOT(on_reloadBtn_clicked()));
     connect(&openCSVBtn, SIGNAL(clicked()), this, SLOT(on_openCSVBtn_clicked()));
     connect(&cptoclpbdBtn, SIGNAL(clicked()), this, SLOT(on_cptoclpbdBtn_clicked()));
+    connect(&saveAsBtn, SIGNAL(clicked()), this, SLOT(on_saveAsBtn_clicked()));
     connect(&manual_0Btn, SIGNAL(clicked()), this, SLOT(on_manual_0Btn_clicked()));
     connect(&manual_1Btn, SIGNAL(clicked()), this, SLOT(on_manual_1Btn_clicked()));
 
@@ -238,6 +242,21 @@ void MainWindow::on_stopBtn_clicked()
 void MainWindow::on_openCSVBtn_clicked()
 {
     ShellExecuteA(0, "open", prog::env::data_csv_path.c_str(), 0, 0, SW_SHOWNORMAL);
+}
+void MainWindow::on_saveAsBtn_clicked()
+{
+    QString new_csv_filename =
+        QFileDialog::getSaveFileName(
+            this,
+            "另存为csv",
+            (prog::env::data_csv_path + "new.csv").c_str(),
+            "csv(*.csv);;All files(*.*)");
+    if (new_csv_filename.isEmpty())
+    {
+        return;
+    }
+    logln(format("save csv as '{}'", new_csv_filename.toStdString()));
+    data.save_csv_as({new_csv_filename.toStdString()});
 }
 void MainWindow::on_cptoclpbdBtn_clicked()
 {

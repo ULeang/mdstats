@@ -358,7 +358,11 @@ bool DataBase::save_csv()
     {
         return false;
     }
-    QFile file(associate_csv_path.value());
+    return save_csv_as(associate_csv_path.value());
+}
+bool DataBase::save_csv_as(std::filesystem::path csv_path)
+{
+    QFile file(csv_path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
     {
         return false;

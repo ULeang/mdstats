@@ -16,7 +16,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 private:
     QTableView stats_tbl, record_tbl;
-    QPushButton startBtn, stopBtn, cptoclpbdBtn, reloadBtn, openCSVBtn;
+    QPushButton startBtn, stopBtn, cptoclpbdBtn, reloadBtn, openCSVBtn, saveAsBtn;
     QPushButton manual_0Btn, manual_1Btn;
     QLabel coin_lbl, st_nd_lbl, result_lbl, time_lbl;
     QLabel corrupted_csv_lbl;
@@ -50,6 +50,7 @@ private slots:
     void on_openCSVBtn_clicked();
     void on_cptoclpbdBtn_clicked();
     void on_reloadBtn_clicked();
+    void on_saveAsBtn_clicked();
     void on_manual_0Btn_clicked();
     void on_manual_1Btn_clicked();
     void on_matcher_got_match_step(MatcherGotType got, size_t n);
