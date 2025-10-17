@@ -157,10 +157,11 @@ bool prog::env::config::load_prog_config()
 #define LOAD(...) \
     load_value(config, VARLOOK(__VA_ARGS__))
 
-    LOAD(custom, deck);
-    LOAD(custom, note);
+    LOAD(custom_list, deck);
+    LOAD(custom_list, note);
 
     LOAD(stats_tbl, column_width);
+    LOAD(stats_tbl, rows_height);
     LOAD(stats_tbl, color, background);
     LOAD(stats_tbl, color, foreground);
 
@@ -190,16 +191,18 @@ bool prog::env::config::load_prog_config()
     LOAD(misc, matcher_sleep_ms);
     LOAD(misc, use_daily_record_csv);
     LOAD(misc, hide_console);
+    LOAD(misc, show_clip_success);
 
     return preprocessed::preprocess();
 }
 
 void prog::env::config::reset_prog_config()
 {
-    custom_deck = {};
-    custom_note = {};
+    custom_list_deck = {};
+    custom_list_note = {};
 
     stats_tbl_column_width = {150, 50, 50};
+    stats_tbl_rows_height = {0};
     stats_tbl_color_background = {};
     stats_tbl_color_foreground = {};
 
@@ -229,22 +232,23 @@ void prog::env::config::reset_prog_config()
     misc_matcher_sleep_ms = {500};
     misc_use_daily_record_csv = {false};
     misc_hide_console = {false};
+    misc_show_clip_success = {false};
 }
 
 bool prog::env::config::preprocessed::preprocess()
 {
-    custom_deck.clear();
-    custom_deck.reserve(prog::env::config::custom_deck.size());
-    for (const auto &d : prog::env::config::custom_deck)
+    custom_list_deck.clear();
+    custom_list_deck.reserve(prog::env::config::custom_list_deck.size());
+    for (const auto &d : prog::env::config::custom_list_deck)
     {
-        custom_deck.push_back(d.c_str());
+        custom_list_deck.push_back(d.c_str());
     }
 
-    custom_note.clear();
-    custom_note.reserve(prog::env::config::custom_note.size());
-    for (const auto &d : prog::env::config::custom_note)
+    custom_list_note.clear();
+    custom_list_note.reserve(prog::env::config::custom_list_note.size());
+    for (const auto &d : prog::env::config::custom_list_note)
     {
-        custom_note.push_back(d.c_str());
+        custom_list_note.push_back(d.c_str());
     }
 
     QColor color;

@@ -17,10 +17,10 @@ static void ensure_font()
               LogLevel::ALWAYS);
         exit(-1);
     }
-    auto fontname = QFontDatabase::applicationFontFamilies(font_id).at(0);
+    auto fontfamily = QFontDatabase::applicationFontFamilies(font_id).at(0);
     logln(std::format("using default font file '{}'\nfont family : '{}'",
-                      prog::env::default_font_filename, fontname.toStdString()));
-    prog::global::qt_font_id = font_id;
+                      prog::env::default_font_filename, fontfamily.toStdString()));
+    prog::global::font = {fontfamily, 14, 700, false};
 }
 
 int main(int argc, char *argv[])

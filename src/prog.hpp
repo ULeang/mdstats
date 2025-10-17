@@ -9,6 +9,7 @@
 
 #include <QStringList>
 #include <QVariant>
+#include <QFont>
 
 namespace prog
 {
@@ -23,16 +24,20 @@ namespace prog
         inline const string opencv_log_directory{"log\\opencv\\"};
         inline const string capture_window_title{"masterduel"};
         inline const string config_filename{"config.toml"};
+        inline const string clip_pic_path{"resource\\pic\\iqltv\\"};
+        inline const std::vector<std::string> clip_pic_name_list{
+            "ufxrziji.gif", "dabmlaziji.png", "qihlvidk.gif", "yrzvbcpcyklp.jpeg"};
 
         inline const string default_font_filename{"resource\\font\\SourceHanSansCN-Bold.otf"};
         inline const double matcher_threshold{0.9};
 
         namespace config
         {
-            inline std::vector<std::string> custom_deck{};
-            inline std::vector<std::string> custom_note{};
+            inline std::vector<std::string> custom_list_deck{};
+            inline std::vector<std::string> custom_list_note{};
 
             inline std::array<size_t, 3> stats_tbl_column_width{};
+            inline size_t stats_tbl_rows_height{};
             inline string stats_tbl_color_background{};
             inline string stats_tbl_color_foreground{};
 
@@ -62,14 +67,15 @@ namespace prog
             inline size_t misc_matcher_sleep_ms{};
             inline bool misc_use_daily_record_csv{};
             inline bool misc_hide_console{};
+            inline bool misc_show_clip_success{};
 
             bool load_prog_config();
             void reset_prog_config();
 
             namespace preprocessed
             {
-                inline QStringList custom_deck{};
-                inline QStringList custom_note{};
+                inline QStringList custom_list_deck{};
+                inline QStringList custom_list_note{};
                 inline QVariant stats_tbl_color_background{};
                 inline QVariant stats_tbl_color_foreground{};
 
@@ -103,7 +109,7 @@ namespace prog
     }
     namespace global
     {
-        inline int qt_font_id;
+        inline QFont font;
     }
 }
 

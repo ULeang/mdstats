@@ -8,7 +8,9 @@
 #include <QColor>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMovie>
 #include <windows.h>
+#include <random>
 
 using std::format;
 
@@ -114,20 +116,24 @@ void MainWindow::construct_all()
 
     // set font
     // auto font = QFont("FiraCode Nerd Font Mono", 16);
-    auto font = QFont(QFontDatabase::applicationFontFamilies(prog::global::qt_font_id).at(0), 14);
-    setFont(font);
+    setFont(prog::global::font);
+
+    setWindowTitle("MD stats");
+    ensure_config();
+    connect_signals();
+    load_database();
 
     // set layout
-    g_layout1->addWidget(stats_tbl, 0, 0, 3, 6);
-    g_layout1->addWidget(manual_0Btn, 3, 0, 1, 3);
-    g_layout1->addWidget(manual_1Btn, 3, 3, 1, 3);
-    g_layout1->addWidget(coin_lbl, 4, 0, 1, 2);
-    g_layout1->addWidget(st_nd_lbl, 4, 2, 1, 2);
-    g_layout1->addWidget(result_lbl, 4, 4, 1, 2);
-    g_layout1->addWidget(time_lbl, 5, 0, 1, 6);
-    g_layout1->addWidget(cptoclpbdBtn, 6, 0, 1, 6);
-    g_layout1->addWidget(startBtn, 7, 0, 1, 3);
-    g_layout1->addWidget(stopBtn, 7, 3, 1, 3);
+    g_layout1->addWidget(stats_tbl, 0, 0, 4, 6);
+    g_layout1->addWidget(manual_0Btn, 4, 0, 1, 3);
+    g_layout1->addWidget(manual_1Btn, 4, 3, 1, 3);
+    g_layout1->addWidget(coin_lbl, 5, 0, 1, 2);
+    g_layout1->addWidget(st_nd_lbl, 5, 2, 1, 2);
+    g_layout1->addWidget(result_lbl, 5, 4, 1, 2);
+    g_layout1->addWidget(time_lbl, 6, 0, 1, 6);
+    g_layout1->addWidget(cptoclpbdBtn, 7, 0, 1, 6);
+    g_layout1->addWidget(startBtn, 8, 0, 1, 3);
+    g_layout1->addWidget(stopBtn, 8, 3, 1, 3);
 
     g_layout2->addWidget(record_tbl, 0, 0, 1, 2);
     g_layout2->addWidget(corrupted_csv_lbl, 0, 0, 1, 2);
@@ -142,12 +148,6 @@ void MainWindow::construct_all()
     h_layout1->addLayout(g_layout2, 3);
     widget->setLayout(h_layout1);
     this->setCentralWidget(widget);
-
-    setWindowTitle("MD stats");
-
-    ensure_config();
-    connect_signals();
-    load_database();
 }
 void MainWindow::destruct_all()
 {
@@ -207,11 +207,17 @@ void MainWindow::ensure_config()
         stats_tbl->setPalette(prog::env::config::preprocessed::stats_tbl_color_background.value<QColor>());
     }
 
-    stats_tbl->setColumnWidth(0, prog::env::config::stats_tbl_column_width[0]);
-    stats_tbl->setColumnWidth(1, prog::env::config::stats_tbl_column_width[1]);
-    stats_tbl->setColumnWidth(2, prog::env::config::stats_tbl_column_width[2]);
+    for (size_t i = 0; i < prog::env::config::stats_tbl_column_width.size(); ++i)
+    {
+        stats_tbl->setColumnWidth(i, prog::env::config::stats_tbl_column_width[i]);
+    }
+    for (size_t i = 0; i < data->get_stats()->rowCount(); ++i)
+    {
+        stats_tbl->setRowHeight(i, prog::env::config::stats_tbl_rows_height);
+    }
 
     record_tbl->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
+    record_tbl->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
 
     for (size_t i = 0; i < prog::env::config::record_tbl_column_width.size(); ++i)
     {
@@ -225,8 +231,8 @@ void MainWindow::ensure_config()
         }
     }
 
-    record_tbl->setItemDelegateForColumn(3, new MyDelegate(prog::env::config::preprocessed::custom_deck));
-    record_tbl->setItemDelegateForColumn(4, new MyDelegate(prog::env::config::preprocessed::custom_note));
+    record_tbl->setItemDelegateForColumn(3, new MyDelegate(prog::env::config::preprocessed::custom_list_deck));
+    record_tbl->setItemDelegateForColumn(4, new MyDelegate(prog::env::config::preprocessed::custom_list_note));
 }
 ErrorType MainWindow::load_database()
 {
@@ -331,6 +337,37 @@ void MainWindow::on_clearrecordBtn_clicked()
 void MainWindow::on_cptoclpbdBtn_clicked()
 {
     data->get_stats()->copy_to_clipboard();
+
+    if (prog::env::config::misc_show_clip_success)
+    {
+        QMessageBox msgbox;
+        msgbox.setWindowTitle("Congratulations");
+
+        static auto e = std::mt19937_64(std::random_device{}());
+        static auto d = std::uniform_int_distribution<size_t>(0, prog::env::clip_pic_name_list.size() - 1); // [a, b]
+        auto chosen = d(e);
+
+        QLabel *giflabel = new QLabel;
+        QMovie movie{(prog::env::clip_pic_path + prog::env::clip_pic_name_list[chosen]).c_str()};
+        giflabel->setMovie(&movie);
+
+        QLabel *textlabel = new QLabel;
+        textlabel->setText("喜报:成功复制到剪贴板了!");
+        auto font = prog::global::font;
+        font.setPointSize(26);
+        textlabel->setFont(font);
+
+        QVBoxLayout *v_layout = new QVBoxLayout;
+        v_layout->addWidget(giflabel);
+        v_layout->addWidget(textlabel);
+
+        delete msgbox.layout();
+        msgbox.setLayout(v_layout);
+
+        movie.start();
+        msgbox.show();
+        msgbox.exec();
+    }
 }
 void MainWindow::on_open_config_Btn_clicked()
 {

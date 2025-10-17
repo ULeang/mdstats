@@ -15,7 +15,7 @@ configure:
 
 .PHONY: build
 build:
-	@cmake --build build
+	@cmake --build build --parallel 16
 
 .PHONY: install
 install:
@@ -32,7 +32,7 @@ debug :
 		-S . \
 		-B build \
 		-G "MinGW Makefiles"
-	@cmake --build build
+	@cmake --build build --parallel 16
 	@make run
 
 .PHONY: release
@@ -45,7 +45,7 @@ release :
 		-S . \
 		-B build \
 		-G "MinGW Makefiles"
-	@cmake --build build
+	@cmake --build build --parallel 16
 	@make run
 
 .PHONY: run
