@@ -57,8 +57,10 @@ void MainWindow::construct_all()
     corrupted_csv_lbl = new QLabel;
 
     h_layout1 = new QHBoxLayout;
+    v_layout1 = new QVBoxLayout;
     g_layout1 = new QGridLayout;
     g_layout2 = new QGridLayout;
+    g_layout3 = new QGridLayout;
     widget = new QWidget;
 
     data = new DataBase;
@@ -99,11 +101,8 @@ void MainWindow::construct_all()
     record_tbl->setItemDelegateForColumn(1, new MyDelegate({"先攻", "后攻"}, false));
     record_tbl->setItemDelegateForColumn(2, new MyDelegate({"胜利", "失败", "平局"}));
 
-    stopBtn->setDisabled(true);
-    startBtn->setEnabled(true);
-    startBtn->setPalette(Qt::green);
-    stopBtn->setPalette(Qt::gray);
-
+    set_qss();
+    start_stop_switch(true);
     disable_manual_btn(true);
 
     corrupted_csv_lbl->setText(
@@ -120,34 +119,40 @@ void MainWindow::construct_all()
 
     setWindowTitle("MD stats");
     ensure_config();
-    connect_signals();
-    load_database();
 
     // set layout
-    g_layout1->addWidget(stats_tbl, 0, 0, 4, 6);
-    g_layout1->addWidget(manual_0Btn, 4, 0, 1, 3);
-    g_layout1->addWidget(manual_1Btn, 4, 3, 1, 3);
-    g_layout1->addWidget(coin_lbl, 5, 0, 1, 2);
-    g_layout1->addWidget(st_nd_lbl, 5, 2, 1, 2);
-    g_layout1->addWidget(result_lbl, 5, 4, 1, 2);
-    g_layout1->addWidget(time_lbl, 6, 0, 1, 6);
-    g_layout1->addWidget(cptoclpbdBtn, 7, 0, 1, 6);
-    g_layout1->addWidget(startBtn, 8, 0, 1, 3);
-    g_layout1->addWidget(stopBtn, 8, 3, 1, 3);
+    g_layout1->addWidget(manual_0Btn, 0, 0, 1, 3);
+    g_layout1->addWidget(manual_1Btn, 0, 3, 1, 3);
+    g_layout1->addWidget(coin_lbl, 1, 0, 1, 2);
+    g_layout1->addWidget(st_nd_lbl, 1, 2, 1, 2);
+    g_layout1->addWidget(result_lbl, 1, 4, 1, 2);
+    g_layout1->addWidget(time_lbl, 2, 0, 1, 6);
 
-    g_layout2->addWidget(record_tbl, 0, 0, 1, 2);
-    g_layout2->addWidget(corrupted_csv_lbl, 0, 0, 1, 2);
-    g_layout2->addWidget(openCSVBtn, 1, 0);
-    g_layout2->addWidget(reloadBtn, 1, 1);
-    g_layout2->addWidget(saveAsBtn, 2, 0);
-    g_layout2->addWidget(clearrecordBtn, 2, 1);
-    g_layout2->addWidget(open_config_Btn, 3, 0);
-    g_layout2->addWidget(reload_config_Btn, 3, 1);
+    g_layout2->addWidget(cptoclpbdBtn, 0, 0, 1, 6);
+    g_layout2->addWidget(startBtn, 1, 0, 1, 3);
+    g_layout2->addWidget(stopBtn, 1, 3, 1, 3);
 
-    h_layout1->addLayout(g_layout1, 2);
-    h_layout1->addLayout(g_layout2, 3);
+    v_layout1->addWidget(stats_tbl, 0);
+    v_layout1->addLayout(g_layout1, 0);
+    v_layout1->addWidget(new QWidget, 1);
+    v_layout1->addLayout(g_layout2, 0);
+
+    g_layout3->addWidget(record_tbl, 0, 0, 1, 2);
+    g_layout3->addWidget(corrupted_csv_lbl, 0, 0, 1, 2);
+    g_layout3->addWidget(openCSVBtn, 1, 0);
+    g_layout3->addWidget(reloadBtn, 1, 1);
+    g_layout3->addWidget(saveAsBtn, 2, 0);
+    g_layout3->addWidget(clearrecordBtn, 2, 1);
+    g_layout3->addWidget(open_config_Btn, 3, 0);
+    g_layout3->addWidget(reload_config_Btn, 3, 1);
+
+    h_layout1->addLayout(v_layout1, 0);
+    h_layout1->addLayout(g_layout3, 1);
     widget->setLayout(h_layout1);
     this->setCentralWidget(widget);
+
+    connect_signals();
+    load_database();
 }
 void MainWindow::destruct_all()
 {
@@ -202,10 +207,10 @@ void MainWindow::on_database_good_csv(std::filesystem::path path)
 
 void MainWindow::ensure_config()
 {
-    if (prog::env::config::preprocessed::stats_tbl_color_background.typeId() == 0x1003)
-    {
-        stats_tbl->setPalette(prog::env::config::preprocessed::stats_tbl_color_background.value<QColor>());
-    }
+    // if (prog::env::config::preprocessed::stats_tbl_color_background.typeId() == 0x1003)
+    // {
+    //     stats_tbl->setPalette(prog::env::config::preprocessed::stats_tbl_color_background.value<QColor>());
+    // }
 
     for (size_t i = 0; i < prog::env::config::stats_tbl_column_width.size(); ++i)
     {
@@ -215,6 +220,10 @@ void MainWindow::ensure_config()
     {
         stats_tbl->setRowHeight(i, prog::env::config::stats_tbl_rows_height);
     }
+    stats_tbl->setFixedWidth(prog::env::config::stats_tbl_column_width[0] +
+                             prog::env::config::stats_tbl_column_width[1] +
+                             prog::env::config::stats_tbl_column_width[2] + 5);
+    stats_tbl->setFixedHeight(prog::env::config::stats_tbl_rows_height * data->get_stats()->rowCount() + 5);
 
     record_tbl->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
     record_tbl->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
@@ -287,10 +296,7 @@ void MainWindow::clear_lbl()
 void MainWindow::on_startBtn_clicked()
 {
     logln("Matcher running...");
-    startBtn->setDisabled(true);
-    stopBtn->setEnabled(true);
-    startBtn->setPalette(Qt::gray);
-    stopBtn->setPalette(Qt::red);
+    start_stop_switch(false);
 
     disable_manual_btn(false);
     manual_reset();
@@ -418,10 +424,7 @@ void MainWindow::on_matcher_got_match_step(MatcherGotType got, size_t n)
 }
 void MainWindow::on_matcher_exited(ErrorType err)
 {
-    stopBtn->setDisabled(true);
-    startBtn->setEnabled(true);
-    startBtn->setPalette(Qt::green);
-    stopBtn->setPalette(Qt::gray);
+    start_stop_switch(true);
 
     disable_manual_btn(true);
 
@@ -431,6 +434,40 @@ void MainWindow::manual_reset()
 {
     manual_0Btn->setText("赢币");
     manual_1Btn->setText("输币");
+}
+void MainWindow::start_stop_switch(bool start)
+{
+    startBtn->setEnabled(start);
+    stopBtn->setDisabled(start);
+}
+void MainWindow::set_qss()
+{
+    const auto qss = QString{"QPushButton { background-color: %1; color : %2;}"
+                             "QPushButton:disabled { background-color: %3; color : %4;}"};
+    startBtn->setStyleSheet(qss
+                                .arg(prog::env::config::preprocessed::button_color_start_enabled_background)
+                                .arg(prog::env::config::preprocessed::button_color_start_enabled_foreground)
+                                .arg(prog::env::config::preprocessed::button_color_start_disabled_background)
+                                .arg(prog::env::config::preprocessed::button_color_start_disabled_foreground));
+    startBtn->setFont(prog::global::font);
+    stopBtn->setStyleSheet(qss
+                               .arg(prog::env::config::preprocessed::button_color_stop_enabled_background)
+                               .arg(prog::env::config::preprocessed::button_color_stop_enabled_foreground)
+                               .arg(prog::env::config::preprocessed::button_color_stop_disabled_background)
+                               .arg(prog::env::config::preprocessed::button_color_stop_disabled_foreground));
+    stopBtn->setFont(prog::global::font);
+    manual_0Btn->setStyleSheet(qss
+                                   .arg(prog::env::config::preprocessed::button_color_manual0_enabled_background)
+                                   .arg(prog::env::config::preprocessed::button_color_manual0_enabled_foreground)
+                                   .arg(prog::env::config::preprocessed::button_color_manual0_disabled_background)
+                                   .arg(prog::env::config::preprocessed::button_color_manual0_disabled_foreground));
+    manual_0Btn->setFont(prog::global::font);
+    manual_1Btn->setStyleSheet(qss
+                                   .arg(prog::env::config::preprocessed::button_color_manual1_enabled_background)
+                                   .arg(prog::env::config::preprocessed::button_color_manual1_enabled_foreground)
+                                   .arg(prog::env::config::preprocessed::button_color_manual1_disabled_background)
+                                   .arg(prog::env::config::preprocessed::button_color_manual1_disabled_foreground));
+    manual_1Btn->setFont(prog::global::font);
 }
 void MainWindow::on_manual_0Btn_clicked()
 {
@@ -446,16 +483,6 @@ void MainWindow::disable_manual_btn(bool disable)
 {
     manual_0Btn->setDisabled(disable);
     manual_1Btn->setDisabled(disable);
-    if (disable)
-    {
-        manual_0Btn->setPalette(Qt::gray);
-        manual_1Btn->setPalette(Qt::gray);
-    }
-    else
-    {
-        manual_0Btn->setPalette(Qt::cyan);
-        manual_1Btn->setPalette(Qt::cyan);
-    }
 }
 void MainWindow::on_reloadBtn_clicked()
 {

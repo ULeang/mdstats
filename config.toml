@@ -56,6 +56,26 @@ victory = { background = "#98fb98", foreground = "#000000" }
 defeat = { background = "#f08080", foreground = "#000000" }
 other = { background = "#afeeee", foreground = "#000000" }
 
+[button.color.start]
+# 设置启动按钮的背景色和前景色，分别对应启用(可以点)时和禁用(不可以点)时
+enabled = { background = "#98fb98", foreground = "#000000" }
+disabled = { background = "#a0a0a0", foreground = "#505050" }
+
+[button.color.stop]
+# 设置停止按钮的背景色和前景色，分别对应启用(可以点)时和禁用(不可以点)时
+enabled = { background = "#f08080", foreground = "#000000" }
+disabled = { background = "#a0a0a0", foreground = "#505050" }
+
+[button.color.manual0]
+# 设置手动输入按钮0号(赢币/先攻/胜利)的背景色和前景色，分别对应启用(可以点)时和禁用(不可以点)时
+enabled = { background = "#afeeee", foreground = "#000000" }
+disabled = { background = "#a0a0a0", foreground = "#505050" }
+
+[button.color.manual1]
+# 设置手动输入按钮1号(输币/后攻/失败)的背景色和前景色，分别对应启用(可以点)时和禁用(不可以点)时
+enabled = { background = "#afeeee", foreground = "#000000" }
+disabled = { background = "#a0a0a0", foreground = "#505050" }
+
 [misc]
 # 设置程序窗口打开时出现的位置以及大小(x轴，y轴，宽度，高度)
 prog_window_init_geometry = { x = 800, y = 400, width = 900, height = 400 }
@@ -67,7 +87,7 @@ use_daily_record_csv = false
 matcher_sleep_ms = 500
 
 # 设置启动时是否隐藏控制台窗口
-hide_console = true
+hide_console = false
 
 # 设置点击复制到剪贴板时是否弹出精彩操作
 show_clip_success = true

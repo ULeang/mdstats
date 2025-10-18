@@ -183,6 +183,26 @@ bool prog::env::config::load_prog_config()
     LOAD(record_tbl, color, result, other, background);
     LOAD(record_tbl, color, result, other, foreground);
 
+    LOAD(button, color, start, enabled, background);
+    LOAD(button, color, start, enabled, foreground);
+    LOAD(button, color, start, disabled, background);
+    LOAD(button, color, start, disabled, foreground);
+
+    LOAD(button, color, stop, enabled, background);
+    LOAD(button, color, stop, enabled, foreground);
+    LOAD(button, color, stop, disabled, background);
+    LOAD(button, color, stop, disabled, foreground);
+
+    LOAD(button, color, manual0, enabled, background);
+    LOAD(button, color, manual0, enabled, foreground);
+    LOAD(button, color, manual0, disabled, background);
+    LOAD(button, color, manual0, disabled, foreground);
+
+    LOAD(button, color, manual1, enabled, background);
+    LOAD(button, color, manual1, enabled, foreground);
+    LOAD(button, color, manual1, disabled, background);
+    LOAD(button, color, manual1, disabled, foreground);
+
     LOAD(misc, prog_window_init_geometry, x);
     LOAD(misc, prog_window_init_geometry, y);
     LOAD(misc, prog_window_init_geometry, width);
@@ -223,6 +243,26 @@ void prog::env::config::reset_prog_config()
     record_tbl_color_result_defeat_foreground = {};
     record_tbl_color_result_other_background = {};
     record_tbl_color_result_other_foreground = {};
+
+    button_color_start_enabled_background = {};
+    button_color_start_enabled_foreground = {};
+    button_color_start_disabled_background = {};
+    button_color_start_disabled_foreground = {};
+
+    button_color_stop_enabled_background = {};
+    button_color_stop_enabled_foreground = {};
+    button_color_stop_disabled_background = {};
+    button_color_stop_disabled_foreground = {};
+
+    button_color_manual0_enabled_background = {};
+    button_color_manual0_enabled_foreground = {};
+    button_color_manual0_disabled_background = {};
+    button_color_manual0_disabled_foreground = {};
+
+    button_color_manual1_enabled_background = {};
+    button_color_manual1_enabled_foreground = {};
+    button_color_manual1_disabled_background = {};
+    button_color_manual1_disabled_foreground = {};
 
     misc_prog_window_init_geometry_x = {800};
     misc_prog_window_init_geometry_y = {400};
@@ -276,6 +316,28 @@ bool prog::env::config::preprocessed::preprocess()
     SETCOLOR(record_tbl_color_result_defeat_foreground);
     SETCOLOR(record_tbl_color_result_other_background);
     SETCOLOR(record_tbl_color_result_other_foreground);
+
+#define SETQSTRING(v) \
+    v = prog::env::config::v.c_str()
+    SETQSTRING(button_color_start_enabled_background);
+    SETQSTRING(button_color_start_enabled_foreground);
+    SETQSTRING(button_color_start_disabled_background);
+    SETQSTRING(button_color_start_disabled_foreground);
+
+    SETQSTRING(button_color_stop_enabled_background);
+    SETQSTRING(button_color_stop_enabled_foreground);
+    SETQSTRING(button_color_stop_disabled_background);
+    SETQSTRING(button_color_stop_disabled_foreground);
+
+    SETQSTRING(button_color_manual0_enabled_background);
+    SETQSTRING(button_color_manual0_enabled_foreground);
+    SETQSTRING(button_color_manual0_disabled_background);
+    SETQSTRING(button_color_manual0_disabled_foreground);
+
+    SETQSTRING(button_color_manual1_enabled_background);
+    SETQSTRING(button_color_manual1_enabled_foreground);
+    SETQSTRING(button_color_manual1_disabled_background);
+    SETQSTRING(button_color_manual1_disabled_foreground);
 
     return true;
 }

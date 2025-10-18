@@ -8,6 +8,7 @@
 #include <QThread>
 #include <QGridLayout>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 
 #include "utils.hpp"
 #include "databasemodel.hpp"
@@ -24,7 +25,8 @@ private:
     QLabel *coin_lbl, *st_nd_lbl, *result_lbl, *time_lbl;
     QLabel *corrupted_csv_lbl;
     QHBoxLayout *h_layout1;
-    QGridLayout *g_layout1, *g_layout2;
+    QVBoxLayout *v_layout1;
+    QGridLayout *g_layout1, *g_layout2, *g_layout3;
     QWidget *widget;
 
     DataBase *data;
@@ -43,6 +45,8 @@ private:
 
     void auto_scroll_record_tbl();
     void disable_manual_btn(bool disable);
+    void start_stop_switch(bool start);
+    void set_qss();
 
     void manual_reset();
 
