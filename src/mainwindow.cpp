@@ -101,7 +101,6 @@ void MainWindow::construct_all()
     record_tbl->setItemDelegateForColumn(1, new MyDelegate({"先攻", "后攻"}, false));
     record_tbl->setItemDelegateForColumn(2, new MyDelegate({"胜利", "失败", "平局"}));
 
-    set_qss();
     start_stop_switch(true);
     disable_manual_btn(true);
 
@@ -207,12 +206,7 @@ void MainWindow::on_database_good_csv(std::filesystem::path path)
 
 void MainWindow::ensure_config()
 {
-    if (prog::env::config::preprocessed::stats_tbl_color_background.typeId() == 0x1003)
-    {
-        // stats_tbl->setPalette(prog::env::config::preprocessed::stats_tbl_color_background.value<QColor>());
-        stats_tbl->setStyleSheet(QString{"background : %1"}.arg(prog::env::config::stats_tbl_color_background.c_str()));
-        stats_tbl->setFont(prog::global::font);
-    }
+    set_qss();
 
     for (size_t i = 0; i < prog::env::config::stats_tbl_column_width.size(); ++i)
     {
@@ -444,6 +438,13 @@ void MainWindow::start_stop_switch(bool start)
 }
 void MainWindow::set_qss()
 {
+    if (prog::env::config::preprocessed::stats_tbl_color_background.typeId() == 0x1003)
+    {
+        // stats_tbl->setPalette(prog::env::config::preprocessed::stats_tbl_color_background.value<QColor>());
+        stats_tbl->setStyleSheet(QString{"background : %1"}.arg(prog::env::config::stats_tbl_color_background.c_str()));
+        stats_tbl->setFont(prog::global::font);
+    }
+
     const auto qss = QString{"QPushButton { background-color: %1; color : %2;}"
                              "QPushButton:disabled { background-color: %3; color : %4;}"};
     startBtn->setStyleSheet(qss

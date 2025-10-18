@@ -23,8 +23,43 @@ static void ensure_font()
     prog::global::font = {fontfamily, 14, 700, false};
 }
 
+class ENSURE_SINGLE_INSTANCE
+{
+    HANDLE hMutex = NULL;
+
+public:
+    ENSURE_SINGLE_INSTANCE()
+    {
+        hMutex = CreateMutex(NULL, FALSE, TEXT("mdstats.exe"));
+        if (hMutex == NULL)
+            return;
+        if (GetLastError() == ERROR_ALREADY_EXISTS)
+        {
+            CloseHandle(hMutex);
+            hMutex = NULL;
+        }
+    }
+    ~ENSURE_SINGLE_INSTANCE()
+    {
+        if (hMutex != NULL)
+        {
+            CloseHandle(hMutex);
+        }
+    }
+    bool ok()
+    {
+        return hMutex != NULL;
+    }
+};
+
 int main(int argc, char *argv[])
 {
+    ENSURE_SINGLE_INSTANCE _si;
+    if (!_si.ok())
+    {
+        logln(std::format("mdstats is already running!"), LogLevel::ALWAYS);
+        return -2;
+    }
     // system("chcp 65001 >nul");
 
     prog::env::config::load_prog_config();

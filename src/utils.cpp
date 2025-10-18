@@ -222,7 +222,7 @@ void prog::env::config::reset_prog_config()
     custom_list_note = {};
 
     stats_tbl_column_width = {150, 50, 50};
-    stats_tbl_rows_height = {0};
+    stats_tbl_rows_height = {30};
     stats_tbl_color_background = {};
     stats_tbl_color_foreground = {};
 
@@ -271,8 +271,8 @@ void prog::env::config::reset_prog_config()
 
     misc_matcher_sleep_ms = {500};
     misc_use_daily_record_csv = {false};
-    misc_hide_console = {true};
-    misc_show_clip_success = {false};
+    misc_hide_console = {false};
+    misc_show_clip_success = {true};
 }
 
 bool prog::env::config::preprocessed::preprocess()
