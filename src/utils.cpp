@@ -7,22 +7,22 @@
 #include <fstream>
 #include <toml.hpp>
 
-std::function<std::optional<cv::Mat>()> capture_fn_generator(ScreenShot &ss, HWND hwnd, double scale)
-{
-    return [&ss, hwnd, scale]()
-    {
-        auto mat = ss.capture_window_mat(hwnd, scale);
-        return mat.has_value() ? std::optional<cv::Mat>(mat.value())
-                               : std::optional<cv::Mat>{};
-    };
-}
 std::function<std::optional<cv::Mat>()> capture_fn_generator(ScreenShot &ss, HWND hwnd, double scale, cv::Rect crop)
 {
     return [&ss, hwnd, scale, crop]()
     {
-        auto mat = ss.capture_window_mat(hwnd, scale);
-        return mat.has_value() ? std::optional<cv::Mat>(mat.value()(crop))
-                               : std::optional<cv::Mat>{};
+        auto mat_e = ss.capture_window_mat(hwnd, scale);
+        if (mat_e.has_value())
+        {
+            auto mat = mat_e.value();
+            auto width = mat.cols;
+            auto height = mat.rows;
+            if (width >= crop.x + crop.width && height >= crop.y + crop.height)
+            {
+                return std::optional(mat(crop));
+            }
+        }
+        return std::optional<cv::Mat>{};
     };
 }
 

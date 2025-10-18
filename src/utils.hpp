@@ -193,7 +193,6 @@ public:
     }
 };
 
-std::function<std::optional<cv::Mat>()> capture_fn_generator(ScreenShot &ss, HWND hwnd, double scale);
 std::function<std::optional<cv::Mat>()> capture_fn_generator(ScreenShot &ss, HWND hwnd, double scale, cv::Rect crop);
 
 std::tm *get_local_time();
