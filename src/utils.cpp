@@ -271,7 +271,7 @@ void prog::env::config::reset_prog_config()
 
     misc_matcher_sleep_ms = {500};
     misc_use_daily_record_csv = {false};
-    misc_hide_console = {false};
+    misc_hide_console = {true};
     misc_show_clip_success = {false};
 }
 

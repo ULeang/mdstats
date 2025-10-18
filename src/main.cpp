@@ -25,14 +25,14 @@ static void ensure_font()
 
 int main(int argc, char *argv[])
 {
-    system("chcp 65001 >nul");
+    // system("chcp 65001 >nul");
 
     prog::env::config::load_prog_config();
 
-    if (prog::env::config::misc_hide_console)
-    {
-        FreeConsole();
-    }
+    // if (prog::env::config::misc_hide_console)
+    // {
+    //     FreeConsole();
+    // }
 
     if constexpr (prog::env::debug::matcher_img_log || prog::env::debug::matcher_text_log)
     {

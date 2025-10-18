@@ -248,12 +248,17 @@ QVariant DataBase::data(const QModelIndex &index, int role) const
 }
 QVariant DataBase::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (role != Qt::DisplayRole)
+    switch (role)
+    {
+    case Qt::TextAlignmentRole:
+        return int(Qt::AlignHCenter | Qt::AlignVCenter);
+    case Qt::DisplayRole:
+        return orientation == Qt::Horizontal
+                   ? (section >= 0 && section < header_labels.size() ? header_labels[section] : QVariant{})
+                   : section + 1;
+    default:
         return {};
-
-    return orientation == Qt::Horizontal
-               ? (section >= 0 && section < header_labels.size() ? header_labels[section] : QVariant{})
-               : section + 1;
+    }
 }
 Qt::ItemFlags DataBase::flags(const QModelIndex &index) const
 {

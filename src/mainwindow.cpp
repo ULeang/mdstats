@@ -207,10 +207,12 @@ void MainWindow::on_database_good_csv(std::filesystem::path path)
 
 void MainWindow::ensure_config()
 {
-    // if (prog::env::config::preprocessed::stats_tbl_color_background.typeId() == 0x1003)
-    // {
-    //     stats_tbl->setPalette(prog::env::config::preprocessed::stats_tbl_color_background.value<QColor>());
-    // }
+    if (prog::env::config::preprocessed::stats_tbl_color_background.typeId() == 0x1003)
+    {
+        // stats_tbl->setPalette(prog::env::config::preprocessed::stats_tbl_color_background.value<QColor>());
+        stats_tbl->setStyleSheet(QString{"background : %1"}.arg(prog::env::config::stats_tbl_color_background.c_str()));
+        stats_tbl->setFont(prog::global::font);
+    }
 
     for (size_t i = 0; i < prog::env::config::stats_tbl_column_width.size(); ++i)
     {
@@ -222,8 +224,8 @@ void MainWindow::ensure_config()
     }
     stats_tbl->setFixedWidth(prog::env::config::stats_tbl_column_width[0] +
                              prog::env::config::stats_tbl_column_width[1] +
-                             prog::env::config::stats_tbl_column_width[2] + 5);
-    stats_tbl->setFixedHeight(prog::env::config::stats_tbl_rows_height * data->get_stats()->rowCount() + 5);
+                             prog::env::config::stats_tbl_column_width[2] + 2);
+    stats_tbl->setFixedHeight(prog::env::config::stats_tbl_rows_height * data->get_stats()->rowCount() + 2);
 
     record_tbl->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
     record_tbl->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);

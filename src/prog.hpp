@@ -86,8 +86,9 @@ namespace prog
 
             inline size_t misc_matcher_sleep_ms{};
             inline bool misc_use_daily_record_csv{};
-            inline bool misc_hide_console{};
             inline bool misc_show_clip_success{};
+            // this variable is not used by this program
+            inline bool misc_hide_console{};
 
             bool load_prog_config();
             void reset_prog_config();

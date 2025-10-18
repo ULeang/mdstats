@@ -1,4 +1,5 @@
-EXEC:=mdstats
+PROJ:=mdstats
+EXEC:=mdstats_with_console
 
 .SHELL: pwsh
 
@@ -19,8 +20,8 @@ build:
 
 .PHONY: install
 install:
-	@cmake --install build --prefix $(EXEC)
-	@windeployqt $(EXEC)/$(EXEC).exe
+	@cmake --install build --prefix $(PROJ)
+	@windeployqt $(PROJ)/$(EXEC).exe
 
 .PHONY: debug
 debug :
@@ -48,6 +49,19 @@ release :
 	@cmake --build build --parallel 16
 	@make run
 
+.PHONY: release_console
+release_console:
+	@mkdir -p build
+	@cmake -DCMAKE_BUILD_TYPE:STRING=Release \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE \
+		-DCMAKE_C_COMPILER=gcc \
+		-DCMAKE_CXX_COMPILER=g++ \
+		-S . \
+		-B build \
+		-G "MinGW Makefiles" \
+		-DWITHOUTCONSOLE:BOOL=true
+	@cmake --build build --parallel 16
+
 .PHONY: run
 run: export PATH:=./lib;${PATH}
 run: ./build/$(EXEC).exe
@@ -58,4 +72,4 @@ run: ./build/$(EXEC).exe
 
 .PHONY: clean
 clean:
-	@rm -rf build $(EXEC)
+	@rm -rf build $(PROJ)
