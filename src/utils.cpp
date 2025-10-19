@@ -213,6 +213,8 @@ bool prog::env::config::load_prog_config()
     LOAD(misc, hide_console);
     LOAD(misc, show_clip_success);
 
+    LOAD(debug, test_capture);
+
     return preprocessed::preprocess();
 }
 
@@ -273,6 +275,8 @@ void prog::env::config::reset_prog_config()
     misc_use_daily_record_csv = {false};
     misc_hide_console = {false};
     misc_show_clip_success = {true};
+
+    debug_test_capture = {false};
 }
 
 bool prog::env::config::preprocessed::preprocess()

@@ -1,0 +1,56 @@
+# unsupported yet
+[1280]
+name = "1280x720"
+crop_coin = { x = 0, y = 0, width = 1280, height = 720 }
+crop_stnd = { x = 0, y = 0, width = 1280, height = 720 }
+crop_result = { x = 0, y = 0, width = 1280, height = 720 }
+
+# unsupported yet
+[1366]
+name = "1366x768"
+crop_coin = { x = 0, y = 0, width = 1366, height = 768 }
+crop_stnd = { x = 0, y = 0, width = 1366, height = 768 }
+crop_result = { x = 0, y = 0, width = 1366, height = 768 }
+
+# unsupported yet
+[1440]
+name = "1440x810"
+crop_coin = { x = 0, y = 0, width = 1440, height = 810 }
+crop_stnd = { x = 0, y = 0, width = 1440, height = 810 }
+crop_result = { x = 0, y = 0, width = 1440, height = 810 }
+
+[1600]
+name = "1600x900"
+crop_coin = { x = 600, y = 530, width = 400, height = 160 }
+crop_stnd = { x = 600, y = 530, width = 400, height = 160 }
+crop_result = { x = 550, y = 300, width = 570, height = 380 }
+
+[1920]
+name = "1920x1080"
+crop_coin = { x = 700, y = 630, width = 500, height = 200 }
+crop_stnd = { x = 700, y = 630, width = 500, height = 200 }
+crop_result = { x = 650, y = 350, width = 620, height = 450 }
+
+[2048]
+name = "2048x1152"
+crop_coin = { x = 750, y = 650, width = 550, height = 220 }
+crop_stnd = { x = 750, y = 650, width = 550, height = 220 }
+crop_result = { x = 700, y = 380, width = 670, height = 480 }
+
+[2560]
+name = "2560x1440"
+crop_coin = { x = 950, y = 850, width = 700, height = 250 }
+crop_stnd = { x = 950, y = 850, width = 700, height = 250 }
+crop_result = { x = 880, y = 450, width = 840, height = 600 }
+
+[3200]
+name = "3200x1800"
+crop_coin = { x = 1200, y = 1050, width = 800, height = 280 }
+crop_stnd = { x = 1200, y = 1050, width = 800, height = 280 }
+crop_result = { x = 1100, y = 600, width = 1050, height = 700 }
+
+[3840]
+name = "3840x2160"
+crop_coin = { x = 1450, y = 1300, width = 950, height = 300 }
+crop_stnd = { x = 1450, y = 1300, width = 950, height = 300 }
+crop_result = { x = 1400, y = 750, width = 1150, height = 700 }

@@ -2,10 +2,11 @@
 
 #include <expected>
 #include <tuple>
+#include <toml.hpp>
 
 MatcherWorker::MatcherWorker() : QObject() {}
 
-static std::expected<std::tuple<std::string, cv::Rect, cv::Rect>, ErrorType>
+static std::expected<std::tuple<std::string, cv::Rect, cv::Rect, cv::Rect>, ErrorType>
 _determine_resolution(long width, long height);
 
 ErrorType MatcherWorker::main_matcher()
@@ -55,10 +56,10 @@ ErrorType MatcherWorker::main_matcher()
         logln(format("cannot determine resolution"));
         emit_exited_return(resolution_e.error());
     }
-    auto [res_text, crop_coin, crop_result] = resolution_e.value();
-    logln(format("determined resolution \t: {}", res_text));
+    auto [res_name, crop_coin, crop_stnd, crop_result] = resolution_e.value();
+    logln(format("determined resolution \t: {}", res_name));
 
-    std::string path{prog::env::opencv_templ_directory + res_text + "\\"};
+    std::string path{prog::env::opencv_templ_directory + res_name + "\\"};
     if (!check_resources({std::filesystem::path{path + "coin_win.png"},
                           std::filesystem::path{path + "coin_lose.png"},
                           std::filesystem::path{path + "go_first.png"},
@@ -67,24 +68,30 @@ ErrorType MatcherWorker::main_matcher()
                           std::filesystem::path{path + "defeat.png"}}))
     {
         logln(format(
-            "opencv template is missing, or current window resolution '{}' is not supported yet",
-            res_text));
+            "opencv template is missing, or current window resolution '{}' is not supported yet, check '{}'",
+            res_name, path));
         emit_exited_return(ErrorType::ErrCheckResources);
     }
 
     auto f_coin = capture_fn_generator(ss, hwnd, scale, crop_coin);
+    auto f_stnd = capture_fn_generator(ss, hwnd, scale, crop_stnd);
     auto f_result = capture_fn_generator(ss, hwnd, scale, crop_result);
 
-    if constexpr (prog::env::debug::test_capture_flag)
+    if (prog::env::config::debug_test_capture)
     {
         auto cap_coin = f_coin();
+        auto cap_stnd = f_stnd();
         auto cap_result = f_result();
-        logln(format("cap_coin {}exists, cap_result {}exists",
-                     cap_coin.has_value() ? "" : "NOT ", cap_result.has_value() ? "" : "NOT "),
+        logln(format("cap_coin {}exists, cap_stnd {}exists, cap_result {}exists",
+                     cap_coin.has_value() ? "" : "NOT ", cap_stnd.has_value() ? "" : "NOT ", cap_result.has_value() ? "" : "NOT "),
               LogLevel::ALWAYS);
         if (cap_coin.has_value())
         {
             cv::imwrite("cap_coin.png", cap_coin.value());
+        }
+        if (cap_stnd.has_value())
+        {
+            cv::imwrite("cap_stnd.png", cap_stnd.value());
         }
         if (cap_result.has_value())
         {
@@ -148,7 +155,7 @@ ErrorType MatcherWorker::main_matcher()
         {
             return coin.error();
         }
-        auto st_nd = _matcher_thread_helper(match_st_nd, f_coin, MatcherGotType::St_nd);
+        auto st_nd = _matcher_thread_helper(match_st_nd, f_stnd, MatcherGotType::St_nd);
         if (st_nd.has_value())
         {
             logln(format("{}", st_nd.value() == 0 ? "go first" : "go second"));
@@ -178,44 +185,40 @@ void MatcherWorker::request_stop()
     stop_requested.store(true, std::memory_order_release);
 }
 
-std::expected<std::tuple<std::string, cv::Rect, cv::Rect>, ErrorType>
-_determine_resolution(long width, long height)
+std::expected<std::tuple<std::string, cv::Rect, cv::Rect, cv::Rect>, ErrorType> static _determine_resolution(long width, long height)
 {
-    if (width < 1280)
+    int resolutions[] = {1280, 1366, 1440, 1600, 1920, 2048, 2560, 3200, 3840};
+    for (size_t i = sizeof(resolutions) / sizeof(resolutions[0]) - 1; i > 0; --i)
     {
-        return std::unexpected{ErrorType::ErrDeterRes};
+        if (width >= resolutions[i])
+        {
+            auto config_r = toml::try_parse(prog::env::opencv_templ_directory + prog::env::opencv_templ_config_filename);
+            if (!config_r.is_ok())
+            {
+                std::cerr << config_r.unwrap_err().at(0) << std::endl;
+                logln("fatal : load template config fail");
+                return std::unexpected{ErrorType::ErrDeterRes};
+            }
+            auto config = config_r.unwrap();
+            auto res = config.at(std::to_string(resolutions[i]));
+            auto name = toml::find<std::string>(res, "name");
+            auto coin_x = toml::find<size_t>(res, "crop_coin", "x");
+            auto coin_y = toml::find<size_t>(res, "crop_coin", "y");
+            auto coin_width = toml::find<size_t>(res, "crop_coin", "width");
+            auto coin_height = toml::find<size_t>(res, "crop_coin", "height");
+            auto stnd_x = toml::find<size_t>(res, "crop_stnd", "x");
+            auto stnd_y = toml::find<size_t>(res, "crop_stnd", "y");
+            auto stnd_width = toml::find<size_t>(res, "crop_stnd", "width");
+            auto stnd_height = toml::find<size_t>(res, "crop_stnd", "height");
+            auto result_x = toml::find<size_t>(res, "crop_result", "x");
+            auto result_y = toml::find<size_t>(res, "crop_result", "y");
+            auto result_width = toml::find<size_t>(res, "crop_result", "width");
+            auto result_height = toml::find<size_t>(res, "crop_result", "height");
+            return std::make_tuple(name,
+                                   cv::Rect{coin_x, coin_y, coin_width, coin_height},
+                                   cv::Rect{stnd_x, stnd_y, stnd_width, stnd_height},
+                                   cv::Rect{result_x, result_y, result_width, result_height});
+        }
     }
-    if (width < 1366)
-    {
-        return std::make_tuple("1280x720", cv::Rect{0, 0, 1280, 720}, cv::Rect{0, 0, 1280, 720});
-    }
-    if (width < 1440)
-    {
-        return std::make_tuple("1366x768", cv::Rect{0, 0, 1366, 768}, cv::Rect{0, 0, 1366, 768});
-    }
-    if (width < 1600)
-    {
-        return std::make_tuple("1440x810", cv::Rect{0, 0, 1440, 810}, cv::Rect{0, 0, 1440, 810});
-    }
-    if (width < 1920)
-    {
-        return std::make_tuple("1600x900", cv::Rect{600, 530, 400, 160}, cv::Rect{550, 300, 570, 380});
-    }
-    if (width < 2048)
-    {
-        return std::make_tuple("1920x1080", cv::Rect{700, 630, 500, 200}, cv::Rect{650, 350, 620, 450});
-    }
-    if (width < 2560)
-    {
-        return std::make_tuple("2048x1152", cv::Rect{750, 650, 550, 220}, cv::Rect{700, 380, 670, 480});
-    }
-    if (width < 3200)
-    {
-        return std::make_tuple("2560x1440", cv::Rect{950, 850, 700, 250}, cv::Rect{880, 450, 840, 600});
-    }
-    if (width < 3840)
-    {
-        return std::make_tuple("3200x1800", cv::Rect{1200, 1050, 800, 280}, cv::Rect{1100, 600, 1050, 700});
-    }
-    return std::make_tuple("3840x2160", cv::Rect{1450, 1300, 950, 300}, cv::Rect{1400, 750, 1150, 700});
+    return std::unexpected{ErrorType::ErrDeterRes};
 }

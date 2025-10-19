@@ -91,3 +91,6 @@ hide_console = true
 
 # 设置点击复制到剪贴板时是否弹出精彩操作
 show_clip_success = true
+
+# [debug]
+# test_capture = true

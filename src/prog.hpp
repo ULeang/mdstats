@@ -27,6 +27,7 @@ namespace prog
         inline const string clip_pic_path{"resource\\pic\\iqltv\\"};
         inline const std::vector<std::string> clip_pic_name_list{
             "ufxrziji.gif", "dabmlaziji.png", "qihlvidk.gif", "yrzvbcpcyklp.jpeg"};
+        inline const string opencv_templ_config_filename{"templateconfig.toml"};
 
         inline const string default_font_filename{"resource\\font\\SourceHanSansCN-Bold.otf"};
         inline const double matcher_threshold{0.9};
@@ -90,6 +91,8 @@ namespace prog
             // this variable is not used by this program
             inline bool misc_hide_console{};
 
+            inline bool debug_test_capture{};
+
             bool load_prog_config();
             void reset_prog_config();
 
@@ -143,7 +146,6 @@ namespace prog
 
         namespace debug
         {
-            inline const bool test_capture_flag{false};
             inline const bool matcher_text_log{false};
             inline const bool matcher_img_log{false};
         }
