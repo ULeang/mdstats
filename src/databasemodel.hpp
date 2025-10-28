@@ -42,8 +42,6 @@ class Stats : public QAbstractTableModel
         QStringList row_data;
     } stats_tbl[rowc];
 
-    void update_stats_tbl();
-
 public:
     Stats(QObject *parent = nullptr);
     ~Stats();
@@ -56,9 +54,11 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-    void clear_stats();
-    void add_record(bool inc, const Record &record);
+    void clear_record(bool update = true);
+    void add_record(const Record &record, bool inc, bool update = true);
     void copy_to_clipboard();
+
+    void update_stats_tbl();
 };
 
 class DataBase : public QAbstractTableModel
@@ -83,7 +83,7 @@ signals:
 
 public slots:
     // these two functions will not save csv automatically
-    void append_record(Record rec);
+    void append_record(Record rec, bool update = true);
     size_t trunc_last(size_t n = 1);
 
     static bool ensure_csv(std::filesystem::path csv_path);

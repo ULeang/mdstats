@@ -42,7 +42,7 @@ Stats::Stats(QObject *parent)
           QStringList{"综合胜率", "", ""},
       }
 {
-    clear_stats();
+    clear_record();
 }
 Stats::~Stats() {}
 
@@ -95,7 +95,7 @@ bool Stats::setData(const QModelIndex &index, const QVariant &value, int role)
     return false;
 }
 
-void Stats::clear_stats()
+void Stats::clear_record(bool update)
 {
     total = 0;
     w_st_wins = 0;
@@ -110,9 +110,11 @@ void Stats::clear_stats()
     l_st_others = 0;
     w_nd_others = 0;
     l_nd_others = 0;
-    update_stats_tbl();
+    if (update)
+        update_stats_tbl();
 }
-void Stats::add_record(bool inc, const Record &record)
+
+void Stats::add_record(const Record &record, bool inc, bool update)
 {
     const auto &coin = record.coin;
     const auto &st_nd = record.st_nd;
@@ -147,7 +149,8 @@ void Stats::add_record(bool inc, const Record &record)
     f_exactly(l_st_others, 0b100'01'10);
     f_exactly(w_nd_others, 0b100'10'01);
     f_exactly(l_nd_others, 0b100'10'10);
-    update_stats_tbl();
+    if (update)
+        update_stats_tbl();
 }
 void Stats::copy_to_clipboard()
 {
@@ -313,9 +316,9 @@ static QString format_record(size_t no, const Record &record)
 }
 
 // these two functions will not save csv automatically
-void DataBase::append_record(Record rec)
+void DataBase::append_record(Record rec, bool update)
 {
-    stats.add_record(true, rec);
+    stats.add_record(rec, true, update);
     associate_csv_content.push_back(format_record(db.size() + 1, rec));
     beginInsertRows({}, db.size(), db.size());
     db.push_back(std::move(rec));
@@ -330,11 +333,12 @@ size_t DataBase::trunc_last(size_t n)
         beginRemoveRows({}, first, db.size() - 1);
         for (size_t i = 0; i < _n; ++i)
         {
-            stats.add_record(false, db.back());
+            stats.add_record(db.back(), false, false);
             db.pop_back();
             associate_csv_content.pop_back();
         }
         endRemoveRows();
+        stats.update_stats_tbl();
     }
     return _n;
 }
@@ -430,8 +434,10 @@ bool DataBase::load_csv(std::filesystem::path csv_path)
                            std::move(result_col[i]),
                            std::move(deck_col[i]),
                            std::move(note_col[i]),
-                           std::move(time_col[i])});
+                           std::move(time_col[i])},
+                          false);
         }
+        stats.update_stats_tbl();
         associate_csv_path = std::move(csv_path);
         emit good_csv(csv_path);
         return true;
@@ -463,10 +469,10 @@ bool DataBase::_setData_helper(QString &r, QString value, const QModelIndex &ind
 {
     if (r == value)
         return false;
-    stats.add_record(false, db[index.row()]);
+    stats.add_record(db[index.row()], false, false);
     r = std::move(value);
     emit dataChanged(index, index, {role});
-    stats.add_record(true, db[index.row()]);
+    stats.add_record(db[index.row()], true, true);
 
     associate_csv_content[index.row()] = format_record(index.row() + 1, db[index.row()]);
     save_csv();
