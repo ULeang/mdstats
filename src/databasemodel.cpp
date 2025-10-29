@@ -1,4 +1,5 @@
 #include "databasemodel.hpp"
+#include "prog.hpp"
 
 #include <QFile>
 #include <QTextStream>
@@ -9,40 +10,17 @@
 
 void Stats::update_stats_tbl()
 {
-    auto coin_win = w_st_wins + w_st_loses + w_st_others + w_nd_wins + w_nd_loses + w_nd_others;
-    auto coin_lose = l_st_wins + l_st_loses + l_st_others + l_nd_wins + l_nd_loses + l_nd_others;
-    auto res_win = w_st_wins + w_nd_wins + l_st_wins + l_nd_wins;
-    auto res_lose = w_st_loses + w_nd_loses + l_st_loses + l_nd_loses;
-    auto coin_win_res_win = w_st_wins + w_nd_wins;
-    auto coin_lose_res_win = l_st_wins + l_nd_wins;
-
-    stats_tbl[0].row_data[1] = QString{"%1"}.arg(total);
-    stats_tbl[1].row_data[1] = QString{"%1"}.arg(coin_win);
-    stats_tbl[1].row_data[2] = QString{"%1"}.arg(coin_lose);
-    stats_tbl[2].row_data[1] = QString{"%1"}.arg(res_win);
-    stats_tbl[2].row_data[2] = QString{"%1"}.arg(res_lose);
-
-    auto win_rate_coin_win = double(coin_win_res_win) / coin_win;
-    auto win_rate_coin_lose = double(coin_lose_res_win) / coin_lose;
-    auto win_rate_total = double(res_win) / total;
-    stats_tbl[3].row_data[1] = QString{coin_win == 0 ? "0" : std::format("{:5.2f}%", 100 * win_rate_coin_win).c_str()};
-    stats_tbl[4].row_data[1] = QString{coin_lose == 0 ? "0" : std::format("{:5.2f}%", 100 * win_rate_coin_lose).c_str()};
-    stats_tbl[5].row_data[1] = QString{total == 0 ? "0" : std::format("{:5.2f}%", 100 * win_rate_total).c_str()};
-    emit dataChanged(index(0, 1), index(5, 2));
+    MyModule::StatsTable::update_stats_table_text(essential_data);
+    emit dataChanged(index(0, 0), index(rowc - 1, colc - 1));
 }
 
 Stats::Stats(QObject *parent)
-    : QAbstractTableModel(parent),
-      stats_tbl{
-          QStringList{"总场次", "", ""},
-          QStringList{"硬币(赢/输)", "", ""},
-          QStringList{"胜负(胜/负)", "", ""},
-          QStringList{"赢币胜率", "", ""},
-          QStringList{"输币胜率", "", ""},
-          QStringList{"综合胜率", "", ""},
-      }
+    : QAbstractTableModel(parent)
 {
-    clear_record();
+    clear_record(false);
+    rowc = MyModule::StatsTable::rows_count();
+    colc = MyModule::StatsTable::cols_count();
+    stats_table_text = MyModule::StatsTable::stats_table_text();
 }
 Stats::~Stats() {}
 
@@ -70,7 +48,7 @@ QVariant Stats::data(const QModelIndex &index, int role) const
     switch (role)
     {
     case Qt::DisplayRole:
-        return stats_tbl[index.row()].row_data[index.column()];
+        return QString{(*stats_table_text)[index.row()][index.column()].c_str()};
     case Qt::TextAlignmentRole:
         return int(Qt::AlignHCenter | Qt::AlignVCenter);
     case Qt::BackgroundRole:
@@ -97,19 +75,19 @@ bool Stats::setData(const QModelIndex &index, const QVariant &value, int role)
 
 void Stats::clear_record(bool update)
 {
-    total = 0;
-    w_st_wins = 0;
-    l_st_wins = 0;
-    w_nd_wins = 0;
-    l_nd_wins = 0;
-    w_st_loses = 0;
-    l_st_loses = 0;
-    w_nd_loses = 0;
-    l_nd_loses = 0;
-    w_st_others = 0;
-    l_st_others = 0;
-    w_nd_others = 0;
-    l_nd_others = 0;
+    essential_data.total = 0;
+    essential_data.w_st_wins = 0;
+    essential_data.l_st_wins = 0;
+    essential_data.w_nd_wins = 0;
+    essential_data.l_nd_wins = 0;
+    essential_data.w_st_loses = 0;
+    essential_data.l_st_loses = 0;
+    essential_data.w_nd_loses = 0;
+    essential_data.l_nd_loses = 0;
+    essential_data.w_st_others = 0;
+    essential_data.l_st_others = 0;
+    essential_data.w_nd_others = 0;
+    essential_data.l_nd_others = 0;
     if (update)
         update_stats_tbl();
 }
@@ -136,19 +114,19 @@ void Stats::add_record(const Record &record, bool inc, bool update)
     //     n = ont_hot & mask ? (inc ? n + 1 : n - 1) : n;
     // };
 
-    inc ? total += 1 : total -= 1;
-    f_exactly(w_st_wins, 0b001'01'01);
-    f_exactly(l_st_wins, 0b001'01'10);
-    f_exactly(w_nd_wins, 0b001'10'01);
-    f_exactly(l_nd_wins, 0b001'10'10);
-    f_exactly(w_st_loses, 0b010'01'01);
-    f_exactly(l_st_loses, 0b010'01'10);
-    f_exactly(w_nd_loses, 0b010'10'01);
-    f_exactly(l_nd_loses, 0b010'10'10);
-    f_exactly(w_st_others, 0b100'01'01);
-    f_exactly(l_st_others, 0b100'01'10);
-    f_exactly(w_nd_others, 0b100'10'01);
-    f_exactly(l_nd_others, 0b100'10'10);
+    inc ? essential_data.total += 1 : essential_data.total -= 1;
+    f_exactly(essential_data.w_st_wins, 0b001'01'01);
+    f_exactly(essential_data.l_st_wins, 0b001'01'10);
+    f_exactly(essential_data.w_nd_wins, 0b001'10'01);
+    f_exactly(essential_data.l_nd_wins, 0b001'10'10);
+    f_exactly(essential_data.w_st_loses, 0b010'01'01);
+    f_exactly(essential_data.l_st_loses, 0b010'01'10);
+    f_exactly(essential_data.w_nd_loses, 0b010'10'01);
+    f_exactly(essential_data.l_nd_loses, 0b010'10'10);
+    f_exactly(essential_data.w_st_others, 0b100'01'01);
+    f_exactly(essential_data.l_st_others, 0b100'01'10);
+    f_exactly(essential_data.w_nd_others, 0b100'10'01);
+    f_exactly(essential_data.l_nd_others, 0b100'10'10);
     if (update)
         update_stats_tbl();
 }
@@ -158,20 +136,20 @@ void Stats::copy_to_clipboard()
         QString{
             "%1\t%2\n%3\t%4/%5\n%6\t%7/%8\n%9\t%10\n%11\t%12\n%13\t%14\n",
         }
-            .arg(stats_tbl[0].row_data[0])
-            .arg(stats_tbl[0].row_data[1])
-            .arg(stats_tbl[1].row_data[0])
-            .arg(stats_tbl[1].row_data[1])
-            .arg(stats_tbl[1].row_data[2])
-            .arg(stats_tbl[2].row_data[0])
-            .arg(stats_tbl[2].row_data[1])
-            .arg(stats_tbl[2].row_data[2])
-            .arg(stats_tbl[3].row_data[0])
-            .arg(stats_tbl[3].row_data[1])
-            .arg(stats_tbl[4].row_data[0])
-            .arg(stats_tbl[4].row_data[1])
-            .arg(stats_tbl[5].row_data[0])
-            .arg(stats_tbl[5].row_data[1])
+            .arg((*stats_table_text)[0][0])
+            .arg((*stats_table_text)[0][1])
+            .arg((*stats_table_text)[1][0])
+            .arg((*stats_table_text)[1][1])
+            .arg((*stats_table_text)[1][2])
+            .arg((*stats_table_text)[2][0])
+            .arg((*stats_table_text)[2][1])
+            .arg((*stats_table_text)[2][2])
+            .arg((*stats_table_text)[3][0])
+            .arg((*stats_table_text)[3][1])
+            .arg((*stats_table_text)[4][0])
+            .arg((*stats_table_text)[4][1])
+            .arg((*stats_table_text)[5][0])
+            .arg((*stats_table_text)[5][1])
             .toStdString()
             .c_str());
 }

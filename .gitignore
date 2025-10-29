@@ -1,7 +1,8 @@
 /*
 !/src/
+!/module/
 !/include/
-!/resource
+!/resource/
 /resource/csv/
 !/CMakeLists.txt
 !/Makefile

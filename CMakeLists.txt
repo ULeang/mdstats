@@ -8,6 +8,8 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 
 qt_standard_project_setup()
 
+add_subdirectory(module/statstable)
+
 set(SRCS
     src/main.cpp
     src/utils.cpp
@@ -33,6 +35,7 @@ target_link_libraries(${PROJECT_NAME}_with_console
     stdc++exp
     Qt::Core
     Qt::Widgets
+    modstatstable
 )
 target_link_directories(${PROJECT_NAME}_with_console
     PRIVATE
@@ -44,6 +47,7 @@ if(WITHOUTCONSOLE)
         WIN32
         MACOSX_BUNDLE
         ${SRCS}
+        # $<TARGET_OBJECTS:${PROJECT_NAME}>
     )
     target_include_directories(${PROJECT_NAME}_without_console
         PRIVATE
@@ -55,6 +59,7 @@ if(WITHOUTCONSOLE)
         stdc++exp
         Qt::Core
         Qt::Widgets
+        modstatstable
     )
     target_link_directories(${PROJECT_NAME}_without_console
         PRIVATE

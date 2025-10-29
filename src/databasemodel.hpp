@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include <optional>
 #include "utils.hpp"
+#include "../module/statstable/statstable.hpp"
 
 struct Record
 {
@@ -20,27 +21,10 @@ class Stats : public QAbstractTableModel
 
     Q_OBJECT
 
-    static const size_t rowc = 6;
-    static const size_t colc = 3;
-
-    size_t total;
-    size_t w_st_wins;
-    size_t l_st_wins;
-    size_t w_nd_wins;
-    size_t l_nd_wins;
-    size_t w_st_loses;
-    size_t l_st_loses;
-    size_t w_nd_loses;
-    size_t l_nd_loses;
-    size_t w_st_others;
-    size_t l_st_others;
-    size_t w_nd_others;
-    size_t l_nd_others;
-
-    struct
-    {
-        QStringList row_data;
-    } stats_tbl[rowc];
+    MyModule::StatsTable::EssentialData essential_data;
+    const MyModule::StatsTable::StatsTableText *stats_table_text;
+    size_t rowc;
+    size_t colc;
 
 public:
     Stats(QObject *parent = nullptr);

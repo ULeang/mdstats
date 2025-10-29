@@ -12,7 +12,7 @@
 #include <filesystem>
 #include <fstream>
 
-#include "prog.hpp"
+#include "prog_config.hpp"
 
 enum class ErrorType
 {
@@ -55,9 +55,24 @@ namespace prog
     }
 }
 
-bool log(const std::string &l, LogLevel log_lv = LogLevel::USUALLY);
-bool logln(const std::string &l, LogLevel log_lv = LogLevel::USUALLY);
-
+inline bool log(const std::string &l, LogLevel log_lv = LogLevel::USUALLY)
+{
+    if (log_lv >= prog::global::log_level)
+    {
+        std::clog << l << std::flush;
+        return true;
+    }
+    return false;
+}
+inline bool logln(const std::string &l, LogLevel log_lv = LogLevel::USUALLY)
+{
+    if (log_lv >= prog::global::log_level)
+    {
+        std::clog << l << std::endl;
+        return true;
+    }
+    return false;
+}
 // screenshot
 
 class ScreenShot

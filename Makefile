@@ -21,6 +21,7 @@ build:
 .PHONY: install
 install:
 	@cmake --install build --prefix $(PROJ)
+	@rm $(PROJ)/libmodstatstable.dll.a
 	@windeployqt $(PROJ)/$(EXEC).exe
 
 .PHONY: debug

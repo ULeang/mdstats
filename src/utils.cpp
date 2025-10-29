@@ -6,6 +6,8 @@
 #include <print>
 #include <fstream>
 #include <toml.hpp>
+#include "toml_reader.hpp"
+#include "prog.hpp"
 
 std::function<std::optional<cv::Mat>()> capture_fn_generator(ScreenShot &ss, HWND hwnd, double scale, cv::Rect crop)
 {
@@ -46,24 +48,6 @@ bool check_resources(const std::vector<std::filesystem::path> &files)
     return true;
 }
 
-bool log(const std::string &l, LogLevel log_lv)
-{
-    if (log_lv >= prog::global::log_level)
-    {
-        std::clog << l << std::flush;
-        return true;
-    }
-    return false;
-}
-bool logln(const std::string &l, LogLevel log_lv)
-{
-    if (log_lv >= prog::global::log_level)
-    {
-        std::clog << l << std::endl;
-        return true;
-    }
-    return false;
-}
 void CopyToClipboard(const char *text)
 {
     // 打开剪贴板
@@ -124,24 +108,6 @@ void CopyToClipboard(const wchar_t *text)
     CloseClipboard();
 }
 
-template <typename T, typename V, typename... Ks>
-concept TOML = requires(T t, V v, V _v, Ks... ks) {
-    { toml::find<std::optional<V>>(t, ks...) } -> std::same_as<std::optional<V>>;
-    { v = _v };
-};
-
-template <typename T, typename V, typename... Ks>
-    requires TOML<T, V, Ks...>
-static bool load_value(T &toml, V &value, const Ks &...ks)
-{
-    std::optional<V> v_o = toml::find<std::optional<V>>(toml, ks...);
-    if (!v_o.has_value())
-    {
-        return false;
-    }
-    value = v_o.value();
-    return true;
-}
 bool prog::env::config::load_prog_config()
 {
     reset_prog_config();

@@ -60,14 +60,10 @@ int main(int argc, char *argv[])
         logln(std::format("mdstats is already running!"), LogLevel::ALWAYS);
         return -2;
     }
-    // system("chcp 65001 >nul");
 
     prog::env::config::load_prog_config();
 
-    // if (prog::env::config::misc_hide_console)
-    // {
-    //     FreeConsole();
-    // }
+    MyModule::StatsTable::RAII _module_statstable_raii;
 
     if constexpr (prog::env::debug::matcher_img_log || prog::env::debug::matcher_text_log)
     {

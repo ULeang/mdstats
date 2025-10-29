@@ -90,12 +90,6 @@ void MainWindow::construct_all()
     // set grid
     stats_tbl->setShowGrid(false);
 
-    // set span
-    stats_tbl->setSpan(0, 1, 1, 2);
-    stats_tbl->setSpan(3, 1, 1, 2);
-    stats_tbl->setSpan(4, 1, 1, 2);
-    stats_tbl->setSpan(5, 1, 1, 2);
-
     // set delegate
     record_tbl->setItemDelegateForColumn(0, new MyDelegate({"赢币", "输币"}, false));
     record_tbl->setItemDelegateForColumn(1, new MyDelegate({"先攻", "后攻"}, false));
@@ -206,20 +200,42 @@ void MainWindow::on_database_good_csv(std::filesystem::path path)
 
 void MainWindow::ensure_config()
 {
+    // set span
+    auto spans = MyModule::StatsTable::spans();
+    auto rowc = data->get_stats()->rowCount();
+    auto colc = data->get_stats()->columnCount();
+    for (size_t r = 0; r < rowc; ++r)
+    {
+        size_t col_sum = 0;
+        for (size_t c = 0; c < colc; ++c)
+        {
+            auto span = spans[r][c];
+            if (span != 1)
+            {
+                stats_tbl->setSpan(r, col_sum, 1, span);
+            }
+            col_sum += span;
+            if (col_sum >= colc)
+                break;
+        }
+    }
+
     set_qss();
 
-    for (size_t i = 0; i < prog::env::config::stats_tbl_column_width.size(); ++i)
+    auto cols_width = MyModule::StatsTable::cols_width();
+    size_t cols_width_sum = 0;
+    for (size_t i = 0; i < colc; ++i)
     {
-        stats_tbl->setColumnWidth(i, prog::env::config::stats_tbl_column_width[i]);
+        stats_tbl->setColumnWidth(i, cols_width[i]);
+        cols_width_sum += cols_width[i];
     }
-    for (size_t i = 0; i < data->get_stats()->rowCount(); ++i)
+    auto row_height = MyModule::StatsTable::rows_height();
+    for (size_t i = 0; i < rowc; ++i)
     {
-        stats_tbl->setRowHeight(i, prog::env::config::stats_tbl_rows_height);
+        stats_tbl->setRowHeight(i, row_height);
     }
-    stats_tbl->setFixedWidth(prog::env::config::stats_tbl_column_width[0] +
-                             prog::env::config::stats_tbl_column_width[1] +
-                             prog::env::config::stats_tbl_column_width[2] + 2);
-    stats_tbl->setFixedHeight(prog::env::config::stats_tbl_rows_height * data->get_stats()->rowCount() + 2);
+    stats_tbl->setFixedWidth(cols_width_sum + 2);
+    stats_tbl->setFixedHeight(row_height * rowc + 2);
 
     record_tbl->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
     record_tbl->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
