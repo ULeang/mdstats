@@ -434,7 +434,6 @@ namespace MyModule
         static AST::Env env;
         void update_stats_table_text(const EssentialData &data)
         {
-            logln("update_stats_table_text");
             env["TOTAL"] = AST::Value(int64_t(data.total));
             env["WFW"] = AST::Value(int64_t(data.w_st_wins));
             env["WFL"] = AST::Value(int64_t(data.w_st_loses));
