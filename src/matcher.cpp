@@ -4,6 +4,8 @@
 #include <tuple>
 #include <toml.hpp>
 
+#include "screenshot.hpp"
+
 MatcherWorker::MatcherWorker() : QObject() {}
 
 static std::expected<std::tuple<std::string, cv::Rect, cv::Rect, cv::Rect>, ErrorType>

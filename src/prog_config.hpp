@@ -7,7 +7,6 @@
 #define PROG_CONFIG_HPP_
 
 #include <string>
-#include <windows.h>
 
 #include <array>
 #include <vector>
@@ -38,7 +37,9 @@ namespace prog
             inline std::vector<std::string> custom_list_deck{};
             inline std::vector<std::string> custom_list_note{};
 
+            // this variable is not used by this program
             inline std::vector<size_t> stats_tbl_column_width{};
+            // this variable is not used by this program
             inline size_t stats_tbl_rows_height{};
             inline string stats_tbl_color_background{};
             inline string stats_tbl_color_foreground{};

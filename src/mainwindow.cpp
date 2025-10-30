@@ -395,6 +395,7 @@ void MainWindow::on_reload_config_Btn_clicked()
 {
     destruct_all();
     prog::env::config::load_prog_config();
+    MyModule::StatsTable::reset();
     construct_all();
 }
 void MainWindow::on_matcher_got_match_step(MatcherGotType got, size_t n)
