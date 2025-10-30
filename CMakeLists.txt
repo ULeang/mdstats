@@ -8,22 +8,43 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 
 qt_standard_project_setup()
 
-add_subdirectory(module/statstable)
+add_subdirectory(module/statstable/v2)
+
+set(MAIN_SRC src/main.cpp)
 
 set(SRCS
-    src/main.cpp
-    src/utils.cpp
+    src/prog.cpp
     src/mainwindow.cpp
     src/databasemodel.cpp
     src/matcher.cpp
     src/delegate.cpp
 )
 
+qt_add_library(common
+    STATIC
+    ${SRCS}
+)
+target_include_directories(common
+    PRIVATE
+    include
+)
+target_link_libraries(common
+    PRIVATE
+    opencv_world4130
+    stdc++exp
+    Qt::Core
+    Qt::Widgets
+    modstatstable
+)
+target_link_directories(common
+    PRIVATE
+    lib
+)
+
 # with console
 qt_add_executable(${PROJECT_NAME}_with_console
     # WIN32
-    MACOSX_BUNDLE
-    ${SRCS}
+    ${MAIN_SRC}
 )
 target_include_directories(${PROJECT_NAME}_with_console
     PRIVATE
@@ -31,6 +52,7 @@ target_include_directories(${PROJECT_NAME}_with_console
 )
 target_link_libraries(${PROJECT_NAME}_with_console
     PRIVATE
+    common
     opencv_world4130
     stdc++exp
     Qt::Core
@@ -41,12 +63,12 @@ target_link_directories(${PROJECT_NAME}_with_console
     PRIVATE
     lib
 )
+install(TARGETS ${PROJECT_NAME}_with_console DESTINATION .)
 
 if(WITHOUTCONSOLE)
     qt_add_executable(${PROJECT_NAME}_without_console
         WIN32
-        MACOSX_BUNDLE
-        ${SRCS}
+        ${MAIN_SRC}
         # $<TARGET_OBJECTS:${PROJECT_NAME}>
     )
     target_include_directories(${PROJECT_NAME}_without_console
@@ -55,6 +77,7 @@ if(WITHOUTCONSOLE)
     )
     target_link_libraries(${PROJECT_NAME}_without_console
         PRIVATE
+        common
         opencv_world4130
         stdc++exp
         Qt::Core
@@ -67,23 +90,7 @@ if(WITHOUTCONSOLE)
     )
     install(TARGETS ${PROJECT_NAME}_without_console DESTINATION .)
 
-    add_executable(${PROJECT_NAME}
-        WIN32
-        src/launcher/launcher.cpp
-    )
-    target_include_directories(${PROJECT_NAME}
-        PRIVATE
-        include
-    )
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-        stdc++exp
-    )
-    target_link_directories(${PROJECT_NAME}
-        PRIVATE
-        lib
-    )
-    install(TARGETS ${PROJECT_NAME} DESTINATION .)
+    add_subdirectory(src/launcher)
 
 endif()
 
@@ -101,6 +108,5 @@ set(PROGFILES
     config.toml
     README.md
 )
-install(TARGETS ${PROJECT_NAME}_with_console DESTINATION .)
 install(FILES ${DLLS} ${PROGFILES} DESTINATION .)
 install(DIRECTORY resource DESTINATION . PATTERN resource/csv EXCLUDE)

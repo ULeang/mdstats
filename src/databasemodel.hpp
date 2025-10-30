@@ -68,7 +68,7 @@ signals:
 public slots:
     // these two functions will not save csv automatically
     void append_record(Record rec, bool update = true);
-    size_t trunc_last(size_t n = 1);
+    size_t trunc_last(size_t n = 1, bool update = true);
 
     static bool ensure_csv(std::filesystem::path csv_path);
 

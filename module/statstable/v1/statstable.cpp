@@ -1,15 +1,17 @@
-#include "statstable.hpp"
+#include "../statstable.hpp"
 #include <format>
 #include <vector>
-#include "../../src/toml_reader.hpp"
-#include "../../src/prog_config.hpp"
-#include "../../src/utils.hpp"
+#include "toml_reader.hpp"
+#include "prog_config.hpp"
+#include "utils.hpp"
 #include <iostream>
 
 namespace MyModule
 {
     namespace StatsTable
     {
+        static const size_t rowc = 6;
+        static const size_t colc = 3;
         static Spans _spans;
         static StatsTableText _stats_table_text;
         static std::vector<size_t> _cols_width;
@@ -25,11 +27,11 @@ namespace MyModule
 
         size_t rows_count()
         {
-            return 6;
+            return rowc;
         }
         size_t cols_count()
         {
-            return 3;
+            return colc;
         }
         const std::vector<size_t> &cols_width()
         {

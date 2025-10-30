@@ -302,7 +302,7 @@ void DataBase::append_record(Record rec, bool update)
     db.push_back(std::move(rec));
     endInsertRows();
 }
-size_t DataBase::trunc_last(size_t n)
+size_t DataBase::trunc_last(size_t n, bool update)
 {
     size_t _n = std::min(n, size_t(db.size()));
     auto first = db.size() - _n;
@@ -316,7 +316,8 @@ size_t DataBase::trunc_last(size_t n)
             associate_csv_content.pop_back();
         }
         endRemoveRows();
-        stats.update_stats_tbl();
+        if (update)
+            stats.update_stats_tbl();
     }
     return _n;
 }
@@ -385,34 +386,30 @@ bool DataBase::save_csv_as(std::filesystem::path csv_path)
 bool DataBase::load_csv(std::filesystem::path csv_path)
 {
     associate_csv_path = std::nullopt;
-    trunc_last(db.size());
+    trunc_last(db.size(), false);
 
     std::ifstream fin(csv_path, std::ios::in);
     if (!fin.good())
     {
         emit warning_corrupted_csv(csv_path);
         logln("DataBase : cannot open csv when load");
+        stats.update_stats_tbl();
         return false;
     }
     try
     {
         rapidcsv::Document doc(fin, rapidcsv::LabelParams(0, 0), rapidcsv::SeparatorParams('|'));
         auto rowc = doc.GetRowCount();
-        auto coin_col = doc.GetColumn<QString>("硬币");
-        auto st_nd_col = doc.GetColumn<QString>("先后");
-        auto result_col = doc.GetColumn<QString>("胜负");
-        auto deck_col = doc.GetColumn<QString>("卡组");
-        auto note_col = doc.GetColumn<QString>("备注");
-        auto time_col = doc.GetColumn<QString>("时间");
         db.reserve(rowc);
         for (size_t i = 0; i < rowc; ++i)
         {
-            append_record({std::move(coin_col[i]),
-                           std::move(st_nd_col[i]),
-                           std::move(result_col[i]),
-                           std::move(deck_col[i]),
-                           std::move(note_col[i]),
-                           std::move(time_col[i])},
+            auto rec = doc.GetRow<QString>(i);
+            append_record({std::move(rec.at(0)),
+                           std::move(rec.at(1)),
+                           std::move(rec.at(2)),
+                           std::move(rec.at(3)),
+                           std::move(rec.at(4)),
+                           std::move(rec.at(5))},
                           false);
         }
         stats.update_stats_tbl();
@@ -422,7 +419,7 @@ bool DataBase::load_csv(std::filesystem::path csv_path)
     }
     catch (const std::out_of_range &e)
     {
-        trunc_last(db.size());
+        trunc_last(db.size(), false);
         associate_csv_path = std::nullopt;
         emit warning_corrupted_csv(csv_path);
         logln(std::format("load csv exception :\n\t{}", e.what()));
@@ -430,11 +427,12 @@ bool DataBase::load_csv(std::filesystem::path csv_path)
     }
     catch (...)
     {
-        trunc_last(db.size());
+        trunc_last(db.size(), false);
         associate_csv_path = std::nullopt;
         emit warning_corrupted_csv(csv_path);
         logln(std::format("load csv exception :\n\tunknown exception"));
     }
+    stats.update_stats_tbl();
     return false;
 }
 

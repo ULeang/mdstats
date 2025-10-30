@@ -206,17 +206,14 @@ void MainWindow::ensure_config()
     auto colc = data->get_stats()->columnCount();
     for (size_t r = 0; r < rowc; ++r)
     {
-        size_t col_sum = 0;
-        for (size_t c = 0; c < colc; ++c)
+        size_t actual_col = 0;
+        for (auto span : spans[r])
         {
-            auto span = spans[r][c];
             if (span != 1)
             {
-                stats_tbl->setSpan(r, col_sum, 1, span);
+                stats_tbl->setSpan(r, actual_col, 1, span);
             }
-            col_sum += span;
-            if (col_sum >= colc)
-                break;
+            actual_col += span;
         }
     }
 

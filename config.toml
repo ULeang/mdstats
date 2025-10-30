@@ -94,3 +94,69 @@ show_clip_success = true
 
 # [debug]
 # test_capture = true
+
+[[stats_tbl.custom_rows]]
+[[stats_tbl.custom_rows.contents]]
+type = "Text"
+text = "总场次"
+span = 1
+[[stats_tbl.custom_rows.contents]]
+type = "Expr"
+expr = "%i TOTAL"
+format = "{}"
+span = 2
+
+[[stats_tbl.custom_rows]]
+[[stats_tbl.custom_rows.contents]]
+type = "Text"
+text = "硬币(赢/输)"
+[[stats_tbl.custom_rows.contents]]
+type = "Expr"
+expr = "%i COINWIN"
+format = "{}"
+[[stats_tbl.custom_rows.contents]]
+type = "Expr"
+expr = "%i COINLOSE"
+format = "{}"
+
+[[stats_tbl.custom_rows]]
+[[stats_tbl.custom_rows.contents]]
+type = "Text"
+text = "胜负(胜/负)"
+[[stats_tbl.custom_rows.contents]]
+type = "Preset"
+preset = "WIN"
+[[stats_tbl.custom_rows.contents]]
+type = "Preset"
+preset = "LOSE"
+
+[[stats_tbl.custom_rows]]
+[[stats_tbl.custom_rows.contents]]
+type = "Text"
+text = "赢币胜率"
+[[stats_tbl.custom_rows.contents]]
+type = "Expr"
+expr = '%f * (/ (+ WFW WSW) COINWIN) 100'
+format = "{:.2f}%"
+opt = "%i == COINWIN 0"
+expr_opt = "%i 0"
+format_opt = "{}"
+span = 2
+
+[[stats_tbl.custom_rows]]
+[[stats_tbl.custom_rows.contents]]
+type = "Text"
+text = "输币胜率"
+[[stats_tbl.custom_rows.contents]]
+type = "Preset"
+preset = "COINLOSEWINRATE"
+span = 2
+
+[[stats_tbl.custom_rows]]
+[[stats_tbl.custom_rows.contents]]
+type = "Text"
+text = "综合胜率"
+[[stats_tbl.custom_rows.contents]]
+type = "Preset"
+preset = "TOTALWINRATE"
+span = 2

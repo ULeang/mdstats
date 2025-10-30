@@ -1,11 +1,17 @@
 cmake_minimum_required(VERSION 4.1)
-project(modstatstable LANGUAGES CXX)
+project(mdstats LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(${PROJECT_NAME} SHARED statstable.cpp)
+set(SRCS
+    launcher.cpp
+)
 
+add_executable(${PROJECT_NAME}
+    WIN32
+    ${SRCS}
+)
 target_include_directories(${PROJECT_NAME}
     PRIVATE
     ../../include
@@ -19,8 +25,3 @@ target_link_directories(${PROJECT_NAME}
     ../../lib
 )
 install(TARGETS ${PROJECT_NAME} DESTINATION .)
-
-# target_link_options(${PROJECT_NAME} PRIVATE
-#     -static -static-libstdc++ -static-libgcc)
-
-# include(GNUInstallDirs)
