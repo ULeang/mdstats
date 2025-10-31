@@ -68,6 +68,10 @@ run: export PATH:=./lib;${PATH}
 run: ./build/$(EXEC).exe
 	@./build/$(EXEC).exe
 
+.PHONY: gdb
+gdb: ./build/$(EXEC).exe
+	@gdb -q --args ./build/$(EXEC).exe
+
 ./build/$(EXEC):
 	@make release
 

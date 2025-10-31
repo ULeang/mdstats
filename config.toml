@@ -24,10 +24,12 @@ note = [
 ]
 
 [stats_tbl]
-# 设置统计数据表格的单元格宽度(第1列,第2列,第3列)
+# 设置统计数据表格的单元格宽度(第1列,第2列,第3列),默认宽度50
 column_width = [150, 50, 50]
 # 设置统计数据表格的单元格高度(所有行)
 rows_height = 30
+# 设置是否使用自定义统计数据表格(详见stats_tbl.custom_rows)
+use_custom_rows = true
 
 [stats_tbl.color]
 # 设置统计数据表格的背景色和前景色，rgb格式
@@ -95,68 +97,131 @@ show_clip_success = true
 # [debug]
 # test_capture = true
 
+# 在toml中,[a]表明a是一个表,即键值对表,或者字典,
+# [[a]]表明a是一个表数组,即a是一个数组,其中每一个元素都是一个表
+# 连续出现的[[a]]分别描述了a这个数组中的每一个元素
+# 对表数组的引用将指向该表数组中上一个被定义的元素
+
+# custom_rows是一个表数组,这是该数组中的第一个元素,即custom_rows[0]
 [[stats_tbl.custom_rows]]
-[[stats_tbl.custom_rows.contents]]
-type = "Text"
-text = "总场次"
-span = 1
-[[stats_tbl.custom_rows.contents]]
+# cells是custom_rows数组第一个元素中的一个成员,其也是一个表数组,这是该数组中的第一个元素,即custom_rows[0].cells[0]
+[[stats_tbl.custom_rows.cells]]
+type = "Text" # 必填,Text/Expr/Preset
+text = "总场次"  # 当type为Text时必填,该单元格固定显示的文本
+span = 1      # 选填,该单元格横向跨越的物理单元格数量,默认为1,即不跨越
+# 这是cells数组中的第二个元素,即custom_rows[0].cells[1]
+[[stats_tbl.custom_rows.cells]]
 type = "Expr"
+# 当type为Expr时必填,该单元格将计算该表达式然后显示其结果
 expr = "%i TOTAL"
+# 当type为Expr时必填,该单元格将以何格式显示其表达式计算的结果,
+# 请参见cpp format:https://en.cppreference.com/w/cpp/utility/format/spec.html
 format = "{}"
 span = 2
 
+# custom_rows[1]
 [[stats_tbl.custom_rows]]
-[[stats_tbl.custom_rows.contents]]
-type = "Text"
-text = "硬币(赢/输)"
-[[stats_tbl.custom_rows.contents]]
-type = "Expr"
-expr = "%i COINWIN"
-format = "{}"
-[[stats_tbl.custom_rows.contents]]
-type = "Expr"
-expr = "%i COINLOSE"
-format = "{}"
+# 这是表数组的另一种表示方式,custom_rows[1].cells
+cells = [
+    { type = "Text", text = "硬币(赢/输)" },
+    { type = "Expr", expr = "%i COINWIN", format = "{}" },
+    { type = "Expr", expr = "%i COINLOSE", format = "{}" },
+]
 
 [[stats_tbl.custom_rows]]
-[[stats_tbl.custom_rows.contents]]
+[[stats_tbl.custom_rows.cells]]
 type = "Text"
 text = "胜负(胜/负)"
-[[stats_tbl.custom_rows.contents]]
+[[stats_tbl.custom_rows.cells]]
 type = "Preset"
-preset = "WIN"
-[[stats_tbl.custom_rows.contents]]
+preset = "WIN"  # 当type为Preset时必填,该单元格将使用预设的显示方案
+[[stats_tbl.custom_rows.cells]]
 type = "Preset"
 preset = "LOSE"
 
 [[stats_tbl.custom_rows]]
-[[stats_tbl.custom_rows.contents]]
+[[stats_tbl.custom_rows.cells]]
 type = "Text"
 text = "赢币胜率"
-[[stats_tbl.custom_rows.contents]]
+[[stats_tbl.custom_rows.cells]]
 type = "Expr"
-expr = '%f * (/ (+ WFW WSW) COINWIN) 100'
+expr = """
+%f
+*   (/  (+  WFW
+            WSW)
+        COINWIN)
+    100"""
 format = "{:.2f}%"
+# 当type为Expr时选填,若有值,该单元格将计算该表达式,若结果为真,改为使用expr_opt与format_opt
 opt = "%i == COINWIN 0"
-expr_opt = "%i 0"
-format_opt = "{}"
+expr_opt = "%i 0"       # 当type为Expr且opt有值时必填
+format_opt = "{}"       # 当type为Expr且opt有值时必填
 span = 2
 
 [[stats_tbl.custom_rows]]
-[[stats_tbl.custom_rows.contents]]
+[[stats_tbl.custom_rows.cells]]
 type = "Text"
 text = "输币胜率"
-[[stats_tbl.custom_rows.contents]]
+[[stats_tbl.custom_rows.cells]]
 type = "Preset"
 preset = "COINLOSEWINRATE"
 span = 2
 
 [[stats_tbl.custom_rows]]
-[[stats_tbl.custom_rows.contents]]
+[[stats_tbl.custom_rows.cells]]
 type = "Text"
 text = "综合胜率"
-[[stats_tbl.custom_rows.contents]]
+[[stats_tbl.custom_rows.cells]]
 type = "Preset"
 preset = "TOTALWINRATE"
 span = 2
+
+# 本程序的表达式
+# 使用前缀表达式
+# 支持+ - * /, > < >= <= == !=,
+# 支持负数,使用圆括号括起来,如'(-114514)'
+# 对于复杂的表达式,请多加圆括号
+# 支持分支表达式if a then b else c,若a的值为真,该表达式的值为b,否则为c,0值被视为假,非0值被视为真,比较运算符的结果为0(假)或1(真)
+# 支持自定义常量let a = b in c,该表达式的结果为c,在表达式c中可以使用常量a,如'let hello = + 114 514 in * hello 2'的结果为1256
+# 不允许重复定义常量
+# 在表达式前需要指定该表达式使用的数据类型,支持%i(整型，内部使用64位有符号整数int64_t),%f(浮点数,内部使用双精度浮点数double)
+# 不支持浮点数字面量,如果有需要,请使用分数,如'%f / 1 3'即1/3
+# 完整的表达式例如'%i let hello = 114 in let world = 514 in if > hello world then 1919 else 810'
+# 请适当使用换行缩进圆括号等提升可读性,如
+# '''
+# %i
+# let hello = 114 in
+# let world = 514 in
+# if > hello world
+# then 1919
+# else 810'''
+
+# 本程序表达式内置的常量
+# TOTAL    -> 总场次
+# WIN      -> 胜利数
+# LOSE     -> 失败数
+# OTHER    -> 其他数(如平局等均被归类为其他)
+# COINWIN  -> 硬币正面数
+# COINLOSE -> 硬币反面数
+# FIRST    -> 先攻数
+# SECOND   -> 后攻数
+# WFW      -> 硬币正面-先攻-胜利数,其中第一个字符代表硬币(W正面L反面),第二个字符代表先后攻(F先攻S后攻),第三个字符代表胜负(W胜利L失败O其他)
+# WSL      -> 硬币正面-后攻-失败数,以此类推,其他不再列举
+
+# 本程序的Preset
+# TOTAL            -> 总场次
+# WIN              -> 胜利数
+# LOSE             -> 失败数
+# COINWIN          -> 硬币正面数
+# COINLOSE         -> 硬币反面数
+# COINWINWINRATE   -> 赢币胜率
+# COINLOSEWINRATE  -> 输币胜率
+# TOTALWINRATE     -> 综合胜率
+
+# 更强的自定义
+# 如果你觉得统计数据表格的自定义功能仍然不够强,可以前往本项目的仓库地址:https://github.com/ULeang/mdstats,
+# 在module/statstable目录下有一个statstable.hpp文件,将其中的接口全部实现,
+# 然后使用x86_64-win32-seh-rev0的mingw gcc编译器将其编译成dll文件,命名`libmodstatstable.dll`
+# 并替换程序根目录中的同名文件即可
+# 作为参考,本项目的模块代码实现位于module/statstable/v2,或者另一个不包含自定义功能的简单模块module/statstable/v1
+# 该接口仅包含标准cpp,你不需要任何其他的qt框架opencv框架等也能进行编译

@@ -4,11 +4,14 @@ project(mdstats LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+set(MODULE_STATSTABLE_VERSION v2)
+add_subdirectory(module/statstable/${MODULE_STATSTABLE_VERSION})
+
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 
 qt_standard_project_setup()
-
-add_subdirectory(module/statstable/v2)
 
 set(MAIN_SRC src/main.cpp)
 

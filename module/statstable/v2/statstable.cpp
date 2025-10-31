@@ -134,15 +134,17 @@ namespace MyModule
                 const auto &used_expr = use_opt ? _expr_opt.value() : _expr;
                 const auto &used_format = use_opt ? _format_opt.value() : _format;
                 auto expr_r = used_expr->eval(env);
-                if (expr_r.index() == 2)
-                    return "ERROR:EXPR";
                 if (expr_r.index() == 0)
                 {
                     return std::format(std::runtime_format(used_format), std::get<int64_t>(expr_r));
                 }
-                else
+                else if (expr_r.index() == 1)
                 {
                     return std::format(std::runtime_format(used_format), std::get<double>(expr_r));
+                }
+                else
+                {
+                    return std::format(std::runtime_format(used_format), std::get<char>(expr_r));
                 }
             }
         };
@@ -283,6 +285,13 @@ namespace MyModule
             size_t default_column_count = 3;
             std::tuple<size_t, size_t, Cells> default_ret{default_row_count, default_column_count, default_cells};
 
+            bool use_custom_rows = false;
+            load_value(toml, use_custom_rows, "stats_tbl", "use_custom_rows");
+            if (!use_custom_rows)
+            {
+                return default_ret;
+            }
+
             Cells ret_cells{};
 
 #define find_from_toml(_name, _type, _toml, _log)                               \
@@ -304,27 +313,27 @@ namespace MyModule
 
             for (const auto &custom_row : custom_rows)
             {
-                find_from_toml(contents, std::vector<toml::value>, custom_row, custom_rows.contents);
+                find_from_toml(cells, std::vector<toml::value>, custom_row, custom_rows.cells);
 
                 ret_cells.push_back({});
-                for (const auto &content : contents)
+                for (const auto &cell : cells)
                 {
-                    find_from_toml(type, std::string, content, custom_rows.contexts.type);
+                    find_from_toml(type, std::string, cell, custom_rows.cells.type);
 
-                    auto span_o = toml::find<std::optional<size_t>>(content, "span");
+                    auto span_o = toml::find<std::optional<size_t>>(cell, "span");
                     size_t span = span_o.has_value() ? span_o.value() : 1;
 
                     if (type == "Text")
                     {
-                        find_from_toml(text, std::string, content, custom_rows.contents.text);
+                        find_from_toml(text, std::string, cell, custom_rows.cells.text);
                         ret_cells.back().push_back(std::make_shared<TextCell>(span, text));
                     }
                     else if (type == "Expr")
                     {
-                        find_from_toml(expr, std::string, content, custom_rows.contents.expr);
-                        find_from_toml(format, std::string, content, custom_rows.contents.format);
+                        find_from_toml(expr, std::string, cell, custom_rows.cells.expr);
+                        find_from_toml(format, std::string, cell, custom_rows.cells.format);
 
-                        auto opt_o = toml::find<std::optional<std::string>>(content, "opt");
+                        auto opt_o = toml::find<std::optional<std::string>>(cell, "opt");
                         if (!opt_o.has_value())
                         {
                             ret_cells.back().push_back(std::make_shared<ExprCell>(span, expr, format));
@@ -332,14 +341,14 @@ namespace MyModule
                         else
                         {
                             const auto &opt = opt_o.value();
-                            find_from_toml(expr_opt, std::string, content, custom_rows.contents.expr_opt);
-                            find_from_toml(format_opt, std::string, content, custom_rows.contents.format_opt);
+                            find_from_toml(expr_opt, std::string, cell, custom_rows.cells.expr_opt);
+                            find_from_toml(format_opt, std::string, cell, custom_rows.cells.format_opt);
                             ret_cells.back().push_back(std::make_shared<ExprCell>(span, expr, format, opt, expr_opt, format_opt));
                         }
                     }
                     else if (type == "Preset")
                     {
-                        find_from_toml(preset, std::string, content, custom_rows.contents.preset);
+                        find_from_toml(preset, std::string, cell, custom_rows.cells.preset);
                         ret_cells.back().push_back(std::make_shared<PresetCell>(span, preset));
                     }
                     else
@@ -455,6 +464,8 @@ namespace MyModule
                                             data.l_st_wins + data.l_nd_wins));
             env["LOSE"] = AST::Value(int64_t(data.w_st_loses + data.w_nd_loses +
                                              data.l_st_loses + data.l_nd_loses));
+            env["OTHER"] = AST::Value(int64_t(data.w_st_others + data.w_nd_others +
+                                             data.l_st_others + data.l_nd_others));
             env["FIRST"] = AST::Value(int64_t(data.w_st_wins + data.w_st_loses + data.w_st_others +
                                               data.l_st_wins + data.l_st_loses + data.l_st_others));
             env["SECOND"] = AST::Value(int64_t(data.w_nd_wins + data.w_nd_loses + data.w_nd_others +
