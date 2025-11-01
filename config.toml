@@ -29,7 +29,7 @@ column_width = [150, 50, 50]
 # 设置统计数据表格的单元格高度(所有行)
 rows_height = 30
 # 设置是否使用自定义统计数据表格(详见stats_tbl.custom_rows)
-use_custom_rows = true
+use_custom_rows = false
 
 [stats_tbl.color]
 # 设置统计数据表格的背景色和前景色，rgb格式
@@ -97,6 +97,14 @@ show_clip_success = true
 # [debug]
 # test_capture = true
 
+
+
+#*************************************************************************#
+#*************************************************************************#
+
+# 注意:
+# 把stats_tbl.use_custom_rows设置为true,该部分内容才会生效
+
 # 在toml中,[a]表明a是一个表,即键值对表,或者字典,
 # [[a]]表明a是一个表数组,即a是一个数组,其中每一个元素都是一个表
 # 连续出现的[[a]]分别描述了a这个数组中的每一个元素
@@ -114,7 +122,7 @@ span = 1      # 选填,该单元格横向跨越的物理单元格数量,默认�
 type = "Expr"
 # 当type为Expr时必填,该单元格将计算该表达式然后显示其结果
 expr = "%i TOTAL"
-# 当type为Expr时必填,该单元格将以何格式显示其表达式计算的结果,
+# 当type为Expr时选填,默认为'{}',该单元格将以何格式显示其表达式计算的结果,
 # 请参见cpp format:https://en.cppreference.com/w/cpp/utility/format/spec.html
 format = "{}"
 span = 2
@@ -122,6 +130,7 @@ span = 2
 # custom_rows[1]
 [[stats_tbl.custom_rows]]
 # 这是表数组的另一种表示方式,custom_rows[1].cells
+# 使用这种表示方式或者上面那种表示方式是等价的
 cells = [
     { type = "Text", text = "硬币(赢/输)" },
     { type = "Expr", expr = "%i COINWIN", format = "{}" },
@@ -155,7 +164,7 @@ format = "{:.2f}%"
 # 当type为Expr时选填,若有值,该单元格将计算该表达式,若结果为真,改为使用expr_opt与format_opt
 opt = "%i == COINWIN 0"
 expr_opt = "%i 0"       # 当type为Expr且opt有值时必填
-format_opt = "{}"       # 当type为Expr且opt有值时必填
+format_opt = "{}"       # 当type为Expr且opt有值时选填,默认为'{}'
 span = 2
 
 [[stats_tbl.custom_rows]]

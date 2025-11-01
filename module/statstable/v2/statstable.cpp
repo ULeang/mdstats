@@ -119,7 +119,11 @@ namespace MyModule
                 {
                     auto opt_r = _opt.value()->eval(env);
                     if (opt_r.index() == 2)
+                    {
+
+                        logln("module statstable : opt eval failed");
                         return "ERROR:OPT";
+                    }
                     if (opt_r.index() == 0)
                     {
                         if (std::get<int64_t>(opt_r) != 0)
@@ -134,17 +138,26 @@ namespace MyModule
                 const auto &used_expr = use_opt ? _expr_opt.value() : _expr;
                 const auto &used_format = use_opt ? _format_opt.value() : _format;
                 auto expr_r = used_expr->eval(env);
-                if (expr_r.index() == 0)
+                try
                 {
-                    return std::format(std::runtime_format(used_format), std::get<int64_t>(expr_r));
+                    if (expr_r.index() == 0)
+                    {
+                        return std::format(std::runtime_format(used_format), std::get<int64_t>(expr_r));
+                    }
+                    else if (expr_r.index() == 1)
+                    {
+                        return std::format(std::runtime_format(used_format), std::get<double>(expr_r));
+                    }
+                    else
+                    {
+                        logln("module statstable : expr eval failed");
+                        return std::format("{}", std::get<char>(expr_r));
+                    }
                 }
-                else if (expr_r.index() == 1)
+                catch (...)
                 {
-                    return std::format(std::runtime_format(used_format), std::get<double>(expr_r));
-                }
-                else
-                {
-                    return std::format(std::runtime_format(used_format), std::get<char>(expr_r));
+                    logln("module statstable : format error");
+                    return "ERROR:FORMAT";
                 }
             }
         };
@@ -331,7 +344,8 @@ namespace MyModule
                     else if (type == "Expr")
                     {
                         find_from_toml(expr, std::string, cell, custom_rows.cells.expr);
-                        find_from_toml(format, std::string, cell, custom_rows.cells.format);
+                        auto format_o = toml::find<std::optional<std::string>>(cell, "format");
+                        std::string format = format_o.has_value() ? format_o.value() : "{}";
 
                         auto opt_o = toml::find<std::optional<std::string>>(cell, "opt");
                         if (!opt_o.has_value())
@@ -465,7 +479,7 @@ namespace MyModule
             env["LOSE"] = AST::Value(int64_t(data.w_st_loses + data.w_nd_loses +
                                              data.l_st_loses + data.l_nd_loses));
             env["OTHER"] = AST::Value(int64_t(data.w_st_others + data.w_nd_others +
-                                             data.l_st_others + data.l_nd_others));
+                                              data.l_st_others + data.l_nd_others));
             env["FIRST"] = AST::Value(int64_t(data.w_st_wins + data.w_st_loses + data.w_st_others +
                                               data.l_st_wins + data.l_st_loses + data.l_st_others));
             env["SECOND"] = AST::Value(int64_t(data.w_nd_wins + data.w_nd_loses + data.w_nd_others +

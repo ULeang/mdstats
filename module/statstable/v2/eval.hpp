@@ -133,18 +133,26 @@ private:
                            { return vl * vr; });
         case div:
         {
-            auto [opl, opr, _] = std::get<std::tuple<pAST, pAST, pAST>>(data);
-            auto vl = opl->_eval<T>(env);
-            if (vl.index() == 2)
-                return '-';
-            auto vr = opr->_eval<T>(env);
-            if (vr.index() == 2)
-                return '-';
-            auto vlv = std::get<T>(vl);
-            auto vrv = std::get<T>(vr);
-            if (vrv == 0)
-                return '-';
-            return vlv / vrv;
+            if constexpr (std::is_same_v<T, double>)
+            {
+                return map2<T>(env, [](T vl, T vr)
+                               { return vl / vr; });
+            }
+            else
+            {
+                auto [opl, opr, _] = std::get<std::tuple<pAST, pAST, pAST>>(data);
+                auto vl = opl->_eval<T>(env);
+                if (vl.index() == 2)
+                    return '-';
+                auto vr = opr->_eval<T>(env);
+                if (vr.index() == 2)
+                    return '-';
+                auto vlv = std::get<T>(vl);
+                auto vrv = std::get<T>(vr);
+                if (vrv == 0)
+                    return '-';
+                return vlv / vrv;
+            }
         }
         case branch:
         {
