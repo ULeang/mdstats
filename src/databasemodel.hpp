@@ -23,8 +23,11 @@ class Stats : public QAbstractTableModel
 
     MyModule::StatsTable::EssentialData essential_data;
     const MyModule::StatsTable::StatsTableText *stats_table_text;
+    QList<QStringList> qt_stats_table_text;
     size_t rowc;
     size_t colc;
+    
+    void stdstringtext_to_qtstringtext();
 
 public:
     Stats(QObject *parent = nullptr);

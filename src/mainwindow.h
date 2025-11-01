@@ -51,12 +51,15 @@ private:
     void manual_reset();
 
     void ensure_config();
+    
+    bool query_open_masterduel();
 
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 signals:
+    void start_matcher();
 
 private slots:
     void on_startBtn_clicked();

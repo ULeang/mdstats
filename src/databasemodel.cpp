@@ -11,7 +11,19 @@
 void Stats::update_stats_tbl()
 {
     MyModule::StatsTable::update_stats_table_text(essential_data);
+    stdstringtext_to_qtstringtext();
     emit dataChanged(index(0, 0), index(rowc - 1, colc - 1));
+}
+// note: before call this function, the proper size of qt_stats_table_text must be set
+void Stats::stdstringtext_to_qtstringtext()
+{
+    for (size_t r = 0; r < rowc; ++r)
+    {
+        for (size_t c = 0; c < colc; ++c)
+        {
+            qt_stats_table_text[r][c] = (*stats_table_text)[r][c].c_str();
+        }
+    }
 }
 
 Stats::Stats(QObject *parent)
@@ -21,6 +33,13 @@ Stats::Stats(QObject *parent)
     rowc = MyModule::StatsTable::rows_count();
     colc = MyModule::StatsTable::cols_count();
     stats_table_text = MyModule::StatsTable::stats_table_text();
+
+    qt_stats_table_text.resize(rowc);
+    for (auto &qt_row : qt_stats_table_text)
+    {
+        qt_row.resize(colc);
+    }
+    stdstringtext_to_qtstringtext();
 }
 Stats::~Stats() {}
 
@@ -48,7 +67,7 @@ QVariant Stats::data(const QModelIndex &index, int role) const
     switch (role)
     {
     case Qt::DisplayRole:
-        return QString{(*stats_table_text)[index.row()][index.column()].c_str()};
+        return qt_stats_table_text[index.row()][index.column()];
     case Qt::TextAlignmentRole:
         return int(Qt::AlignHCenter | Qt::AlignVCenter);
     case Qt::BackgroundRole:
@@ -98,20 +117,20 @@ void Stats::add_record(const Record &record, bool inc, bool update)
     const auto &st_nd = record.st_nd;
     const auto &result = record.result;
 
-    size_t ont_hot = 0b000'00'00;
-    ont_hot |= coin == "赢币" ? 0b000'00'01 : 0b000'00'10;
-    ont_hot |= st_nd == "先攻" ? 0b000'01'00 : 0b000'10'00;
-    ont_hot |= result == "胜利"   ? 0b001'00'00
+    size_t one_hot = 0b000'00'00;
+    one_hot |= coin == "赢币" ? 0b000'00'01 : 0b000'00'10;
+    one_hot |= st_nd == "先攻" ? 0b000'01'00 : 0b000'10'00;
+    one_hot |= result == "胜利"   ? 0b001'00'00
                : result == "失败" ? 0b010'00'00
                                   : 0b100'00'00;
 
-    auto f_exactly = [ont_hot, inc](size_t &n, size_t mask)
+    auto f_exactly = [one_hot, inc](size_t &n, size_t mask)
     {
-        n = (ont_hot ^ mask) == 0 ? (inc ? n + 1 : n - 1) : n;
+        n = (one_hot ^ mask) == 0 ? (inc ? n + 1 : n - 1) : n;
     };
-    // auto f_any = [ont_hot, inc](size_t &n, size_t mask)
+    // auto f_any = [one_hot, inc](size_t &n, size_t mask)
     // {
-    //     n = ont_hot & mask ? (inc ? n + 1 : n - 1) : n;
+    //     n = one_hot & mask ? (inc ? n + 1 : n - 1) : n;
     // };
 
     inc ? essential_data.total += 1 : essential_data.total -= 1;
@@ -132,26 +151,21 @@ void Stats::add_record(const Record &record, bool inc, bool update)
 }
 void Stats::copy_to_clipboard()
 {
-    CopyToClipboard(
-        QString{
-            "%1\t%2\n%3\t%4/%5\n%6\t%7/%8\n%9\t%10\n%11\t%12\n%13\t%14\n",
+    QString content;
+    for (const auto &row : qt_stats_table_text)
+    {
+        for (const auto &col : row)
+        {
+            if (col.isEmpty())
+            {
+                continue;
+            }
+            content += col;
+            content.push_back('\t');
         }
-            .arg((*stats_table_text)[0][0])
-            .arg((*stats_table_text)[0][1])
-            .arg((*stats_table_text)[1][0])
-            .arg((*stats_table_text)[1][1])
-            .arg((*stats_table_text)[1][2])
-            .arg((*stats_table_text)[2][0])
-            .arg((*stats_table_text)[2][1])
-            .arg((*stats_table_text)[2][2])
-            .arg((*stats_table_text)[3][0])
-            .arg((*stats_table_text)[3][1])
-            .arg((*stats_table_text)[4][0])
-            .arg((*stats_table_text)[4][1])
-            .arg((*stats_table_text)[5][0])
-            .arg((*stats_table_text)[5][1])
-            .toStdString()
-            .c_str());
+        content.push_back('\n');
+    }
+    CopyToClipboard(reinterpret_cast<const wchar_t *>(content.utf16()));
 }
 
 DataBase::DataBase(QObject *parent) : QAbstractTableModel(parent)

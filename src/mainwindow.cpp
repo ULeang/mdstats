@@ -166,7 +166,7 @@ void MainWindow::destruct_all()
 void MainWindow::connect_signals()
 {
     connect(startBtn, SIGNAL(clicked()), this, SLOT(on_startBtn_clicked()));
-    connect(startBtn, SIGNAL(clicked()), matcher, SLOT(main_matcher()), Qt::QueuedConnection);
+    connect(this, SIGNAL(start_matcher()), matcher, SLOT(main_matcher()), Qt::QueuedConnection);
 
     connect(stopBtn, SIGNAL(clicked()), this, SLOT(on_stopBtn_clicked()));
     connect(reloadBtn, SIGNAL(clicked()), this, SLOT(on_reloadBtn_clicked()));
@@ -191,6 +191,17 @@ void MainWindow::connect_signals()
 }
 void MainWindow::on_database_warning_corrupted_csv(std::filesystem::path path)
 {
+    QMessageBox msg;
+    msg.setWindowTitle("损坏的csv文件");
+    msg.setText(
+        R"(警告:csv文件已损坏,你正处于无csv模式,
+此时的一切数据都不会被保存
+请点击下方'打开data.csv目录'尝试修复,
+或者直接删除该文件,然后点击'重新加载数据'
+提示:目前仅支持utf8编码和utf16编码)");
+    auto confirm = msg.addButton("确定", QMessageBox::AcceptRole);
+    msg.setFont(prog::global::font);
+    msg.exec();
     corrupted_csv_lbl->setVisible(true);
 }
 void MainWindow::on_database_good_csv(std::filesystem::path path)
@@ -302,8 +313,43 @@ void MainWindow::clear_lbl()
     result_lbl->clear();
     time_lbl->clear();
 }
+bool MainWindow::query_open_masterduel()
+{
+    HWND hwnd = FindWindowA(NULL, prog::env::capture_window_title.c_str());
+    if (!hwnd)
+    {
+        QMessageBox msg;
+        msg.setWindowTitle("启动Masterduel");
+        msg.setText("未检测到Masterduel窗口,是否启动?");
+        auto open_md = msg.addButton("MD,启动!", QMessageBox::AcceptRole);
+        auto open_steam = msg.addButton("Steam,启动!", QMessageBox::AcceptRole);
+        auto not_open = msg.addButton("取消!", QMessageBox::RejectRole);
+        msg.setDefaultButton(open_md);
+        msg.setFont(prog::global::font);
+
+        msg.exec();
+        auto clickedbtn = msg.clickedButton();
+        if (clickedbtn == open_md)
+        {
+            logln("launching Masterduel");
+            std::system("start steam://rungameid/1449850");
+        }
+        else if (clickedbtn == open_steam)
+        {
+            logln("launching Steam");
+            std::system("start steam://open/main"); // or steam://open/library
+        }
+        return false;
+    }
+    return true;
+}
 void MainWindow::on_startBtn_clicked()
 {
+    if (!query_open_masterduel())
+    {
+        return;
+    }
+    emit start_matcher();
     logln("Matcher running...");
     start_stop_switch(false);
 
@@ -336,13 +382,17 @@ void MainWindow::on_saveAsBtn_clicked()
 }
 void MainWindow::on_clearrecordBtn_clicked()
 {
-    auto chosen_button = QMessageBox::question(
-        this,
-        "清除所有记录",
-        "是否清除所有记录?此操作不可逆",
-        QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No),
-        QMessageBox::No);
-    if (chosen_button == QMessageBox::Yes)
+    QMessageBox msg;
+    msg.setWindowTitle("清除所有记录");
+    msg.setText("是否清除所有记录?此操作不可逆");
+    auto yes = msg.addButton("是", QMessageBox::AcceptRole);
+    auto no = msg.addButton("否", QMessageBox::RejectRole);
+    msg.setDefaultButton(no);
+    msg.setFont(prog::global::font);
+
+    msg.exec();
+    auto clickedbtn = msg.clickedButton();
+    if (clickedbtn == yes)
     {
         logln("clearing all records by user");
         data->trunc_last(~0);
