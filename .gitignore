@@ -10,3 +10,4 @@
 !/config.toml
 !/LICENSE
 !/README.md
+!.clang-format
