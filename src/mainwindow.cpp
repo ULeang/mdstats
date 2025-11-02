@@ -4,7 +4,6 @@
 #include "prog_config.hpp"
 
 #include <windows.h>
-#include <winsock.h>
 #include <QColor>
 #include <QFileDialog>
 #include <QFontDatabase>
@@ -312,19 +311,22 @@ bool MainWindow::query_open_masterduel() {
       msg_waiting_md.setWindowTitle("等待MD启动");
       msg_waiting_md.setText("等待MD启动中");
       auto cancel_btn = msg_waiting_md.addButton("取消", QMessageBox::RejectRole);
+      msg_waiting_md.setFont(prog::global::font);
 
       std::atomic_bool md_launched{false};
       std::jthread     j([&msg_waiting_md, &md_launched](std::stop_token stoken) {
-        logln("launching Masterduel");
-        std::system("start steam://rungameid/1449850");
+        logln(std::format("launching Masterduel : '{}'",
+                              prog::env::config::misc_launch_masterduel_cmdline));
+        create_process(prog::env::config::misc_launch_masterduel_cmdline.c_str());
+
         while (!stoken.stop_requested()) {
           HWND hwnd = FindWindowA(NULL, prog::env::capture_window_title.c_str());
           if (!hwnd) {
             Sleep(100);
           } else {
-            md_launched.store(true, std::memory_order_release);
             // at the start of md, its window is not the proper size, wait for 2 seconds
             Sleep(2000);
+            md_launched.store(true, std::memory_order_release);
             msg_waiting_md.close();
             return;
           }
@@ -339,8 +341,9 @@ bool MainWindow::query_open_masterduel() {
       }
       return false;
     } else if (clickedbtn == open_steam) {
-      logln("launching Steam");
-      std::system("start steam://open/main");  // or steam://open/library
+      logln(std::format("launching Steam : '{}'", prog::env::config::misc_launch_steam_cmdline));
+      // std::system("start steam://open/main");  // or steam://open/library
+      create_process(prog::env::config::misc_launch_steam_cmdline.c_str());
     }
     return false;
   }

@@ -127,5 +127,14 @@ inline void CopyToClipboard(const wchar_t *text) {
   // 关闭剪贴板
   CloseClipboard();
 }
+inline WINBOOL create_process(const char *cmdline, DWORD creation_flag = CREATE_NO_WINDOW) {
+  STARTUPINFOA        sinfo;
+  PROCESS_INFORMATION pinfo;
+  ZeroMemory(&sinfo, sizeof(sinfo));
+  sinfo.cb = sizeof(sinfo);
+  ZeroMemory(&pinfo, sizeof(pinfo));
+  return CreateProcessA(NULL, const_cast<char *>(cmdline), NULL, NULL, FALSE, creation_flag, NULL,
+                        NULL, &sinfo, &pinfo);
+}
 
 #endif

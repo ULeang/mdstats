@@ -90,6 +90,9 @@ inline bool   misc_show_clip_success{};
 // this variable is not used by this program
 inline bool   misc_hide_console{};
 
+inline std::string misc_launch_steam_cmdline{};
+inline std::string misc_launch_masterduel_cmdline{};
+
 inline bool debug_test_capture{};
 
 bool load_prog_config();

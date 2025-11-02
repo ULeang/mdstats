@@ -94,9 +94,14 @@ hide_console = true
 # 设置点击复制到剪贴板时是否弹出精彩操作
 show_clip_success = true
 
+# 启动Steam使用的命令行
+launch_steam_cmdline = "cmd /c start steam://open/main"
+
+# 启动Masterduel使用的命令行
+launch_masterduel_cmdline = "cmd /c start steam://rungameid/1449850"
+
 # [debug]
 # test_capture = true
-
 
 
 #*************************************************************************#

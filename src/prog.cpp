@@ -76,6 +76,8 @@ bool prog::env::config::load_prog_config() {
   LOAD(misc, use_daily_record_csv);
   LOAD(misc, hide_console);
   LOAD(misc, show_clip_success);
+  LOAD(misc, launch_steam_cmdline);
+  LOAD(misc, launch_masterduel_cmdline);
 
   LOAD(debug, test_capture);
 
@@ -134,10 +136,12 @@ void prog::env::config::reset_prog_config() {
   misc_prog_window_init_geometry_width  = {900};
   misc_prog_window_init_geometry_height = {400};
 
-  misc_matcher_sleep_ms     = {500};
-  misc_use_daily_record_csv = {false};
-  misc_hide_console         = {false};
-  misc_show_clip_success    = {true};
+  misc_matcher_sleep_ms          = {500};
+  misc_use_daily_record_csv      = {false};
+  misc_hide_console              = {false};
+  misc_show_clip_success         = {true};
+  misc_launch_steam_cmdline      = "cmd /c start steam://open/main";
+  misc_launch_masterduel_cmdline = "cmd /c start steam://rungameid/1449850";
 
   debug_test_capture = {false};
 }
