@@ -2,93 +2,93 @@
 #define DATABASEMODEL_HPP_
 
 #include <QAbstractTableModel>
+#include <filesystem>
 #include <optional>
-#include "utils.hpp"
 #include "../module/statstable/statstable.hpp"
 
-struct Record
-{
-    QString coin;
-    QString st_nd;
-    QString result;
-    QString deck;
-    QString note;
-    QString time;
+struct Record {
+  QString coin;
+  QString st_nd;
+  QString result;
+  QString deck;
+  QString note;
+  QString time;
 };
 
-class Stats : public QAbstractTableModel
-{
+class Stats : public QAbstractTableModel {
+  Q_OBJECT
 
-    Q_OBJECT
+  MyModule::StatsTable::EssentialData         essential_data;
+  const MyModule::StatsTable::StatsTableText *stats_table_text;
+  QList<QStringList>                          qt_stats_table_text;
+  size_t                                      rowc;
+  size_t                                      colc;
 
-    MyModule::StatsTable::EssentialData essential_data;
-    const MyModule::StatsTable::StatsTableText *stats_table_text;
-    QList<QStringList> qt_stats_table_text;
-    size_t rowc;
-    size_t colc;
-    
-    void stdstringtext_to_qtstringtext();
+  void stdstringtext_to_qtstringtext();
 
 public:
-    Stats(QObject *parent = nullptr);
-    ~Stats();
+  Stats(QObject *parent = nullptr);
+  ~Stats();
 
-    // Essential methods to override
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+  // Essential methods to override
+  int           rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  int           columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  QVariant      data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+  QVariant      headerData(int             section,
+                           Qt::Orientation orientation,
+                           int             role = Qt::DisplayRole) const override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-    void clear_record(bool update = true);
-    void add_record(const Record &record, bool inc, bool update = true);
-    void copy_to_clipboard();
+  void clear_record(bool update = true);
+  void add_record(const Record &record, bool inc, bool update = true);
+  void copy_to_clipboard();
 
-    void update_stats_tbl();
+  void update_stats_tbl();
 };
 
-class DataBase : public QAbstractTableModel
-{
-    Q_OBJECT
+class DataBase : public QAbstractTableModel {
+  Q_OBJECT
 
 public:
-    DataBase(QObject *parent = nullptr);
-    ~DataBase();
+  DataBase(QObject *parent = nullptr);
+  ~DataBase();
 
-    // Essential methods to override
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+  // Essential methods to override
+  int           rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  int           columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  QVariant      data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+  QVariant      headerData(int             section,
+                           Qt::Orientation orientation,
+                           int             role = Qt::DisplayRole) const override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
 signals:
-    void warning_corrupted_csv(std::filesystem::path path);
-    void good_csv(std::filesystem::path path);
+  void warning_corrupted_csv(std::filesystem::path path);
+  void good_csv(std::filesystem::path path);
 
 public slots:
-    // these two functions will not save csv automatically
-    void append_record(Record rec, bool update = true);
-    size_t trunc_last(size_t n = 1, bool update = true);
+  // these two functions will not save csv automatically
+  void   append_record(Record rec, bool update = true);
+  size_t trunc_last(size_t n = 1, bool update = true);
 
-    static bool ensure_csv(std::filesystem::path csv_path);
+  static bool ensure_csv(std::filesystem::path csv_path);
 
-    bool load_csv(std::filesystem::path csv_path);
-    bool save_csv();
-    bool save_csv_as(std::filesystem::path csv_path);
+  bool load_csv(std::filesystem::path csv_path);
+  bool save_csv();
+  bool save_csv_as(std::filesystem::path csv_path);
 
-    Stats *get_stats();
+  Stats *get_stats();
 
 private:
-    std::optional<std::filesystem::path> associate_csv_path;
-    QStringList associate_csv_content;
-    QStringList header_labels;
-    QVector<Record> db;
-    Stats stats;
+  std::optional<std::filesystem::path> associate_csv_path;
+  QStringList                          associate_csv_content;
+  QStringList                          header_labels;
+  QVector<Record>                      db;
+  Stats                                stats;
 
-    bool _setData_helper(QString &r, QString value, const QModelIndex &index, int role);
+  bool _setData_helper(QString &r, QString value, const QModelIndex &index, int role);
 };
 
 #endif
