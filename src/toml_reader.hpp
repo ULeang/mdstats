@@ -2,6 +2,7 @@
 #define TOML_READER_HPP_
 
 #include <toml.hpp>
+#include "evil.h"
 
 template<typename T, typename V, typename... Ks>
 concept TOML = requires(T t, V v, V _v, Ks... ks) {
@@ -19,5 +20,10 @@ inline bool load_value(T &toml, V &value, const Ks &...ks) {
   value = v_o.value();
   return true;
 }
+
+#define LOAD(toml, ...) load_value(toml, VARLOOK(__VA_ARGS__))
+#define DEFTHENLOAD(type, init, toml, ...) \
+  type VARNAME(__VA_ARGS__) = init;        \
+  LOAD(toml, __VA_ARGS__);
 
 #endif

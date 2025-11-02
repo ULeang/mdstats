@@ -13,6 +13,28 @@ struct Record {
   QString deck;
   QString note;
   QString time;
+  QString get_column(size_t index) const {
+    switch (index) {
+      case 0:  return coin;
+      case 1:  return st_nd;
+      case 2:  return result;
+      case 3:  return deck;
+      case 4:  return note;
+      case 5:  return time;
+      default: return {};
+    }
+  }
+  QString &get_column_by_ref(size_t index) {
+    switch (index) {
+      case 0:  return coin;
+      case 1:  return st_nd;
+      case 2:  return result;
+      case 3:  return deck;
+      case 4:  return note;
+      case 5:  return time;
+      default: throw std::out_of_range(std::format("invalid index '{}'", index));
+    }
+  }
 };
 
 class Stats : public QAbstractTableModel {

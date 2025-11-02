@@ -66,60 +66,43 @@ QVariant Stats::headerData(int section, Qt::Orientation orientation, int role) c
   return {};
 }
 Qt::ItemFlags Stats::flags(const QModelIndex &index) const {
-  return QAbstractTableModel::flags(index);
+  return Qt::ItemIsEnabled;
+  // return QAbstractTableModel::flags(index);
 }
 bool Stats::setData(const QModelIndex &index, const QVariant &value, int role) {
   return false;
 }
 
 void Stats::clear_record(bool update) {
-  essential_data.total       = 0;
-  essential_data.w_st_wins   = 0;
-  essential_data.l_st_wins   = 0;
-  essential_data.w_nd_wins   = 0;
-  essential_data.l_nd_wins   = 0;
-  essential_data.w_st_loses  = 0;
-  essential_data.l_st_loses  = 0;
-  essential_data.w_nd_loses  = 0;
-  essential_data.l_nd_loses  = 0;
-  essential_data.w_st_others = 0;
-  essential_data.l_st_others = 0;
-  essential_data.w_nd_others = 0;
-  essential_data.l_nd_others = 0;
+  std::memset(&essential_data, 0, sizeof(essential_data));
   if (update) update_stats_tbl();
 }
 
 void Stats::add_record(const Record &record, bool inc, bool update) {
-  const auto &coin   = record.coin;
-  const auto &st_nd  = record.st_nd;
-  const auto &result = record.result;
+  std::unordered_map<size_t, size_t *> map = {
+    {0b001'01'01, &essential_data.w_st_wins  },
+    {0b001'01'10, &essential_data.l_st_wins  },
+    {0b001'10'01, &essential_data.w_nd_wins  },
+    {0b001'10'10, &essential_data.l_nd_wins  },
+    {0b010'01'01, &essential_data.w_st_loses },
+    {0b010'01'10, &essential_data.l_st_loses },
+    {0b010'10'01, &essential_data.w_nd_loses },
+    {0b010'10'10, &essential_data.l_nd_loses },
+    {0b100'01'01, &essential_data.w_st_others},
+    {0b100'01'10, &essential_data.l_st_others},
+    {0b100'10'01, &essential_data.w_nd_others},
+    {0b100'10'10, &essential_data.l_nd_others},
+  };
 
   size_t one_hot  = 0b000'00'00;
-  one_hot        |= coin == "赢币" ? 0b000'00'01 : 0b000'00'10;
-  one_hot        |= st_nd == "先攻" ? 0b000'01'00 : 0b000'10'00;
-  one_hot        |= result == "胜利" ? 0b001'00'00 : result == "失败" ? 0b010'00'00 : 0b100'00'00;
-
-  auto f_exactly = [one_hot, inc](size_t &n, size_t mask) {
-    n = (one_hot ^ mask) == 0 ? (inc ? n + 1 : n - 1) : n;
-  };
-  // auto f_any = [one_hot, inc](size_t &n, size_t mask)
-  // {
-  //     n = one_hot & mask ? (inc ? n + 1 : n - 1) : n;
-  // };
+  one_hot        |= record.coin == "赢币" ? 0b000'00'01 : 0b000'00'10;
+  one_hot        |= record.st_nd == "先攻" ? 0b000'01'00 : 0b000'10'00;
+  one_hot        |= record.result == "胜利" ? 0b001'00'00
+                  : record.result == "失败" ? 0b010'00'00
+                                            : 0b100'00'00;
 
   inc ? essential_data.total += 1 : essential_data.total -= 1;
-  f_exactly(essential_data.w_st_wins, 0b001'01'01);
-  f_exactly(essential_data.l_st_wins, 0b001'01'10);
-  f_exactly(essential_data.w_nd_wins, 0b001'10'01);
-  f_exactly(essential_data.l_nd_wins, 0b001'10'10);
-  f_exactly(essential_data.w_st_loses, 0b010'01'01);
-  f_exactly(essential_data.l_st_loses, 0b010'01'10);
-  f_exactly(essential_data.w_nd_loses, 0b010'10'01);
-  f_exactly(essential_data.l_nd_loses, 0b010'10'10);
-  f_exactly(essential_data.w_st_others, 0b100'01'01);
-  f_exactly(essential_data.l_st_others, 0b100'01'10);
-  f_exactly(essential_data.w_nd_others, 0b100'10'01);
-  f_exactly(essential_data.l_nd_others, 0b100'10'10);
+  inc ? *map[one_hot] += 1 : *map[one_hot] -= 1;
   if (update) update_stats_tbl();
 }
 void Stats::copy_to_clipboard() {
@@ -163,13 +146,7 @@ QVariant DataBase::data(const QModelIndex &index, int role) const {
   using namespace prog::env::config::preprocessed;
   switch (role) {
     case Qt::DisplayRole:
-    case Qt::EditRole:
-      return index.column() == 0 ? rec.coin
-           : index.column() == 1 ? rec.st_nd
-           : index.column() == 2 ? rec.result
-           : index.column() == 3 ? rec.deck
-           : index.column() == 4 ? rec.note
-                                 : rec.time;
+    case Qt::EditRole:          return rec.get_column(index.column());
     case Qt::TextAlignmentRole: return int(Qt::AlignHCenter | Qt::AlignVCenter);
     case Qt::BackgroundRole:
       return index.column() == 0 ? (rec.coin == "赢币" ? record_tbl_color_coin_win_background
@@ -219,20 +196,9 @@ bool DataBase::setData(const QModelIndex &index, const QVariant &value, int role
   auto &rec = db[index.row()];
 
   switch (role) {
-    case Qt::EditRole: {
-      if (index.column() == 0)
-        return _setData_helper(rec.coin, std::move(value.toString()), index, role);
-      else if (index.column() == 1)
-        return _setData_helper(rec.st_nd, std::move(value.toString()), index, role);
-      else if (index.column() == 2)
-        return _setData_helper(rec.result, std::move(value.toString()), index, role);
-      else if (index.column() == 3)
-        return _setData_helper(rec.deck, std::move(value.toString()), index, role);
-      else if (index.column() == 4)
-        return _setData_helper(rec.note, std::move(value.toString()), index, role);
-      else
-        return _setData_helper(rec.time, std::move(value.toString()), index, role);
-    } break;
+    case Qt::EditRole:
+      return _setData_helper(rec.get_column_by_ref(index.column()), std::move(value.toString()),
+                             index, role);
     default: return false;
   }
 }

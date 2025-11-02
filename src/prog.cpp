@@ -1,4 +1,3 @@
-#include "evil.h"
 #include "utils.hpp"
 
 #include <QColor>
@@ -19,67 +18,65 @@ bool prog::env::config::load_prog_config() {
   }
   auto config = config_r.unwrap();
 
-#define LOAD(...) load_value(config, VARLOOK(__VA_ARGS__))
+  LOAD(config, custom_list, deck);
+  LOAD(config, custom_list, note);
 
-  LOAD(custom_list, deck);
-  LOAD(custom_list, note);
+  LOAD(config, stats_tbl, column_width);
+  LOAD(config, stats_tbl, rows_height);
+  LOAD(config, stats_tbl, color, background);
+  LOAD(config, stats_tbl, color, foreground);
 
-  LOAD(stats_tbl, column_width);
-  LOAD(stats_tbl, rows_height);
-  LOAD(stats_tbl, color, background);
-  LOAD(stats_tbl, color, foreground);
+  LOAD(config, record_tbl, column_width);
+  LOAD(config, record_tbl, color, coin, win, background);
+  LOAD(config, record_tbl, color, coin, win, foreground);
+  LOAD(config, record_tbl, color, coin, lose, background);
+  LOAD(config, record_tbl, color, coin, lose, foreground);
 
-  LOAD(record_tbl, column_width);
-  LOAD(record_tbl, color, coin, win, background);
-  LOAD(record_tbl, color, coin, win, foreground);
-  LOAD(record_tbl, color, coin, lose, background);
-  LOAD(record_tbl, color, coin, lose, foreground);
+  LOAD(config, record_tbl, color, st_nd, first, background);
+  LOAD(config, record_tbl, color, st_nd, first, foreground);
+  LOAD(config, record_tbl, color, st_nd, second, background);
+  LOAD(config, record_tbl, color, st_nd, second, foreground);
 
-  LOAD(record_tbl, color, st_nd, first, background);
-  LOAD(record_tbl, color, st_nd, first, foreground);
-  LOAD(record_tbl, color, st_nd, second, background);
-  LOAD(record_tbl, color, st_nd, second, foreground);
+  LOAD(config, record_tbl, color, result, victory, background);
+  LOAD(config, record_tbl, color, result, victory, foreground);
+  LOAD(config, record_tbl, color, result, defeat, background);
+  LOAD(config, record_tbl, color, result, defeat, foreground);
+  LOAD(config, record_tbl, color, result, other, background);
+  LOAD(config, record_tbl, color, result, other, foreground);
 
-  LOAD(record_tbl, color, result, victory, background);
-  LOAD(record_tbl, color, result, victory, foreground);
-  LOAD(record_tbl, color, result, defeat, background);
-  LOAD(record_tbl, color, result, defeat, foreground);
-  LOAD(record_tbl, color, result, other, background);
-  LOAD(record_tbl, color, result, other, foreground);
+  LOAD(config, button, color, start, enabled, background);
+  LOAD(config, button, color, start, enabled, foreground);
+  LOAD(config, button, color, start, disabled, background);
+  LOAD(config, button, color, start, disabled, foreground);
 
-  LOAD(button, color, start, enabled, background);
-  LOAD(button, color, start, enabled, foreground);
-  LOAD(button, color, start, disabled, background);
-  LOAD(button, color, start, disabled, foreground);
+  LOAD(config, button, color, stop, enabled, background);
+  LOAD(config, button, color, stop, enabled, foreground);
+  LOAD(config, button, color, stop, disabled, background);
+  LOAD(config, button, color, stop, disabled, foreground);
 
-  LOAD(button, color, stop, enabled, background);
-  LOAD(button, color, stop, enabled, foreground);
-  LOAD(button, color, stop, disabled, background);
-  LOAD(button, color, stop, disabled, foreground);
+  LOAD(config, button, color, manual0, enabled, background);
+  LOAD(config, button, color, manual0, enabled, foreground);
+  LOAD(config, button, color, manual0, disabled, background);
+  LOAD(config, button, color, manual0, disabled, foreground);
 
-  LOAD(button, color, manual0, enabled, background);
-  LOAD(button, color, manual0, enabled, foreground);
-  LOAD(button, color, manual0, disabled, background);
-  LOAD(button, color, manual0, disabled, foreground);
+  LOAD(config, button, color, manual1, enabled, background);
+  LOAD(config, button, color, manual1, enabled, foreground);
+  LOAD(config, button, color, manual1, disabled, background);
+  LOAD(config, button, color, manual1, disabled, foreground);
 
-  LOAD(button, color, manual1, enabled, background);
-  LOAD(button, color, manual1, enabled, foreground);
-  LOAD(button, color, manual1, disabled, background);
-  LOAD(button, color, manual1, disabled, foreground);
+  LOAD(config, misc, prog_window_init_geometry, x);
+  LOAD(config, misc, prog_window_init_geometry, y);
+  LOAD(config, misc, prog_window_init_geometry, width);
+  LOAD(config, misc, prog_window_init_geometry, height);
 
-  LOAD(misc, prog_window_init_geometry, x);
-  LOAD(misc, prog_window_init_geometry, y);
-  LOAD(misc, prog_window_init_geometry, width);
-  LOAD(misc, prog_window_init_geometry, height);
+  LOAD(config, misc, matcher_sleep_ms);
+  LOAD(config, misc, use_daily_record_csv);
+  LOAD(config, misc, hide_console);
+  LOAD(config, misc, show_clip_success);
+  LOAD(config, misc, launch_steam_cmdline);
+  LOAD(config, misc, launch_masterduel_cmdline);
 
-  LOAD(misc, matcher_sleep_ms);
-  LOAD(misc, use_daily_record_csv);
-  LOAD(misc, hide_console);
-  LOAD(misc, show_clip_success);
-  LOAD(misc, launch_steam_cmdline);
-  LOAD(misc, launch_masterduel_cmdline);
-
-  LOAD(debug, test_capture);
+  LOAD(config, debug, test_capture);
 
   return preprocessed::preprocess();
 }

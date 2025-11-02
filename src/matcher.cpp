@@ -172,29 +172,31 @@ std::expected<std::tuple<std::string, cv::Rect, cv::Rect, cv::Rect>,
         logln("fatal : load template config fail");
         return std::unexpected{ErrorType::ErrDeterRes};
       }
-      auto config        = config_r.unwrap();
-      auto res           = config.at(std::to_string(resolutions[i]));
-      auto name          = toml::find<std::string>(res, "name");
-      auto coin_x        = toml::find<size_t>(res, "crop_coin", "x");
-      auto coin_y        = toml::find<size_t>(res, "crop_coin", "y");
-      auto coin_width    = toml::find<size_t>(res, "crop_coin", "width");
-      auto coin_height   = toml::find<size_t>(res, "crop_coin", "height");
-      auto stnd_x        = toml::find<size_t>(res, "crop_stnd", "x");
-      auto stnd_y        = toml::find<size_t>(res, "crop_stnd", "y");
-      auto stnd_width    = toml::find<size_t>(res, "crop_stnd", "width");
-      auto stnd_height   = toml::find<size_t>(res, "crop_stnd", "height");
-      auto result_x      = toml::find<size_t>(res, "crop_result", "x");
-      auto result_y      = toml::find<size_t>(res, "crop_result", "y");
-      auto result_width  = toml::find<size_t>(res, "crop_result", "width");
-      auto result_height = toml::find<size_t>(res, "crop_result", "height");
+      auto config = config_r.unwrap();
+      auto res    = config.at(std::to_string(resolutions[i]));
+
+      auto name               = toml::find<std::string>(res, "name");
+      auto crop_coin_x        = toml::find<size_t>(res, "crop_coin", "x");
+      auto crop_coin_y        = toml::find<size_t>(res, "crop_coin", "y");
+      auto crop_coin_width    = toml::find<size_t>(res, "crop_coin", "width");
+      auto crop_coin_height   = toml::find<size_t>(res, "crop_coin", "height");
+      auto crop_stnd_x        = toml::find<size_t>(res, "crop_stnd", "x");
+      auto crop_stnd_y        = toml::find<size_t>(res, "crop_stnd", "y");
+      auto crop_stnd_width    = toml::find<size_t>(res, "crop_stnd", "width");
+      auto crop_stnd_height   = toml::find<size_t>(res, "crop_stnd", "height");
+      auto crop_result_x      = toml::find<size_t>(res, "crop_result", "x");
+      auto crop_result_y      = toml::find<size_t>(res, "crop_result", "y");
+      auto crop_result_width  = toml::find<size_t>(res, "crop_result", "width");
+      auto crop_result_height = toml::find<size_t>(res, "crop_result", "height");
+
       return std::make_tuple(
         name,
-        cv::Rect{static_cast<int>(coin_x), static_cast<int>(coin_y), static_cast<int>(coin_width),
-                 static_cast<int>(coin_height)},
-        cv::Rect{static_cast<int>(stnd_x), static_cast<int>(stnd_y), static_cast<int>(stnd_width),
-                 static_cast<int>(stnd_height)},
-        cv::Rect{static_cast<int>(result_x), static_cast<int>(result_y),
-                 static_cast<int>(result_width), static_cast<int>(result_height)});
+        cv::Rect{static_cast<int>(crop_coin_x), static_cast<int>(crop_coin_y),
+                 static_cast<int>(crop_coin_width), static_cast<int>(crop_coin_height)},
+        cv::Rect{static_cast<int>(crop_stnd_x), static_cast<int>(crop_stnd_y),
+                 static_cast<int>(crop_stnd_width), static_cast<int>(crop_stnd_height)},
+        cv::Rect{static_cast<int>(crop_result_x), static_cast<int>(crop_result_y),
+                 static_cast<int>(crop_result_width), static_cast<int>(crop_result_height)});
     }
   }
   return std::unexpected{ErrorType::ErrDeterRes};
