@@ -100,6 +100,12 @@ launch_steam_cmdline = "cmd /c start steam://open/main"
 # 启动Masterduel使用的命令行
 launch_masterduel_cmdline = "cmd /c start steam://rungameid/1449850"
 
+# Masterduel启动成功后,延迟启动匹配程序的时间,单位毫秒
+# 由于MD在启动成功后需要一段时间初始化分辨率,如果在MD启动后立即启动匹配程序,会导致识别分辨率错误
+# 所以需要延迟一段时间等待MD的分辨率正确后再启动匹配程序,这段时间因pc配置等而异
+# 如果你点击MD启动后无法正常自动启动匹配,请增加这个值
+launch_masterduel_matcher_delay = 3000
+
 # [debug]
 # test_capture = true
 

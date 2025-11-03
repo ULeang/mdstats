@@ -92,6 +92,7 @@ inline bool   misc_hide_console{};
 
 inline std::string misc_launch_steam_cmdline{};
 inline std::string misc_launch_masterduel_cmdline{};
+inline size_t misc_launch_masterduel_matcher_delay{};
 
 inline bool debug_test_capture{};
 

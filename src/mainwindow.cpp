@@ -150,13 +150,13 @@ void MainWindow::construct_all() {
   load_database();
 }
 void MainWindow::destruct_all() {
-  this->setCentralWidget(nullptr);
-
   on_stopBtn_clicked();
 
   matcher_thread->quit();
   matcher_thread->wait();
   delete matcher_thread;
+
+  this->setCentralWidget(nullptr);
 
   // delete a itemview will not result in the delete of its model
   delete data;
@@ -219,7 +219,6 @@ void MainWindow::ensure_config() {
     size_t actual_col = 0;
     for (auto span : spans[r]) {
       if (span != 1) {
-        logln(std::format("setting span r={},c={},rowspan={},colspan={}",r,actual_col,1,span));
         stats_tbl->setSpan(r, actual_col, 1, span);
       }
       actual_col += span;
@@ -269,6 +268,9 @@ ErrorType MainWindow::load_database() {
   }
 
   std::string data_csv_full_name = prog::env::data_csv_path + data_csv_name;
+  return load_database(data_csv_full_name);
+}
+ErrorType MainWindow::load_database(std::string data_csv_full_name) {
   logln(format("loading record from '{}'", data_csv_full_name));
 
   std::filesystem::path csv_filepath(data_csv_full_name);
@@ -332,8 +334,8 @@ bool MainWindow::query_open_masterduel() {
           if (!hwnd) {
             Sleep(100);
           } else {
-            // at the start of md, its window is not the proper size, wait for 2 seconds
-            Sleep(2000);
+            // at the start of md, its window is not the proper size, wait for some time
+            Sleep(prog::env::config::misc_launch_masterduel_matcher_delay);
             md_launched.store(true, std::memory_order_release);
             msg_waiting_md.close();
             return;
@@ -540,5 +542,24 @@ void MainWindow::disable_manual_btn(bool disable) {
   manual_1Btn->setDisabled(disable);
 }
 void MainWindow::on_reloadBtn_clicked() {
-  load_database();
+  QMessageBox msg;
+  msg.setWindowTitle("重新加载数据");
+  msg.setText("选择加载类型");
+  auto manual_load = msg.addButton("手动加载", QMessageBox::AcceptRole);
+  auto auto_load   = msg.addButton("自动加载", QMessageBox::RejectRole);
+  msg.setDefaultButton(auto_load);
+  msg.setFont(prog::global::font);
+
+  msg.exec();
+  auto clickedbtn = msg.clickedButton();
+  if (clickedbtn == manual_load) {
+    QString csv_filename = QFileDialog::getOpenFileName(
+      this, "加载csv", prog::env::data_csv_path.c_str(), "csv(*.csv);;All files(*.*)");
+    if (csv_filename.isEmpty()) {
+      return;
+    }
+    load_database(csv_filename.toStdString());
+  } else {
+    load_database();
+  }
 }

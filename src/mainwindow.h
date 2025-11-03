@@ -42,6 +42,7 @@ private:
 
   void      connect_signals();
   ErrorType load_database();
+  ErrorType load_database(std::string data_csv_full_name);
   void      add_record_to_db_by_lbl();
   void      clear_lbl();
 
