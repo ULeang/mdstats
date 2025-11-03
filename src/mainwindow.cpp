@@ -90,9 +90,12 @@ void MainWindow::construct_all() {
   stats_tbl->setShowGrid(false);
 
   // set delegate
-  record_tbl->setItemDelegateForColumn(0, new MyDelegate({"赢币", "输币"}, false));
-  record_tbl->setItemDelegateForColumn(1, new MyDelegate({"先攻", "后攻"}, false));
-  record_tbl->setItemDelegateForColumn(2, new MyDelegate({"胜利", "失败", "平局"}));
+  delegate0 = new MyDelegate({"赢币", "输币"}, false);
+  delegate1 = new MyDelegate({"先攻", "后攻"}, false);
+  delegate2 = new MyDelegate({"胜利", "失败", "平局"});
+  record_tbl->setItemDelegateForColumn(0, delegate0);
+  record_tbl->setItemDelegateForColumn(1, delegate1);
+  record_tbl->setItemDelegateForColumn(2, delegate2);
 
   start_stop_switch(true);
   disable_manual_btn(true);
@@ -155,10 +158,13 @@ void MainWindow::destruct_all() {
   matcher_thread->wait();
   delete matcher_thread;
 
-  delete widget;
-
   // delete a itemview will not result in the delete of its model
   delete data;
+  delete delegate0;
+  delete delegate1;
+  delete delegate2;
+  delete delegate3;
+  delete delegate4;
 }
 
 void MainWindow::connect_signals() {
@@ -179,6 +185,7 @@ void MainWindow::connect_signals() {
   connect(matcher, SIGNAL(got_match_step(MatcherGotType, size_t)), this,
           SLOT(on_matcher_got_match_step(MatcherGotType, size_t)));
   connect(matcher, SIGNAL(exited(ErrorType)), this, SLOT(on_matcher_exited(ErrorType)));
+  connect(matcher_thread, SIGNAL(finished()), matcher, SLOT(deleteLater()));
 
   connect(data, SIGNAL(warning_corrupted_csv(std::filesystem::path)), this,
           SLOT(on_database_warning_corrupted_csv(std::filesystem::path)));
@@ -212,6 +219,7 @@ void MainWindow::ensure_config() {
     size_t actual_col = 0;
     for (auto span : spans[r]) {
       if (span != 1) {
+        logln(std::format("setting span r={},c={},rowspan={},colspan={}",r,actual_col,1,span));
         stats_tbl->setSpan(r, actual_col, 1, span);
       }
       actual_col += span;
@@ -245,10 +253,10 @@ void MainWindow::ensure_config() {
     }
   }
 
-  record_tbl->setItemDelegateForColumn(
-    3, new MyDelegate(prog::env::config::preprocessed::custom_list_deck));
-  record_tbl->setItemDelegateForColumn(
-    4, new MyDelegate(prog::env::config::preprocessed::custom_list_note));
+  delegate3 = new MyDelegate(prog::env::config::preprocessed::custom_list_deck);
+  delegate4 = new MyDelegate(prog::env::config::preprocessed::custom_list_note);
+  record_tbl->setItemDelegateForColumn(3, delegate3);
+  record_tbl->setItemDelegateForColumn(4, delegate4);
 }
 ErrorType MainWindow::load_database() {
   std::string data_csv_name;

@@ -90,14 +90,14 @@ public:
   }
   std::string display(const EssentialData &data, AST::Env &env) const override {
     if (!valid) {
-      return "INVALID";
+      return "E:INVLAID";
     }
     bool use_opt = false;
     if (_opt.has_value()) {
       auto opt_r = _opt.value()->eval(env);
       if (opt_r.index() == 2) {
         logln("module statstable : opt eval failed");
-        return "ERROR:OPT";
+        return "E:OPT";
       }
       if (opt_r.index() == 0) {
         if (std::get<int64_t>(opt_r) != 0) use_opt = true;
@@ -115,11 +115,11 @@ public:
         return std::format(std::runtime_format(used_format), std::get<double>(expr_r));
       } else {
         logln("module statstable : expr eval failed");
-        return std::format("{}", std::get<char>(expr_r));
+        return "E:EXPR";
       }
     } catch (...) {
       logln("module statstable : format error");
-      return "ERROR:FORMAT";
+      return "E:FORMAT";
     }
   }
 };
@@ -135,15 +135,14 @@ class PresetCell : public Cell {
     COINLOSEWINRATE,
     TOTALWINRATE,
   } _preset;
+#define SETLOOKUP(_enum) \
+  {                      \
+    #_enum, _enum        \
+  }
   const std::unordered_map<std::string, Preset> lookup = {
-    {"TOTAL",           TOTAL          },
-    {"WIN",             WIN            },
-    {"LOSE",            LOSE           },
-    {"COINWIN",         COINWIN        },
-    {"COINLOSE",        COINLOSE       },
-    {"COINWINWINRATE",  COINWINWINRATE },
-    {"COINLOSEWINRATE", COINLOSEWINRATE},
-    {"TOTALWINRATE",    TOTALWINRATE   },
+    SETLOOKUP(TOTAL),           SETLOOKUP(WIN),          SETLOOKUP(LOSE),
+    SETLOOKUP(COINWIN),         SETLOOKUP(COINLOSE),     SETLOOKUP(COINWINWINRATE),
+    SETLOOKUP(COINLOSEWINRATE), SETLOOKUP(TOTALWINRATE),
   };
 
 public:
@@ -222,17 +221,17 @@ const StatsTableText *stats_table_text() {
   return &_stats_table_text;
 }
 
+static const Cells default_cells = {
+  {std::make_shared<TextCell>(1, "总场次"), std::make_shared<PresetCell>(2, "TOTAL")},
+  {std::make_shared<TextCell>(1, "硬币(赢/输)"), std::make_shared<PresetCell>(1, "COINWIN"),
+   std::make_shared<PresetCell>(1, "COINLOSE")},
+  {std::make_shared<TextCell>(1, "胜负(胜/负)"), std::make_shared<PresetCell>(1, "WIN"),
+   std::make_shared<PresetCell>(1, "LOSE")},
+  {std::make_shared<TextCell>(1, "赢币胜率"), std::make_shared<PresetCell>(2, "COINWINWINRATE")},
+  {std::make_shared<TextCell>(1, "输币胜率"), std::make_shared<PresetCell>(2, "COINLOSEWINRATE")},
+  {std::make_shared<TextCell>(1, "综合胜率"), std::make_shared<PresetCell>(2, "TOTALWINRATE")},
+};
 static std::tuple<size_t, size_t, Cells> load_cells(const toml::value &toml) {
-  Cells default_cells = {
-    {std::make_shared<TextCell>(1, "总场次"), std::make_shared<PresetCell>(2, "TOTAL")},
-    {std::make_shared<TextCell>(1, "硬币(赢/输)"), std::make_shared<PresetCell>(1, "COINWIN"),
-     std::make_shared<PresetCell>(1, "COINLOSE")},
-    {std::make_shared<TextCell>(1, "胜负(胜/负)"), std::make_shared<PresetCell>(1, "WIN"),
-     std::make_shared<PresetCell>(1, "LOSE")},
-    {std::make_shared<TextCell>(1, "赢币胜率"), std::make_shared<PresetCell>(2, "COINWINWINRATE")},
-    {std::make_shared<TextCell>(1, "输币胜率"), std::make_shared<PresetCell>(2, "COINLOSEWINRATE")},
-    {std::make_shared<TextCell>(1, "综合胜率"), std::make_shared<PresetCell>(2, "TOTALWINRATE")},
-  };
   size_t                            default_row_count    = 6;
   size_t                            default_column_count = 3;
   std::tuple<size_t, size_t, Cells> default_ret{default_row_count, default_column_count,
@@ -246,12 +245,12 @@ static std::tuple<size_t, size_t, Cells> load_cells(const toml::value &toml) {
 
   Cells ret_cells{};
 
-#define find_from_toml(_name, _type, _toml, _log)                           \
-  auto _name##_o = toml::find<std::optional<_type>>(_toml, #_name);         \
-  if (!_name##_o.has_value()) {                                             \
-    logln("module statstable : load " #_log " fail, using default config"); \
-    return default_ret;                                                     \
-  }                                                                         \
+#define find_from_toml(_name, _type, _toml, _log, _callback)        \
+  auto _name##_o = toml::find<std::optional<_type>>(_toml, #_name); \
+  if (!_name##_o.has_value()) {                                     \
+    logln("module statstable : load " #_log " fail");               \
+    _callback;                                                      \
+  }                                                                 \
   const auto &_name = _name##_o.value();
 
   auto custom_rows_o =
@@ -263,20 +262,32 @@ static std::tuple<size_t, size_t, Cells> load_cells(const toml::value &toml) {
   const auto &custom_rows = custom_rows_o.value();
 
   for (const auto &custom_row : custom_rows) {
-    find_from_toml(cells, std::vector<toml::value>, custom_row, custom_rows.cells);
+    find_from_toml(cells, std::vector<toml::value>, custom_row, custom_rows.cells, {
+      ret_cells.push_back({});
+      continue;
+    });
 
     ret_cells.push_back({});
     for (const auto &cell : cells) {
-      find_from_toml(type, std::string, cell, custom_rows.cells.type);
-
       auto   span_o = toml::find<std::optional<size_t>>(cell, "span");
       size_t span   = span_o.has_value() ? span_o.value() : 1;
 
+      find_from_toml(type, std::string, cell, custom_rows.cells.type, {
+        ret_cells.back().push_back(std::make_shared<DefaultCell>(span));
+        continue;
+      });
+
       if (type == "Text") {
-        find_from_toml(text, std::string, cell, custom_rows.cells.text);
+        find_from_toml(text, std::string, cell, custom_rows.cells.text, {
+          ret_cells.back().push_back(std::make_shared<DefaultCell>(span));
+          continue;
+        });
         ret_cells.back().push_back(std::make_shared<TextCell>(span, text));
       } else if (type == "Expr") {
-        find_from_toml(expr, std::string, cell, custom_rows.cells.expr);
+        find_from_toml(expr, std::string, cell, custom_rows.cells.expr, {
+          ret_cells.back().push_back(std::make_shared<DefaultCell>(span));
+          continue;
+        });
         auto        format_o = toml::find<std::optional<std::string>>(cell, "format");
         std::string format   = format_o.has_value() ? format_o.value() : "{}";
 
@@ -285,17 +296,27 @@ static std::tuple<size_t, size_t, Cells> load_cells(const toml::value &toml) {
           ret_cells.back().push_back(std::make_shared<ExprCell>(span, expr, format));
         } else {
           const auto &opt = opt_o.value();
-          find_from_toml(expr_opt, std::string, cell, custom_rows.cells.expr_opt);
-          find_from_toml(format_opt, std::string, cell, custom_rows.cells.format_opt);
+          find_from_toml(expr_opt, std::string, cell, custom_rows.cells.expr_opt, {
+            ret_cells.back().push_back(std::make_shared<DefaultCell>(span));
+            continue;
+          });
+          find_from_toml(format_opt, std::string, cell, custom_rows.cells.format_opt, {
+            ret_cells.back().push_back(std::make_shared<DefaultCell>(span));
+            continue;
+          });
           ret_cells.back().push_back(
             std::make_shared<ExprCell>(span, expr, format, opt, expr_opt, format_opt));
         }
       } else if (type == "Preset") {
-        find_from_toml(preset, std::string, cell, custom_rows.cells.preset);
+        find_from_toml(preset, std::string, cell, custom_rows.cells.preset, {
+          ret_cells.back().push_back(std::make_shared<DefaultCell>(span));
+          continue;
+        });
         ret_cells.back().push_back(std::make_shared<PresetCell>(span, preset));
       } else {
-        logln(std::format("module statstable : unknown type '{}', using default config", type));
-        return default_ret;
+        logln(std::format("module statstable : unknown type '{}'", type));
+        ret_cells.back().push_back(std::make_shared<DefaultCell>(span));
+        continue;
       }
     }
   }
@@ -329,18 +350,9 @@ static void calculate_span_text() {
   }
 }
 static void default_config() {
-  _cells = {
-    {std::make_shared<TextCell>(1, "总场次"), std::make_shared<PresetCell>(2, "TOTAL")},
-    {std::make_shared<TextCell>(1, "硬币(赢/输)"), std::make_shared<PresetCell>(1, "COINWIN"),
-     std::make_shared<PresetCell>(1, "COINLOSE")},
-    {std::make_shared<TextCell>(1, "胜负(胜/负)"), std::make_shared<PresetCell>(1, "WIN"),
-     std::make_shared<PresetCell>(1, "LOSE")},
-    {std::make_shared<TextCell>(1, "赢币胜率"), std::make_shared<PresetCell>(2, "COINWINWINRATE")},
-    {std::make_shared<TextCell>(1, "输币胜率"), std::make_shared<PresetCell>(2, "COINLOSEWINRATE")},
-    {std::make_shared<TextCell>(1, "综合胜率"), std::make_shared<PresetCell>(2, "TOTALWINRATE")},
-  };
-  _rowc = 6;
-  _colc = 3;
+  _cells = default_cells;
+  _rowc  = 6;
+  _colc  = 3;
   calculate_span_text();
 }
 void reset() {

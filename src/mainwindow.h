@@ -11,6 +11,7 @@
 #include <QVBoxLayout>
 
 #include "databasemodel.hpp"
+#include "delegate.hpp"
 #include "matcher.hpp"
 #include "utils.hpp"
 
@@ -18,6 +19,7 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 private:
   QTableView  *stats_tbl, *record_tbl;
+  MyDelegate  *delegate0, *delegate1, *delegate2, *delegate3, *delegate4;
   QPushButton *startBtn, *stopBtn, *cptoclpbdBtn, *reloadBtn, *openCSVBtn, *saveAsBtn,
     *clearrecordBtn;
   QPushButton *manual_0Btn, *manual_1Btn;
