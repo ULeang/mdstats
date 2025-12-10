@@ -65,7 +65,7 @@ public:
     return hBitmap;
   }
 
-  static cv::Mat HBITMAP_to_Mat(HBITMAP &hBitmap) {
+  static cv::Mat HBITMAP_to_Mat(HBITMAP hBitmap) {
     BITMAP bmp;
     GetObject(hBitmap, sizeof(BITMAP), &bmp);
 

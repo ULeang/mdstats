@@ -43,6 +43,7 @@ target_link_directories(common
     PRIVATE
     lib
 )
+add_subdirectory(src/perf)
 
 # with console
 qt_add_executable(${PROJECT_NAME}_with_console

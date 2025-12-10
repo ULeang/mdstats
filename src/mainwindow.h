@@ -47,6 +47,7 @@ private:
   void      clear_lbl();
 
   void auto_scroll_record_tbl();
+  void notify_on_matcher_got_result();
   void disable_manual_btn(bool disable);
   void start_stop_switch(bool start);
   void set_qss();

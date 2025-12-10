@@ -35,7 +35,6 @@ debug :
 		-B build \
 		-G "MinGW Makefiles"
 	@cmake --build build --parallel 16
-	@make run
 
 .PHONY: release
 release :
@@ -48,7 +47,6 @@ release :
 		-B build \
 		-G "MinGW Makefiles"
 	@cmake --build build --parallel 16
-	@make run
 
 .PHONY: release_console
 release_console:
@@ -72,9 +70,18 @@ run: ./build/$(EXEC).exe
 gdb: ./build/$(EXEC).exe
 	@gdb -q --args ./build/$(EXEC).exe
 
-./build/$(EXEC):
-	@make release
+.PHONY: perf
+perf: export PATH:=./lib;${PATH}
+perf: ./build/mdstats_perf.exe
+	@$^
+
+./build/$(EXEC).exe:
+	@make debug
+
+.PHONY: zip
+zip: install
+	@7z a $(PROJ).zip $(PROJ)/
 
 .PHONY: clean
 clean:
-	@rm -rf build $(PROJ)
+	@rm -rf build $(PROJ) $(PROJ).zip

@@ -2,6 +2,7 @@
 #include "delegate.hpp"
 #include "prog.hpp"
 #include "prog_config.hpp"
+#include "utils.hpp"
 
 #include <windows.h>
 #include <QColor>
@@ -296,6 +297,21 @@ void MainWindow::add_record_to_db_by_lbl() {
     {coin_lbl->text(), st_nd_lbl->text(), result_lbl->text(), {}, {}, time_lbl->text()});
   auto_scroll_record_tbl();
 }
+void MainWindow::notify_on_matcher_got_result() {
+  if (!prog::env::config::notification_record_got_enable) return;
+
+  const static std::string text        = "Match Result Got";
+  const static std::string attribution = "mdstats";
+  std::string              expiration =
+    std::format("(Get-Date).AddSeconds({})", prog::env::config::notification_record_got_expiration);
+  std::string silent = prog::env::config::notification_record_got_silent ? "-Silent" : "";
+
+  std::string cmd = std::format(
+    "pwsh -c \"New-BurntToastNotification -Text '{}' -Attribution '{}' -ExpirationTime {} "
+    "{}\"",
+    text, attribution, expiration, silent);
+  create_process(cmd.c_str());
+}
 void MainWindow::clear_lbl() {
   coin_lbl->clear();
   st_nd_lbl->clear();
@@ -463,6 +479,7 @@ void MainWindow::on_matcher_got_match_step(MatcherGotType got, size_t n) {
       disable_manual_btn(false);
       break;
     case MatcherGotType::Result: {
+      notify_on_matcher_got_result();
       result_lbl->setText({n == 0 ? "胜利" : "失败"});
 
       auto t        = get_local_time();

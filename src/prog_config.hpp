@@ -92,7 +92,11 @@ inline bool   misc_hide_console{};
 
 inline std::string misc_launch_steam_cmdline{};
 inline std::string misc_launch_masterduel_cmdline{};
-inline size_t misc_launch_masterduel_matcher_delay{};
+inline size_t      misc_launch_masterduel_matcher_delay{};
+
+inline bool   notification_record_got_enable{};
+inline bool   notification_record_got_silent{};
+inline size_t notification_record_got_expiration{};
 
 inline bool debug_test_capture{};
 

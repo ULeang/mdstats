@@ -76,6 +76,9 @@ bool prog::env::config::load_prog_config() {
   LOAD(config, misc, launch_steam_cmdline);
   LOAD(config, misc, launch_masterduel_cmdline);
   LOAD(config, misc, launch_masterduel_matcher_delay);
+  LOAD(config, notification, record_got, enable);
+  LOAD(config, notification, record_got, silent);
+  LOAD(config, notification, record_got, expiration);
 
   LOAD(config, debug, test_capture);
 
@@ -141,6 +144,10 @@ void prog::env::config::reset_prog_config() {
   misc_launch_steam_cmdline            = "cmd /c start steam://open/main";
   misc_launch_masterduel_cmdline       = "cmd /c start steam://rungameid/1449850";
   misc_launch_masterduel_matcher_delay = {3000};
+
+  notification_record_got_enable     = {false};
+  notification_record_got_silent     = {true};
+  notification_record_got_expiration = {3600};
 
   debug_test_capture = {false};
 }
