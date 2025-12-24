@@ -23,4 +23,5 @@ target_link_libraries(${PROJECT_NAME}
 target_link_directories(${PROJECT_NAME}
     PRIVATE
     ../../lib
+    ../../module/toast_notify/target/release
 )

@@ -23,26 +23,42 @@ set(SRCS
     src/delegate.cpp
 )
 
+set(INCS
+    include
+    module/statstable
+    module/toast_notify/binding
+)
+
+set(LIBS
+    opencv_world4130
+    stdc++exp
+    Qt::Core
+    Qt::Widgets
+    modstatstable
+    toast_notify
+)
+set(LIBDIRS
+    lib
+    module/toast_notify/target/release
+)
+
 qt_add_library(common
     STATIC
     ${SRCS}
 )
 target_include_directories(common
     PRIVATE
-    include
+    ${INCS}
 )
 target_link_libraries(common
     PRIVATE
-    opencv_world4130
-    stdc++exp
-    Qt::Core
-    Qt::Widgets
-    modstatstable
+    ${LIBS}
 )
 target_link_directories(common
     PRIVATE
-    lib
+    ${LIBDIRS}
 )
+
 add_subdirectory(src/perf)
 
 # with console
@@ -52,20 +68,16 @@ qt_add_executable(${PROJECT_NAME}_with_console
 )
 target_include_directories(${PROJECT_NAME}_with_console
     PRIVATE
-    include
+    ${INCS}
 )
 target_link_libraries(${PROJECT_NAME}_with_console
     PRIVATE
     common
-    opencv_world4130
-    stdc++exp
-    Qt::Core
-    Qt::Widgets
-    modstatstable
+    ${LIBS}
 )
 target_link_directories(${PROJECT_NAME}_with_console
     PRIVATE
-    lib
+    ${LIBDIRS}
 )
 install(TARGETS ${PROJECT_NAME}_with_console DESTINATION .)
 
@@ -77,20 +89,16 @@ if(WITHOUTCONSOLE)
     )
     target_include_directories(${PROJECT_NAME}_without_console
         PRIVATE
-        include
+        ${INCS}
     )
     target_link_libraries(${PROJECT_NAME}_without_console
         PRIVATE
         common
-        opencv_world4130
-        stdc++exp
-        Qt::Core
-        Qt::Widgets
-        modstatstable
+        ${LIBS}
     )
     target_link_directories(${PROJECT_NAME}_without_console
         PRIVATE
-        lib
+        ${LIBDIRS}
     )
     install(TARGETS ${PROJECT_NAME}_without_console DESTINATION .)
 
@@ -107,6 +115,7 @@ set(DLLS
     lib/libstdc++-6.dll
     lib/libgcc_s_seh-1.dll
     lib/libopencv_world4130.dll
+    module/toast_notify/target/release/toast_notify.dll
 )
 set(PROGFILES
     config.toml

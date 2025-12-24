@@ -4,7 +4,7 @@
 #include <QAbstractTableModel>
 #include <filesystem>
 #include <optional>
-#include "../module/statstable/statstable.hpp"
+#include "statstable.hpp"
 
 struct Record {
   QString coin;

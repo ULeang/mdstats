@@ -24,7 +24,7 @@ note = [
 ]
 
 [stats_tbl]
-# 设置统计数据表格的单元格宽度(第1列,第2列,第3列),默认宽度50
+# 设置统计数据表格的单元格宽度(第1列,第2列,第3列,...),默认宽度50
 column_width = [150, 50, 50]
 # 设置统计数据表格的单元格高度(所有行)
 rows_height = 30
@@ -106,10 +106,13 @@ launch_masterduel_cmdline = "cmd /c start steam://rungameid/1449850"
 # 如果你点击MD启动后无法正常自动启动匹配,请增加这个值
 launch_masterduel_matcher_delay = 3000
 
-# [notification.record_got]
-# enable = true
-# silent = true
-# expiration = 3600
+[notification.record_got]
+# 识别到对战结果后是否发送系统通知,true为是,false为否
+enable = true
+# 是否关闭通知提示音,true为是,false为否
+silent = true
+# 系统通知过期时间,即经过多久后从通知中心消失,单位秒
+expiration = 3600
 
 # [debug]
 # test_capture = true

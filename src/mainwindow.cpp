@@ -2,6 +2,7 @@
 #include "delegate.hpp"
 #include "prog.hpp"
 #include "prog_config.hpp"
+#include "toast_notify.h"
 #include "utils.hpp"
 
 #include <windows.h>
@@ -300,17 +301,13 @@ void MainWindow::add_record_to_db_by_lbl() {
 void MainWindow::notify_on_matcher_got_result() {
   if (!prog::env::config::notification_record_got_enable) return;
 
-  const static std::string text        = "Match Result Got";
-  const static std::string attribution = "mdstats";
-  std::string              expiration =
-    std::format("(Get-Date).AddSeconds({})", prog::env::config::notification_record_got_expiration);
-  std::string silent = prog::env::config::notification_record_got_silent ? "-Silent" : "";
+  Sound       sound = prog::env::config::notification_record_got_silent ? None : Default;
+  std::string text2 =
+    std::format("{}-{}-{}", coin_lbl->text().toStdString(), st_nd_lbl->text().toStdString(),
+                result_lbl->text().toStdString());
+  uint64_t expiration = prog::env::config::notification_record_got_expiration;
 
-  std::string cmd = std::format(
-    "pwsh -c \"New-BurntToastNotification -Text '{}' -Attribution '{}' -ExpirationTime {} "
-    "{}\"",
-    text, attribution, expiration, silent);
-  create_process(cmd.c_str());
+  toast_notify("Match Result Got", text2.c_str(), "mdstats", sound, expiration);
 }
 void MainWindow::clear_lbl() {
   coin_lbl->clear();
@@ -479,13 +476,15 @@ void MainWindow::on_matcher_got_match_step(MatcherGotType got, size_t n) {
       disable_manual_btn(false);
       break;
     case MatcherGotType::Result: {
-      notify_on_matcher_got_result();
       result_lbl->setText({n == 0 ? "胜利" : "失败"});
 
       auto t        = get_local_time();
       auto t_string = std::format("{:04}-{:02}-{:02} {:02}:{:02}:{:02}", t->tm_year + 1900,
                                   t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
       time_lbl->setText(t_string.c_str());
+
+      notify_on_matcher_got_result();
+
       manual_0Btn->setText("赢币");
       manual_1Btn->setText("输币");
       disable_manual_btn(false);

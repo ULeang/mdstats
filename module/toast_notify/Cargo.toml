@@ -1,0 +1,10 @@
+[package]
+name = "toast_notify"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+winrt-toast-reborn = "0.3.8"

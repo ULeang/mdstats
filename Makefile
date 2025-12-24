@@ -14,6 +14,10 @@ configure:
 		-B build \
 		-G "MinGW Makefiles"
 
+.PHONY: toast
+toast:
+	@cd module/toast_notify && cargo build --release
+
 .PHONY: build
 build:
 	@cmake --build build --parallel 16
