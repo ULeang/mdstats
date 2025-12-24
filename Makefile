@@ -21,6 +21,7 @@ toast:
 .PHONY: build
 build:
 	@cmake --build build --parallel 16
+	@cp module/toast_notify/target/release/toast_notify.dll build
 
 .PHONY: install
 install:
@@ -39,6 +40,7 @@ debug :
 		-B build \
 		-G "MinGW Makefiles"
 	@cmake --build build --parallel 16
+	@cp module/toast_notify/target/release/toast_notify.dll build
 
 .PHONY: release
 release :
@@ -51,6 +53,7 @@ release :
 		-B build \
 		-G "MinGW Makefiles"
 	@cmake --build build --parallel 16
+	@cp module/toast_notify/target/release/toast_notify.dll build
 
 .PHONY: release_console
 release_console:
@@ -64,6 +67,7 @@ release_console:
 		-G "MinGW Makefiles" \
 		-DWITHOUTCONSOLE:BOOL=true
 	@cmake --build build --parallel 16
+	@cp module/toast_notify/target/release/toast_notify.dll build
 
 .PHONY: run
 run: export PATH:=./lib;${PATH}

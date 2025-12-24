@@ -60,7 +60,9 @@ bool preprocess();
 }  // namespace env
 namespace global {
 inline QFont font{};
-}
+
+inline std::vector<std::string> clip_pic_name_list{};
+}  // namespace global
 }  // namespace prog
 
 #endif

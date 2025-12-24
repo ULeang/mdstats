@@ -16,16 +16,14 @@ namespace prog {
 namespace env {
 using std::string;
 
-inline const string                   data_csv_path{"resource\\csv\\"};
-inline const string                   default_data_csv_name{"data.csv"};
-inline const string                   opencv_templ_directory{"resource\\template\\"};
-inline const string                   opencv_log_directory{"log\\opencv\\"};
-inline const string                   capture_window_title{"masterduel"};
-inline const string                   config_filename{"config.toml"};
-inline const string                   clip_pic_path{"resource\\pic\\iqltv\\"};
-inline const std::vector<std::string> clip_pic_name_list{"ufxrziji.gif", "dabmlaziji.png",
-                                                         "qihlvidk.gif", "yrzvbcpcyklp.jpeg"};
-inline const string                   opencv_templ_config_filename{"templateconfig.toml"};
+inline const string data_csv_path{"resource\\csv\\"};
+inline const string default_data_csv_name{"data.csv"};
+inline const string opencv_templ_directory{"resource\\template\\"};
+inline const string opencv_log_directory{"log\\opencv\\"};
+inline const string capture_window_title{"masterduel"};
+inline const string config_filename{"config.toml"};
+inline const string clip_pic_path{"resource\\pic\\iqltv\\"};
+inline const string opencv_templ_config_filename{"templateconfig.toml"};
 
 inline const string default_font_filename{"resource\\font\\SourceHanSansCN-Bold.otf"};
 inline const double matcher_threshold{0.9};

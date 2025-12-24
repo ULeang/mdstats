@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <QApplication>
 #include <QFontDatabase>
+#include <filesystem>
 
 #include "mainwindow.h"
 
@@ -20,6 +21,20 @@ static void ensure_font() {
   logln(std::format("using default font file '{}'\nfont family : '{}'",
                     prog::env::default_font_filename, fontfamily.toStdString()));
   prog::global::font = {fontfamily, 14, 700, false};
+}
+static void ensure_clip_pic() {
+  const std::filesystem::path clip_pic_path{prog::env::clip_pic_path};
+  if (!std::filesystem::exists(clip_pic_path)) {
+    logln(std::format("clip pic path '{}' inexists", prog::env::clip_pic_path));
+    return;
+  }
+
+  for (const auto &entry : std::filesystem::directory_iterator{clip_pic_path}) {
+    if (entry.is_directory()) continue;
+    prog::global::clip_pic_name_list.push_back(entry.path().filename().string());
+  }
+  logln(std::format("there are {} pic(s) in {}", prog::global::clip_pic_name_list.size(),
+                    prog::env::clip_pic_path));
 }
 
 class ENSURE_SINGLE_INSTANCE {
@@ -60,6 +75,7 @@ int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
 
   ensure_font();
+  ensure_clip_pic();
 
   MainWindow w;
 

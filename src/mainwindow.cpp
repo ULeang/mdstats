@@ -424,31 +424,40 @@ void MainWindow::on_cptoclpbdBtn_clicked() {
     QMessageBox msgbox;
     msgbox.setWindowTitle("Congratulations");
 
-    static auto e = std::mt19937_64(std::random_device{}());
-    static auto d =
-      std::uniform_int_distribution<size_t>(0, prog::env::clip_pic_name_list.size() - 1);  // [a, b]
-    auto chosen = d(e);
+    const auto clip_pic_num = prog::global::clip_pic_name_list.size();
+    if (clip_pic_num == 0) {
+      msgbox.setText("喜报:成功复制到剪贴板了!");
+      auto font = prog::global::font;
+      font.setPointSize(26);
+      msgbox.setFont(font);
+      msgbox.show();
+      msgbox.exec();
+    } else {
+      static auto e      = std::mt19937_64(std::random_device{}());
+      static auto d      = std::uniform_int_distribution<size_t>(0, clip_pic_num - 1);  // [a, b]
+      auto        chosen = d(e);
 
-    QLabel *giflabel = new QLabel;
-    QMovie  movie{(prog::env::clip_pic_path + prog::env::clip_pic_name_list[chosen]).c_str()};
-    giflabel->setMovie(&movie);
+      QLabel *giflabel = new QLabel;
+      QMovie movie{(prog::env::clip_pic_path + prog::global::clip_pic_name_list[chosen]).c_str()};
+      giflabel->setMovie(&movie);
 
-    QLabel *textlabel = new QLabel;
-    textlabel->setText("喜报:成功复制到剪贴板了!");
-    auto font = prog::global::font;
-    font.setPointSize(26);
-    textlabel->setFont(font);
+      QLabel *textlabel = new QLabel;
+      textlabel->setText("喜报:成功复制到剪贴板了!");
+      auto font = prog::global::font;
+      font.setPointSize(26);
+      textlabel->setFont(font);
 
-    QVBoxLayout *v_layout = new QVBoxLayout;
-    v_layout->addWidget(giflabel);
-    v_layout->addWidget(textlabel);
+      QVBoxLayout *v_layout = new QVBoxLayout;
+      v_layout->addWidget(giflabel);
+      v_layout->addWidget(textlabel);
 
-    delete msgbox.layout();
-    msgbox.setLayout(v_layout);
+      delete msgbox.layout();
+      msgbox.setLayout(v_layout);
 
-    movie.start();
-    msgbox.show();
-    msgbox.exec();
+      movie.start();
+      msgbox.show();
+      msgbox.exec();
+    }
   }
 }
 void MainWindow::on_open_config_Btn_clicked() {
