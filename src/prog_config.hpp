@@ -26,7 +26,6 @@ inline const string clip_pic_path{"resource\\pic\\iqltv\\"};
 inline const string opencv_templ_config_filename{"templateconfig.toml"};
 
 inline const string default_font_filename{"resource\\font\\SourceHanSansCN-Bold.otf"};
-inline const double matcher_threshold{0.9};
 
 namespace config {
 inline std::vector<std::string> custom_list_deck{};
@@ -92,11 +91,14 @@ inline std::string misc_launch_steam_cmdline{};
 inline std::string misc_launch_masterduel_cmdline{};
 inline size_t      misc_launch_masterduel_matcher_delay{};
 
+inline double misc_opencv_template_match_threshold{};
+
 inline bool   notification_record_got_enable{};
 inline bool   notification_record_got_silent{};
 inline size_t notification_record_got_expiration{};
 
 inline bool debug_test_capture{};
+inline bool debug_match_score{};
 
 bool load_prog_config();
 void reset_prog_config();

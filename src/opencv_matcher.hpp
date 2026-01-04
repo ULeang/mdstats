@@ -60,6 +60,9 @@ public:
 
       if (maxVal > threshold) {
         all_res.push_back({i, maxVal, maxLoc});
+        if (prog::env::config::debug_match_score) {
+          logln(std::format("maxVal:{}", maxVal));
+        }
       }
     }
     if (all_res.empty()) {

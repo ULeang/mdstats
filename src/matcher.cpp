@@ -94,15 +94,17 @@ ErrorType MatcherWorker::main_matcher() {
     }
   }
 
+  logln(std::format("using matcher threshold : {}",
+                    prog::env::config::misc_opencv_template_match_threshold));
   Matcher match_coin({(path + "coin_win.png").c_str(), (path + "coin_lose.png").c_str()},
-                     prog::env::matcher_threshold, prog::env::debug::matcher_img_log,
-                     prog::env::debug::matcher_text_log);
+                     prog::env::config::misc_opencv_template_match_threshold,
+                     prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
   Matcher match_st_nd({(path + "go_first.png").c_str(), (path + "go_second.png").c_str()},
-                      prog::env::matcher_threshold, prog::env::debug::matcher_img_log,
-                      prog::env::debug::matcher_text_log);
+                      prog::env::config::misc_opencv_template_match_threshold,
+                      prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
   Matcher match_result({(path + "victory.png").c_str(), (path + "defeat.png").c_str()},
-                       prog::env::matcher_threshold, prog::env::debug::matcher_img_log,
-                       prog::env::debug::matcher_text_log);
+                       prog::env::config::misc_opencv_template_match_threshold,
+                       prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
 
   auto _matcher_thread_helper =
     [this, &stop_requested = stop_requested, &external_input_flag = external_input_flag,

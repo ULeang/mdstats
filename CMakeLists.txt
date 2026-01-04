@@ -42,8 +42,25 @@ set(LIBDIRS
     module/toast_notify/target/release
 )
 
+qt_add_library(mainobj
+    OBJECT
+    ${MAIN_SRC}
+)
+target_include_directories(mainobj
+    PRIVATE
+    ${INCS}
+)
+target_link_libraries(mainobj
+    PRIVATE
+    ${LIBS}
+)
+target_link_directories(mainobj
+    PRIVATE
+    ${LIBDIRS}
+)
+
 qt_add_library(common
-    STATIC
+    OBJECT
     ${SRCS}
 )
 target_include_directories(common
@@ -63,8 +80,8 @@ add_subdirectory(src/perf)
 
 # with console
 qt_add_executable(${PROJECT_NAME}_with_console
-    # WIN32
-    ${MAIN_SRC}
+    $<TARGET_OBJECTS:mainobj>
+    $<TARGET_OBJECTS:common>
 )
 target_include_directories(${PROJECT_NAME}_with_console
     PRIVATE
@@ -72,7 +89,6 @@ target_include_directories(${PROJECT_NAME}_with_console
 )
 target_link_libraries(${PROJECT_NAME}_with_console
     PRIVATE
-    common
     ${LIBS}
 )
 target_link_directories(${PROJECT_NAME}_with_console
@@ -84,8 +100,8 @@ install(TARGETS ${PROJECT_NAME}_with_console DESTINATION .)
 if(WITHOUTCONSOLE)
     qt_add_executable(${PROJECT_NAME}_without_console
         WIN32
-        ${MAIN_SRC}
-        # $<TARGET_OBJECTS:${PROJECT_NAME}>
+        $<TARGET_OBJECTS:mainobj>
+        $<TARGET_OBJECTS:common>
     )
     target_include_directories(${PROJECT_NAME}_without_console
         PRIVATE
@@ -93,7 +109,6 @@ if(WITHOUTCONSOLE)
     )
     target_link_libraries(${PROJECT_NAME}_without_console
         PRIVATE
-        common
         ${LIBS}
     )
     target_link_directories(${PROJECT_NAME}_without_console
