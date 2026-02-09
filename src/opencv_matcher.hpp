@@ -36,7 +36,15 @@ public:
     templ.reserve(size);
     all_res.reserve(size);
     std::ranges::for_each(img_filepath.begin(), img_filepath.end(), [this](const char *p) {
-      templ.push_back(cv::imread(p, cv::IMREAD_COLOR));
+      auto img = cv::imread(p, cv::IMREAD_COLOR);
+      if (prog::env::config::misc_opencv_template_match_gray) {
+        logln("using gray");
+        cv::Mat img_gray;
+        cv::cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
+        templ.push_back(img_gray);
+      } else {
+        templ.push_back(img);
+      }
     });
   }
 
@@ -47,6 +55,11 @@ public:
       return std::unexpected(MatcherFailT::CannotGetImage);
     }
     cv::Mat image = finput.value();
+    if (prog::env::config::misc_opencv_template_match_gray) {
+      cv::Mat image_gray;
+      cv::cvtColor(image, image_gray, cv::COLOR_BGR2GRAY);
+      image = std::move(image_gray);
+    }
 
     for (size_t i = 0; i < size; ++i) {
       cv::Mat result;

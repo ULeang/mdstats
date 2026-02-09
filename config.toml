@@ -112,6 +112,10 @@ launch_masterduel_matcher_delay = 3000
 # 此时请稍微降低该门槛(不要降低太多)
 opencv_template_match_threshold = 0.9
 
+# 实验性功能
+# 进行模板匹配之前是否对图像灰度化
+opencv_template_match_gray = true
+
 [notification.record_got]
 # 识别到对战结果后是否发送系统通知,true为是,false为否
 enable = true

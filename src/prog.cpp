@@ -77,6 +77,7 @@ bool prog::env::config::load_prog_config() {
   LOAD(config, misc, launch_masterduel_cmdline);
   LOAD(config, misc, launch_masterduel_matcher_delay);
   LOAD(config, misc, opencv_template_match_threshold);
+  LOAD(config, misc, opencv_template_match_gray);
 
   LOAD(config, notification, record_got, enable);
   LOAD(config, notification, record_got, silent);
@@ -148,6 +149,7 @@ void prog::env::config::reset_prog_config() {
   misc_launch_masterduel_cmdline       = "cmd /c start steam://rungameid/1449850";
   misc_launch_masterduel_matcher_delay = {3000};
   misc_opencv_template_match_threshold = {0.9};
+  misc_opencv_template_match_gray      = {false};
 
   notification_record_got_enable     = {false};
   notification_record_got_silent     = {true};

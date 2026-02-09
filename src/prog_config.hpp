@@ -92,6 +92,7 @@ inline std::string misc_launch_masterduel_cmdline{};
 inline size_t      misc_launch_masterduel_matcher_delay{};
 
 inline double misc_opencv_template_match_threshold{};
+inline bool   misc_opencv_template_match_gray{};
 
 inline bool   notification_record_got_enable{};
 inline bool   notification_record_got_silent{};
