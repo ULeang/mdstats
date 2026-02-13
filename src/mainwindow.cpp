@@ -438,7 +438,7 @@ void MainWindow::on_cptoclpbdBtn_clicked() {
       auto        chosen = d(e);
 
       QLabel *giflabel = new QLabel;
-      QMovie movie{(prog::env::clip_pic_path + prog::global::clip_pic_name_list[chosen]).c_str()};
+      QMovie  movie{(prog::env::clip_pic_path + prog::global::clip_pic_name_list[chosen]).c_str()};
       giflabel->setMovie(&movie);
 
       QLabel *textlabel = new QLabel;
@@ -485,20 +485,40 @@ void MainWindow::on_matcher_got_match_step(MatcherGotType got, size_t n) {
       disable_manual_btn(false);
       break;
     case MatcherGotType::Result: {
-      result_lbl->setText({n == 0 ? "胜利" : "失败"});
+      if (n <= 1) {
+        result_lbl->setText({n == 0 ? "胜利" : "失败"});
 
-      auto t        = get_local_time();
-      auto t_string = std::format("{:04}-{:02}-{:02} {:02}:{:02}:{:02}", t->tm_year + 1900,
-                                  t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
-      time_lbl->setText(t_string.c_str());
+        auto t        = get_local_time();
+        auto t_string = std::format("{:04}-{:02}-{:02} {:02}:{:02}:{:02}", t->tm_year + 1900,
+                                    t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
+        time_lbl->setText(t_string.c_str());
 
-      notify_on_matcher_got_result();
+        notify_on_matcher_got_result();
 
-      manual_0Btn->setText("赢币");
-      manual_1Btn->setText("输币");
-      disable_manual_btn(false);
-      add_record_to_db_by_lbl();
-      data->save_csv();
+        manual_0Btn->setText("赢币");
+        manual_1Btn->setText("输币");
+        disable_manual_btn(false);
+        add_record_to_db_by_lbl();
+        data->save_csv();
+      } else {
+        result_lbl->setText("未知");
+
+        auto t        = get_local_time();
+        auto t_string = std::format("{:04}-{:02}-{:02} {:02}:{:02}:{:02}", t->tm_year + 1900,
+                                    t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
+        time_lbl->setText(t_string.c_str());
+
+        notify_on_matcher_got_result();
+
+        add_record_to_db_by_lbl();
+        data->save_csv();
+        clear_lbl();
+
+        coin_lbl->setText({n == 2 ? "赢币" : "输币"});
+        manual_0Btn->setText("先攻");
+        manual_1Btn->setText("后攻");
+        disable_manual_btn(false);
+      }
     } break;
     default: break;
   }

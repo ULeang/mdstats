@@ -15,21 +15,30 @@ template<>
 class T_Matcher<CV_8UC3, cv::TM_CCOEFF_NORMED> {
   std::vector<cv::Mat> templ;
   std::ofstream        _flog;
+  size_t               size;  // should be const
+  // match all templates to choose the highest score,
+  // if set to false, just choose the first score that reach the threshold
+  bool                 check_all;  // should be const
 
   // used by try_once()
   std::vector<std::tuple<size_t, double, cv::Point>> all_res;
 
 public:
-  const size_t size;
-  double       threshold;
-  bool         log;
-  bool         text_log;
+  double threshold;
+  bool   log;
+  bool   text_log;
 
   explicit T_Matcher(std::initializer_list<const char *> img_filepath,
                      double                              threshold = 0.9,
                      bool                                log       = false,
-                     bool                                text_log  = true)
-    : size(img_filepath.size()), threshold(threshold), log(log), text_log(text_log), _flog() {
+                     bool                                text_log  = true,
+                     bool                                check_all = false)
+    : size(img_filepath.size()),
+      check_all(check_all),
+      threshold(threshold),
+      log(log),
+      text_log(text_log),
+      _flog() {
     if (prog::env::debug::matcher_text_log) {
       _flog.open("log.txt", std::ios::out | std::ios::app);
     }
@@ -38,7 +47,6 @@ public:
     std::ranges::for_each(img_filepath.begin(), img_filepath.end(), [this](const char *p) {
       auto img = cv::imread(p, cv::IMREAD_COLOR);
       if (prog::env::config::misc_opencv_template_match_gray) {
-        logln("using gray");
         cv::Mat img_gray;
         cv::cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
         templ.push_back(img_gray);
@@ -76,6 +84,9 @@ public:
         if (prog::env::config::debug_match_score) {
           logln(std::format("maxVal:{}", maxVal));
         }
+        if (!check_all) {
+          break;
+        }
       }
     }
     if (all_res.empty()) {
@@ -109,6 +120,8 @@ public:
 
     return c_i;
   }
+  T_Matcher(T_Matcher &&m)                                           = default;
+  T_Matcher<CV_8UC3, cv::TM_CCOEFF_NORMED> &operator=(T_Matcher &&m) = default;
 
   std::expected<size_t, MatcherFailT> keep_try(const std::function<std::optional<cv::Mat>()> &f,
                                                DWORD sleep = 1 * 1000) {

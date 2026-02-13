@@ -94,6 +94,8 @@ inline size_t      misc_launch_masterduel_matcher_delay{};
 inline double misc_opencv_template_match_threshold{};
 inline bool   misc_opencv_template_match_gray{};
 
+inline bool misc_check_missing_result{};
+
 inline bool   notification_record_got_enable{};
 inline bool   notification_record_got_silent{};
 inline size_t notification_record_got_expiration{};

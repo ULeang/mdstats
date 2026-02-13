@@ -78,6 +78,7 @@ bool prog::env::config::load_prog_config() {
   LOAD(config, misc, launch_masterduel_matcher_delay);
   LOAD(config, misc, opencv_template_match_threshold);
   LOAD(config, misc, opencv_template_match_gray);
+  LOAD(config, misc, check_missing_result);
 
   LOAD(config, notification, record_got, enable);
   LOAD(config, notification, record_got, silent);
@@ -150,6 +151,7 @@ void prog::env::config::reset_prog_config() {
   misc_launch_masterduel_matcher_delay = {3000};
   misc_opencv_template_match_threshold = {0.9};
   misc_opencv_template_match_gray      = {false};
+  misc_check_missing_result            = {false};
 
   notification_record_got_enable     = {false};
   notification_record_got_silent     = {true};

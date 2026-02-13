@@ -113,8 +113,13 @@ launch_masterduel_matcher_delay = 3000
 opencv_template_match_threshold = 0.9
 
 # 实验性功能
-# 进行模板匹配之前是否对图像灰度化
+# 进行模板匹配之前是否对图像灰度化，该功能用于解决某些场地导致匹配对局结果失败的问题（如教导场地）
 opencv_template_match_gray = true
+
+# 检测是否错过了对局结果
+# 在检测对局结果的环节检测是否出现硬币结果，如果出现则代表错过了对局结果
+# 这个情况下将上一把的结果记为未知，注意启动这个功能会延长对局结果环节的耗时从而导致匹配频率下降
+check_missing_result = true
 
 [notification.record_got]
 # 识别到对战结果后是否发送系统通知,true为是,false为否

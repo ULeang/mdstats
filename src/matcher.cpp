@@ -1,6 +1,7 @@
 #include "matcher.hpp"
 
 #include <expected>
+#include <initializer_list>
 #include <toml.hpp>
 #include <tuple>
 
@@ -102,9 +103,17 @@ ErrorType MatcherWorker::main_matcher() {
   Matcher match_st_nd({(path + "go_first.png").c_str(), (path + "go_second.png").c_str()},
                       prog::env::config::misc_opencv_template_match_threshold,
                       prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
-  Matcher match_result({(path + "victory.png").c_str(), (path + "defeat.png").c_str()},
-                       prog::env::config::misc_opencv_template_match_threshold,
-                       prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
+  Matcher match_result{};
+  if (prog::env::config::misc_check_missing_result) {
+    match_result = Matcher({(path + "victory.png").c_str(), (path + "defeat.png").c_str(),
+                            (path + "coin_win.png").c_str(), (path + "coin_lose.png").c_str()},
+                           prog::env::config::misc_opencv_template_match_threshold,
+                           prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
+  } else {
+    match_result = Matcher({(path + "victory.png").c_str(), (path + "defeat.png").c_str()},
+                           prog::env::config::misc_opencv_template_match_threshold,
+                           prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
+  }
 
   auto _matcher_thread_helper =
     [this, &stop_requested = stop_requested, &external_input_flag = external_input_flag,
