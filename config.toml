@@ -220,6 +220,15 @@ type = "Preset"
 preset = "TOTALWINRATE"
 span = 2
 
+[[stats_tbl.custom_rows]]
+[[stats_tbl.custom_rows.cells]]
+type = "Text"
+text = "未知对局数"
+[[stats_tbl.custom_rows.cells]]
+type = "Expr"
+expr = "%i OTHER"
+span = 2
+
 # 本程序的表达式
 # 使用前缀表达式
 # 支持+ - * /, > < >= <= == !=,

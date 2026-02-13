@@ -99,20 +99,22 @@ ErrorType MatcherWorker::main_matcher() {
                     prog::env::config::misc_opencv_template_match_threshold));
   Matcher match_coin({(path + "coin_win.png").c_str(), (path + "coin_lose.png").c_str()},
                      prog::env::config::misc_opencv_template_match_threshold,
-                     prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
+                     prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log, true);
   Matcher match_st_nd({(path + "go_first.png").c_str(), (path + "go_second.png").c_str()},
                       prog::env::config::misc_opencv_template_match_threshold,
-                      prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
+                      prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log, true);
   Matcher match_result{};
   if (prog::env::config::misc_check_missing_result) {
-    match_result = Matcher({(path + "victory.png").c_str(), (path + "defeat.png").c_str(),
-                            (path + "coin_win.png").c_str(), (path + "coin_lose.png").c_str()},
-                           prog::env::config::misc_opencv_template_match_threshold,
-                           prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
+    match_result =
+      Matcher({(path + "victory.png").c_str(), (path + "defeat.png").c_str(),
+               (path + "coin_win.png").c_str(), (path + "coin_lose.png").c_str()},
+              prog::env::config::misc_opencv_template_match_threshold,
+              prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log, true);
   } else {
-    match_result = Matcher({(path + "victory.png").c_str(), (path + "defeat.png").c_str()},
-                           prog::env::config::misc_opencv_template_match_threshold,
-                           prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
+    match_result =
+      Matcher({(path + "victory.png").c_str(), (path + "defeat.png").c_str()},
+              prog::env::config::misc_opencv_template_match_threshold,
+              prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log, true);
   }
 
   auto _matcher_thread_helper =
