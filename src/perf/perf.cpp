@@ -43,9 +43,10 @@ void _t_templatematch(ScreenShot &ss, HWND hwnd, double scale) {
   auto        crop_result = cv::Rect{880, 450, 840, 600};
   auto        f_result    = capture_fn_generator(ss, hwnd, scale, crop_result);
   std::string path{prog::env::opencv_templ_directory + R"*(2560x1440\)*"};
-  Matcher     match_result({(path + "victory.png").c_str(), (path + "defeat.png").c_str()},
+  Matcher     match_result({(path + "victory.png").c_str(), (path + "defeat.png").c_str(),
+                            (path + "coin_win.png").c_str(), (path + "coin_lose.png").c_str()},
                            prog::env::config::misc_opencv_template_match_threshold,
-                           prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log);
+                           prog::env::debug::matcher_img_log, prog::env::debug::matcher_text_log, true);
 
   for (int i = 0; i < 100; ++i) {
     auto mr = match_result.try_once(f_result);

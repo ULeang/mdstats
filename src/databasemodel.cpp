@@ -79,21 +79,6 @@ void Stats::clear_record(bool update) {
 }
 
 void Stats::add_record(const Record &record, bool inc, bool update) {
-  std::unordered_map<size_t, size_t *> map = {
-    {0b001'01'01, &essential_data.w_st_wins  },
-    {0b001'01'10, &essential_data.l_st_wins  },
-    {0b001'10'01, &essential_data.w_nd_wins  },
-    {0b001'10'10, &essential_data.l_nd_wins  },
-    {0b010'01'01, &essential_data.w_st_loses },
-    {0b010'01'10, &essential_data.l_st_loses },
-    {0b010'10'01, &essential_data.w_nd_loses },
-    {0b010'10'10, &essential_data.l_nd_loses },
-    {0b100'01'01, &essential_data.w_st_others},
-    {0b100'01'10, &essential_data.l_st_others},
-    {0b100'10'01, &essential_data.w_nd_others},
-    {0b100'10'10, &essential_data.l_nd_others},
-  };
-
   size_t one_hot  = 0b000'00'00;
   one_hot        |= record.coin == "赢币" ? 0b000'00'01 : 0b000'00'10;
   one_hot        |= record.st_nd == "先攻" ? 0b000'01'00 : 0b000'10'00;
@@ -102,7 +87,23 @@ void Stats::add_record(const Record &record, bool inc, bool update) {
                                             : 0b100'00'00;
 
   inc ? essential_data.total += 1 : essential_data.total -= 1;
-  inc ? *map[one_hot] += 1 : *map[one_hot] -= 1;
+  size_t *p = nullptr;
+  switch (one_hot) {
+    case 0b001'01'01: p = &essential_data.w_st_wins; break;
+    case 0b001'01'10: p = &essential_data.l_st_wins; break;
+    case 0b001'10'01: p = &essential_data.w_nd_wins; break;
+    case 0b001'10'10: p = &essential_data.l_nd_wins; break;
+    case 0b010'01'01: p = &essential_data.w_st_loses; break;
+    case 0b010'01'10: p = &essential_data.l_st_loses; break;
+    case 0b010'10'01: p = &essential_data.w_nd_loses; break;
+    case 0b010'10'10: p = &essential_data.l_nd_loses; break;
+    case 0b100'01'01: p = &essential_data.w_st_others; break;
+    case 0b100'01'10: p = &essential_data.l_st_others; break;
+    case 0b100'10'01: p = &essential_data.w_nd_others; break;
+    case 0b100'10'10: p = &essential_data.l_nd_others; break;
+    default:          exit(1); break;  // unreachable
+  }
+  inc ? *p += 1 : *p -= 1;
   if (update) update_stats_tbl();
 }
 void Stats::copy_to_clipboard() {
