@@ -16,6 +16,8 @@ inline QStringList custom_list_deck{};
 inline QStringList custom_list_note{};
 inline QVariant    stats_tbl_color_background{};
 inline QVariant    stats_tbl_color_foreground{};
+inline QVariant    stats_tbl_color_background_float{};
+inline QVariant    stats_tbl_color_foreground_float{};
 
 inline QVariant record_tbl_color_coin_win_background{};
 inline QVariant record_tbl_color_coin_win_foreground{};

@@ -25,6 +25,8 @@ bool prog::env::config::load_prog_config() {
   LOAD(config, stats_tbl, rows_height);
   LOAD(config, stats_tbl, color, background);
   LOAD(config, stats_tbl, color, foreground);
+  LOAD(config, stats_tbl, color, background_float);
+  LOAD(config, stats_tbl, color, foreground_float);
 
   LOAD(config, record_tbl, column_width);
   LOAD(config, record_tbl, color, coin, win, background);
@@ -69,6 +71,10 @@ bool prog::env::config::load_prog_config() {
   LOAD(config, misc, prog_window_init_geometry, width);
   LOAD(config, misc, prog_window_init_geometry, height);
 
+  LOAD(config, misc, float_window_init_geometry, x);
+  LOAD(config, misc, float_window_init_geometry, y);
+  LOAD(config, misc, float_window_init_geometry, rel_to_md);
+
   LOAD(config, misc, matcher_sleep_ms);
   LOAD(config, misc, use_daily_record_csv);
   LOAD(config, misc, hide_console);
@@ -94,10 +100,12 @@ void prog::env::config::reset_prog_config() {
   custom_list_deck = {};
   custom_list_note = {};
 
-  stats_tbl_column_width     = {150, 50, 50};
-  stats_tbl_rows_height      = {30};
-  stats_tbl_color_background = {};
-  stats_tbl_color_foreground = {};
+  stats_tbl_column_width           = {150, 50, 50};
+  stats_tbl_rows_height            = {30};
+  stats_tbl_color_background       = {};
+  stats_tbl_color_foreground       = {};
+  stats_tbl_color_background_float = {};
+  stats_tbl_color_foreground_float = {};
 
   record_tbl_column_width               = {0, 0, 0, 0, 150, 0};
   record_tbl_color_coin_win_background  = {};
@@ -142,6 +150,10 @@ void prog::env::config::reset_prog_config() {
   misc_prog_window_init_geometry_width  = {900};
   misc_prog_window_init_geometry_height = {400};
 
+  misc_float_window_init_geometry_x         = {800};
+  misc_float_window_init_geometry_y         = {400};
+  misc_float_window_init_geometry_rel_to_md = {true};
+
   misc_matcher_sleep_ms                = {500};
   misc_use_daily_record_csv            = {false};
   misc_hide_console                    = {false};
@@ -182,6 +194,8 @@ bool prog::env::config::preprocessed::preprocess() {
 
   SETCOLOR(stats_tbl_color_background);
   SETCOLOR(stats_tbl_color_foreground);
+  SETCOLOR(stats_tbl_color_background_float);
+  SETCOLOR(stats_tbl_color_foreground_float);
 
   SETCOLOR(record_tbl_color_coin_win_background);
   SETCOLOR(record_tbl_color_coin_win_foreground);

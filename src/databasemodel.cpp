@@ -56,8 +56,8 @@ QVariant Stats::data(const QModelIndex &index, int role) const {
   switch (role) {
     case Qt::DisplayRole:       return qt_stats_table_text[index.row()][index.column()];
     case Qt::TextAlignmentRole: return int(Qt::AlignHCenter | Qt::AlignVCenter);
-    case Qt::BackgroundRole:    return prog::env::config::preprocessed::stats_tbl_color_background;
-    case Qt::ForegroundRole:    return prog::env::config::preprocessed::stats_tbl_color_foreground;
+    // case Qt::BackgroundRole:    return prog::env::config::preprocessed::stats_tbl_color_background;
+    // case Qt::ForegroundRole:    return prog::env::config::preprocessed::stats_tbl_color_foreground;
     case Qt::FontRole:
     default:                    return {};
   }

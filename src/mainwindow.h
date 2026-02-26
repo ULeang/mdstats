@@ -12,6 +12,7 @@
 
 #include "databasemodel.hpp"
 #include "delegate.hpp"
+#include "floatwindow.hpp"
 #include "matcher.hpp"
 #include "utils.hpp"
 
@@ -21,7 +22,7 @@ private:
   QTableView  *stats_tbl, *record_tbl;
   MyDelegate  *delegate0, *delegate1, *delegate2, *delegate3, *delegate4;
   QPushButton *startBtn, *stopBtn, *cptoclpbdBtn, *reloadBtn, *openCSVBtn, *saveAsBtn,
-    *clearrecordBtn;
+    *clearrecordBtn, *float_windowBtn;
   QPushButton *manual_0Btn, *manual_1Btn;
   QPushButton *open_config_Btn, *reload_config_Btn;
   QLabel      *coin_lbl, *st_nd_lbl, *result_lbl, *time_lbl;
@@ -35,6 +36,8 @@ private:
 
   QThread       *matcher_thread;
   MatcherWorker *matcher;
+
+  FloatWindow *float_window;
 
   void reset();
   void construct_all();
@@ -61,6 +64,8 @@ private:
 public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
+  
+  void closeEvent(QCloseEvent *event) override;
 
 signals:
   void start_matcher();
@@ -81,6 +86,7 @@ private slots:
   void on_matcher_exited(ErrorType err);
   void on_database_warning_corrupted_csv(std::filesystem::path path);
   void on_database_good_csv(std::filesystem::path path);
+  void on_float_windowBtn_clicked();
 };
 
 #endif  // MAINWINDOW_H

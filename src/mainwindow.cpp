@@ -5,6 +5,7 @@
 #include "toast_notify.h"
 #include "utils.hpp"
 
+#include <qpushbutton.h>
 #include <windows.h>
 #include <QColor>
 #include <QFileDialog>
@@ -50,6 +51,7 @@ void MainWindow::construct_all() {
   manual_1Btn       = new QPushButton;
   open_config_Btn   = new QPushButton;
   reload_config_Btn = new QPushButton;
+  float_windowBtn   = new QPushButton;
 
   coin_lbl          = new QLabel;
   st_nd_lbl         = new QLabel;
@@ -68,6 +70,8 @@ void MainWindow::construct_all() {
   matcher_thread = new QThread;
   matcher        = new MatcherWorker;
 
+  float_window = nullptr;
+
   startBtn->setText("启动");
   stopBtn->setText("停止");
   cptoclpbdBtn->setText("复制到剪贴板");
@@ -78,6 +82,7 @@ void MainWindow::construct_all() {
   manual_reset();
   open_config_Btn->setText("打开配置文件");
   reload_config_Btn->setText("重新加载配置文件");
+  float_windowBtn->setText("打开悬浮窗");
 
   matcher->moveToThread(matcher_thread);
   matcher_thread->start();
@@ -130,6 +135,7 @@ void MainWindow::construct_all() {
   g_layout2->addWidget(stopBtn, 1, 3, 1, 3);
 
   v_layout1->addWidget(stats_tbl, 0);
+  v_layout1->addWidget(float_windowBtn, 0);
   v_layout1->addLayout(g_layout1, 0);
   v_layout1->addWidget(new QWidget, 1);
   v_layout1->addLayout(g_layout2, 0);
@@ -152,6 +158,11 @@ void MainWindow::construct_all() {
   load_database();
 }
 void MainWindow::destruct_all() {
+  if (float_window != nullptr) {
+    float_window->close();
+    float_window = nullptr;
+  }
+
   on_stopBtn_clicked();
 
   matcher_thread->quit();
@@ -183,6 +194,7 @@ void MainWindow::connect_signals() {
   connect(manual_1Btn, SIGNAL(clicked()), this, SLOT(on_manual_1Btn_clicked()));
   connect(open_config_Btn, SIGNAL(clicked()), this, SLOT(on_open_config_Btn_clicked()));
   connect(reload_config_Btn, SIGNAL(clicked()), this, SLOT(on_reload_config_Btn_clicked()));
+  connect(float_windowBtn, SIGNAL(clicked()), this, SLOT(on_float_windowBtn_clicked()));
 
   connect(matcher, SIGNAL(got_match_step(MatcherGotType, size_t)), this,
           SLOT(on_matcher_got_match_step(MatcherGotType, size_t)));
@@ -469,6 +481,20 @@ void MainWindow::on_reload_config_Btn_clicked() {
   MyModule::StatsTable::reset();
   construct_all();
 }
+void MainWindow::on_float_windowBtn_clicked() {
+  if (float_window == nullptr) {
+    float_window = new FloatWindow(data->get_stats());
+    float_window->set_self_ptr(&float_window);
+    float_window->setAttribute(Qt::WA_DeleteOnClose);
+    float_window->show();
+    float_windowBtn->setText("关闭悬浮窗");
+  } else {
+    float_window->close();
+    float_window = nullptr;
+    float_windowBtn->setText("打开悬浮窗");
+  }
+}
+
 void MainWindow::on_matcher_got_match_step(MatcherGotType got, size_t n) {
   switch (got) {
     case MatcherGotType::Coin:
@@ -539,11 +565,24 @@ void MainWindow::start_stop_switch(bool start) {
   stopBtn->setDisabled(start);
 }
 void MainWindow::set_qss() {
+  size_t  stats_tbl_updated = 0;
+  QString stats_tbl_style_sheet{};
   if (prog::env::config::preprocessed::stats_tbl_color_background.typeId() == 0x1003) {
-    // stats_tbl->setPalette(prog::env::config::preprocessed::stats_tbl_color_background.value<QColor>());
-    stats_tbl->setStyleSheet(
-      QString{"background : %1"}.arg(prog::env::config::stats_tbl_color_background.c_str()));
-    stats_tbl->setFont(prog::global::font);
+    stats_tbl_style_sheet.append(
+      QString{"background-color : %1"}.arg(prog::env::config::stats_tbl_color_background.c_str()));
+    ++stats_tbl_updated;
+  }
+  if (prog::env::config::preprocessed::stats_tbl_color_foreground.typeId() == 0x1003) {
+    if (stats_tbl_updated != 0) {
+      stats_tbl_style_sheet.append(';');
+    }
+    stats_tbl_style_sheet.append(
+      QString{"color : %1"}.arg(prog::env::config::stats_tbl_color_foreground.c_str()));
+    ++stats_tbl_updated;
+  }
+  if (stats_tbl_updated != 0) {
+    stats_tbl->setStyleSheet(stats_tbl_style_sheet);
+    stats_tbl->setFont(prog::global::font);  // after set qss, font would be set to default
   }
 
   const auto qss = QString{
@@ -607,4 +646,11 @@ void MainWindow::on_reloadBtn_clicked() {
   } else {
     load_database();
   }
+}
+void MainWindow::closeEvent(QCloseEvent *event) {
+  if (float_window != nullptr) {
+    float_window->close();
+    float_window = nullptr;
+  }
+  event->accept();
 }

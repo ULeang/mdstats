@@ -21,6 +21,7 @@ set(SRCS
     src/databasemodel.cpp
     src/matcher.cpp
     src/delegate.cpp
+    src/floatwindow.cpp
 )
 
 set(INCS

@@ -37,6 +37,8 @@ inline std::vector<size_t> stats_tbl_column_width{};
 inline size_t              stats_tbl_rows_height{};
 inline string              stats_tbl_color_background{};
 inline string              stats_tbl_color_foreground{};
+inline string              stats_tbl_color_background_float{};
+inline string              stats_tbl_color_foreground_float{};
 
 inline std::array<size_t, 6> record_tbl_column_width{};
 inline string                record_tbl_color_coin_win_background{};
@@ -80,6 +82,10 @@ inline size_t misc_prog_window_init_geometry_x{};
 inline size_t misc_prog_window_init_geometry_y{};
 inline size_t misc_prog_window_init_geometry_width{};
 inline size_t misc_prog_window_init_geometry_height{};
+
+inline size_t misc_float_window_init_geometry_x{};
+inline size_t misc_float_window_init_geometry_y{};
+inline bool   misc_float_window_init_geometry_rel_to_md{};
 
 inline size_t misc_matcher_sleep_ms{};
 inline bool   misc_use_daily_record_csv{};
