@@ -16,6 +16,8 @@ class FloatWindow : public QWidget {
 private:
   FloatWindow **p_this;
 
+  double screen_scale;
+  HWND   hwnd_md;
   bool   mouse_pressed;
   QPoint mouse_init_pos;
 

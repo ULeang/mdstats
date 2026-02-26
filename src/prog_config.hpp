@@ -86,6 +86,7 @@ inline size_t misc_prog_window_init_geometry_height{};
 inline size_t misc_float_window_init_geometry_x{};
 inline size_t misc_float_window_init_geometry_y{};
 inline bool   misc_float_window_init_geometry_rel_to_md{};
+inline bool   misc_float_window_init_geometry_lock{};
 
 inline size_t misc_matcher_sleep_ms{};
 inline bool   misc_use_daily_record_csv{};

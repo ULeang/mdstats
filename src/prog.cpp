@@ -74,6 +74,7 @@ bool prog::env::config::load_prog_config() {
   LOAD(config, misc, float_window_init_geometry, x);
   LOAD(config, misc, float_window_init_geometry, y);
   LOAD(config, misc, float_window_init_geometry, rel_to_md);
+  LOAD(config, misc, float_window_init_geometry, lock);
 
   LOAD(config, misc, matcher_sleep_ms);
   LOAD(config, misc, use_daily_record_csv);
@@ -153,6 +154,7 @@ void prog::env::config::reset_prog_config() {
   misc_float_window_init_geometry_x         = {800};
   misc_float_window_init_geometry_y         = {400};
   misc_float_window_init_geometry_rel_to_md = {true};
+  misc_float_window_init_geometry_lock      = {false};
 
   misc_matcher_sleep_ms                = {500};
   misc_use_daily_record_csv            = {false};

@@ -11,28 +11,32 @@
 
 FloatWindow::FloatWindow(QAbstractItemModel *stats_model, QWidget *parent)
   : p_this(nullptr), mouse_pressed(false), mouse_init_pos(), QWidget(parent) {
+  // get scale and md handle
+  QScreen *screen = this->screen();
+  if (!screen) {
+    logln("FATAL: cannot get screen", LogLevel::ALWAYS);
+    exit(-1);
+  }
+  screen_scale = screen->devicePixelRatio();
+  hwnd_md      = FindWindowA(NULL, prog::env::capture_window_title.c_str());
+
   QTableView  *table   = new QTableView;
   QHBoxLayout *hlayout = new QHBoxLayout;
 
   setAttribute(Qt::WA_TranslucentBackground);
+  // let mouse bypass the floating window itself so it is locked
+  if (prog::env::config::misc_float_window_init_geometry_lock) {
+    setAttribute(Qt::WA_TransparentForMouseEvents);
+  }
 
   auto x = prog::env::config::misc_float_window_init_geometry_x;
   auto y = prog::env::config::misc_float_window_init_geometry_y;
   if (prog::env::config::misc_float_window_init_geometry_rel_to_md) {
-    HWND hwnd = FindWindowA(NULL, prog::env::capture_window_title.c_str());
-    if (hwnd) {
+    if (hwnd_md) {
       RECT rect;  // left, top, right, bottom
-      if (GetWindowRect(hwnd, &rect)) {
-        // get scale
-        QScreen *screen = this->screen();
-        if (!screen) {
-          logln("FATAL: cannot get screen", LogLevel::ALWAYS);
-          exit(-1);
-        }
-        qreal scaleFactor = screen->devicePixelRatio();
-
-        x += rect.left / scaleFactor;
-        y += rect.top / scaleFactor;
+      if (GetWindowRect(hwnd_md, &rect)) {
+        x += rect.left / screen_scale;
+        y += rect.top / screen_scale;
       }
     }
   }
@@ -125,5 +129,16 @@ void FloatWindow::mouseMoveEvent(QMouseEvent *event) {
 void FloatWindow::mouseReleaseEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     mouse_pressed = false;
+    if (prog::env::config::misc_float_window_init_geometry_rel_to_md && hwnd_md) {
+      RECT rect;  // left, top, right, bottom
+      if (GetWindowRect(hwnd_md, &rect)) {
+        auto _x = x();
+        auto _y = y();
+        logln(std::format(
+          R"*(current position of floating window : ({:4},{:4})
+                     relative to md : ({:4},{:4}))*",
+          _x, _y, int(_x - rect.left / screen_scale), int(_y - rect.top / screen_scale)));
+      }
+    }
   }
 }

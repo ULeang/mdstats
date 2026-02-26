@@ -87,7 +87,8 @@ prog_window_init_geometry = { x = 800, y = 400, width = 900, height = 400 }
 
 # 设置悬浮窗口打开时出现的位置(x轴，y轴)，悬浮窗口也可以点击边框位置进行拖动
 # 设置坐标是否相对于md窗口，打开悬浮窗口时md需要正常打开否则相对坐标无效
-float_window_init_geometry = { x = 800, y = 300, rel_to_md = true }
+# 设置是否锁定悬浮窗
+float_window_init_geometry = { x = 1451, y = 405, rel_to_md = true, lock = false }
 
 # 设置是否按日期保存记录数据，false为否，true为是
 use_daily_record_csv = false
