@@ -555,6 +555,22 @@ void MainWindow::on_matcher_exited(ErrorType err) {
   disable_manual_btn(true);
 
   logln(format("Matcher exited with {}", size_t(err)));
+  if (err == ErrorType::ErrMatcherCannotGetImage) {
+    QMessageBox msg;
+    msg.setWindowTitle("线程已退出");
+    msg.setText(
+      "警告:由于无法捕获图像,匹配线程已退出。\n这可能是因为MD被关闭了,请重新启动匹配线程。");
+    auto restart = msg.addButton("启动", QMessageBox::ApplyRole);
+    auto ok      = msg.addButton("OK", QMessageBox::AcceptRole);
+    msg.setDefaultButton(ok);
+    msg.setFont(prog::global::font);
+    msg.show();
+    msg.exec();
+    auto clickedbtn = msg.clickedButton();
+    if (clickedbtn == restart) {
+      on_startBtn_clicked();
+    }
+  }
 }
 void MainWindow::manual_reset() {
   manual_0Btn->setText("赢币");

@@ -17,6 +17,7 @@ enum class ErrorType {
   ErrEnsureCSV,
   ErrCheckResources,
   ErrStopRequested,
+  ErrMatcherCannotGetImage,
   ErrOthers,
 };
 

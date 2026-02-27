@@ -8,6 +8,7 @@
 #include "opencv_matcher.hpp"
 #include "prog_config.hpp"
 #include "screenshot.hpp"
+#include "utils.hpp"
 
 MatcherWorker::MatcherWorker() : QObject() {}
 
@@ -135,7 +136,18 @@ ErrorType MatcherWorker::main_matcher() {
       if (match_r.has_value()) {
         emit got_match_step(got, match_r.value());
         return match_r.value();
+      } else if (match_r.error() != MatcherFailT::TryNExceed) {
+        ErrorType et;
+        switch (match_r.error()) {
+          case MatcherFailT::OK:             et = ErrorType::OK; break;
+          case MatcherFailT::CannotGetImage: et = ErrorType::ErrMatcherCannotGetImage; break;
+          case MatcherFailT::Other:          et = ErrorType::ErrOthers; break;
+          default:                           exit(-1); break;  // unreachable
+        }
+        emit exited(et);
+        return std::unexpected{et};
       }
+
       if (stop_requested.load(std::memory_order_acquire) == true) {
         emit exited(ErrorType::ErrStopRequested);
         return std::unexpected{ErrorType::ErrStopRequested};

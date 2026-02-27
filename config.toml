@@ -35,8 +35,9 @@ use_custom_rows = false
 # 设置统计数据表格的背景色和前景色，rgb格式
 background = "#00ff00"
 foreground = "#ffffff"
-# 设置悬浮窗统计数据表格的背景色和前景色，`transparent`代表透明，或者使用rgba格式的alpha通道
-background_float = "transparent"
+# 设置悬浮窗统计数据表格的背景色和前景色，`transparent`代表透明，或者使用argb格式的alpha通道
+# background_float = "transparent"
+background_float = "#10000000" #AARRGGBB,注意vscode预览使用的是#RRGGBBAA
 foreground_float = "#ffffff"
 
 [record_tbl]
