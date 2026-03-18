@@ -251,8 +251,8 @@ void MainWindow::ensure_config() {
   for (size_t i = 0; i < rowc; ++i) {
     stats_tbl->setRowHeight(i, row_height);
   }
-  stats_tbl->setFixedWidth(cols_width_sum + 2);
-  stats_tbl->setFixedHeight(row_height * rowc + 2);
+  stats_tbl->setFixedWidth(cols_width_sum + 4);
+  stats_tbl->setFixedHeight(row_height * rowc + 4);
 
   record_tbl->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
   record_tbl->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);

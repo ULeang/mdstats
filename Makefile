@@ -1,8 +1,6 @@
 PROJ:=mdstats
 EXEC:=mdstats_with_console
 
-.SHELL: pwsh
-
 .PHONY: configure
 configure:
 	@mkdir -p build

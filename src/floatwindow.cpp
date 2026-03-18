@@ -73,8 +73,8 @@ FloatWindow::FloatWindow(QAbstractItemModel *stats_model, QWidget *parent)
   for (size_t i = 0; i < rowc; ++i) {
     table->setRowHeight(i, row_height);
   }
-  table->setFixedWidth(cols_width_sum + 2);
-  table->setFixedHeight(row_height * rowc + 2);
+  table->setFixedWidth(cols_width_sum + 4);
+  table->setFixedHeight(row_height * rowc + 4);
 
   size_t  stats_tbl_updated = 0;
   QString stats_tbl_style_sheet{};
