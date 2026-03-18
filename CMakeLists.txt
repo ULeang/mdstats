@@ -31,7 +31,9 @@ set(INCS
 )
 
 set(LIBS
-    opencv_world4130
+    opencv_core4130
+    opencv_imgproc4130
+    opencv_imgcodecs4130
     stdc++exp
     Qt::Core
     Qt::Widgets
@@ -130,7 +132,9 @@ endif()
 set(DLLS
     lib/libstdc++-6.dll
     lib/libgcc_s_seh-1.dll
-    lib/libopencv_world4130.dll
+    lib/libopencv_core4130.dll
+    lib/libopencv_imgproc4130.dll
+    lib/libopencv_imgcodecs4130.dll
     module/toast_notify/target/release/toast_notify.dll
 )
 set(PROGFILES

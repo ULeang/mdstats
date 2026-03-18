@@ -2,6 +2,42 @@
 
 MD stats是一个基于图像识别模板匹配的MD对局自动统计工具
 
+## Build
+
+### 1.Gcc
+安装[MSYS2](https://www.msys2.org/)
+打开`MSYS2 MINGW64`
+```MSYS2 MINGW64
+$ pacman -Syu
+$ pacman -S mingw-w64-ucrt-x86_64-gcc
+$ pacman -S mingw-w64-ucrt-x86_64-make # 可选，或者自行准备make
+$ ln -sf /ucrt64/bin/ming32-make.exe /ucrt64/bin/make.exe # 可选，如果你安装了其他make，可能产生冲突
+```
+（可选）把`$MSYS2/usr/bin`加入系统环境变量`Path`中，用于提供`Makefile`所需的`mkdir`和`rm`等程序。
+（可选）自行修改`Makefile`。
+
+### 2.Rust
+安装[Rust](https://rust-lang.org/)
+
+### 3.Cmake
+安装[Cmake](https://cmake.org/)
+
+### 4.Qt
+安装[Qt](https://www.qt.io/)
+通过官方在线下载器安装预编译的`Qt`库，选择`mingw_64`版本，本项目当前使用`Qt`版本为`6.10.2`。
+
+### 5.OpenCV
+安装[OpenCV](https://github.com/opencv/opencv)
+下载`OpenCV 4.13.0`版本的源码，用`Gcc`+`Cmake`进行编译，编译出的相关`dll`文件复制到本项目的`lib`目录下，头文件复制到`inlcude`目录下。
+
+### 6.编译
+```shell
+$ make toast
+$ make release_console
+$ make install
+```
+完成后将在本项目根目录下生成`mdstats`目录。
+
 ## 安装方式
 
 TODO

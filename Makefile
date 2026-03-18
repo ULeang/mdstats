@@ -26,6 +26,7 @@ install:
 	@cmake --install build --prefix $(PROJ)
 	@rm $(PROJ)/libmodstatstable.dll.a
 	@windeployqt $(PROJ)/$(EXEC).exe
+	@cp lib/libwinpthread-1.dll $(PROJ) # windeployqt wrongly replaces this dll, leads to a runtime error
 
 .PHONY: debug
 debug :
@@ -85,7 +86,7 @@ perf: ./build/mdstats_perf.exe
 	@make debug
 
 .PHONY: zip
-zip: install
+zip:
 	@7z a $(PROJ).zip $(PROJ)/
 
 .PHONY: clean
