@@ -85,6 +85,7 @@ public:
                            int             role = Qt::DisplayRole) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+  std::filesystem::path get_associate_csv_path() const;
 
 signals:
   void warning_corrupted_csv(std::filesystem::path path);

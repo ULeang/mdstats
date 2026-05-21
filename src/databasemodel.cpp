@@ -72,7 +72,9 @@ Qt::ItemFlags Stats::flags(const QModelIndex &index) const {
 bool Stats::setData(const QModelIndex &index, const QVariant &value, int role) {
   return false;
 }
-
+std::filesystem::path DataBase::get_associate_csv_path()const {
+    return associate_csv_path.value();
+}
 void Stats::clear_record(bool update) {
   std::memset(&essential_data, 0, sizeof(essential_data));
   if (update) update_stats_tbl();

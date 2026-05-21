@@ -425,6 +425,7 @@ void MainWindow::on_clearrecordBtn_clicked() {
   auto clickedbtn = msg.clickedButton();
   if (clickedbtn == yes) {
     logln("clearing all records by user");
+    data->save_csv_as(data->get_associate_csv_path().concat(".bak"));
     data->trunc_last(~0);
     data->save_csv();
   }
